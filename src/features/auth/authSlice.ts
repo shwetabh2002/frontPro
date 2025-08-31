@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
+import { getApiBaseUrl } from '../../config/api';
 
 export interface User {
   _id: string;
@@ -86,7 +87,7 @@ export const refreshToken = createAsyncThunk(
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/auth/refresh`, {
+      const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
