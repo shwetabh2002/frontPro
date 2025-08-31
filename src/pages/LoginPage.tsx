@@ -170,28 +170,7 @@ const LoginPage: React.FC = () => {
             </div>
           </form>
 
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 py-1 bg-gradient-to-r from-slate-100 to-blue-100 text-slate-600 font-medium rounded-full border border-slate-200">
-                  Demo Credentials
-                </span>
-              </div>
-            </div>
-            <div className="mt-6 text-center space-y-2">
-              <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                <p className="text-sm font-semibold text-blue-800">Admin Access</p>
-                <p className="text-xs text-blue-600">admin@example.com / admin123</p>
-              </div>
-              <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
-                <p className="text-sm font-semibold text-emerald-800">Employee Access</p>
-                <p className="text-xs text-emerald-600">employee@example.com / employee123</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 

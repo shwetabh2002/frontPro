@@ -1,7 +1,7 @@
 // API Configuration Constants
 export const API_CONFIG = {
   // Base URLs - Environment-based configuration
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000',
+  BASE_URL: process.env.NODE_ENV === 'development' ? process.env.REACT_APP_API_BASE_URL : process.env.REACT_APP_API_BASE_URL_PRODUCTION,
   
   // Environment-specific configurations
   ENVIRONMENT: {
