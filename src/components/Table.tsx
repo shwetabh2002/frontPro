@@ -49,14 +49,14 @@ function Table<T extends Record<string, any>>({
   }
 
   return (
-    <div className={`overflow-x-auto rounded-xl border border-slate-200 shadow-lg ${className}`}>
-      <table className="min-w-full table-fixed divide-y divide-slate-200">
-        <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
+    <div className={`overflow-x-auto rounded-xl border border-amber-500/30 shadow-lg ${className}`}>
+      <table className="min-w-full table-fixed divide-y divide-amber-500/20">
+        <thead className="bg-gradient-to-r from-gray-900 to-black">
           <tr>
             {columns.map((column, index) => (
               <th
                 key={column.key}
-                className={`px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider ${
+                className={`px-4 py-4 text-left text-xs font-bold text-amber-400 uppercase tracking-wider ${
                   index === 0 ? 'w-32' : // Customer ID column
                   index === 1 ? 'w-48' : // Name column
                   index === 2 ? 'w-64' : // Email column
@@ -72,13 +72,13 @@ function Table<T extends Record<string, any>>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-slate-100">
+        <tbody className="bg-gray-800 divide-y divide-amber-500/10">
           {data.map((item, index) => (
-            <tr key={index} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200">
+            <tr key={index} className="hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10 transition-all duration-200">
               {columns.map((column, colIndex) => (
                 <td 
                   key={column.key} 
-                  className={`px-4 py-4 text-sm text-slate-700 font-medium ${
+                  className={`px-4 py-4 text-sm text-gray-200 font-medium ${
                     colIndex === 5 ? 'break-words leading-relaxed' : 'whitespace-nowrap' // Address column can wrap with better line height
                   }`}
                 >

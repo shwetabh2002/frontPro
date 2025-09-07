@@ -13,9 +13,9 @@ interface Sale {
 
 const SalesPage: React.FC = () => {
   const sales: Sale[] = [
-    { id: '#1234', customer: 'John Doe', amount: 120.00, status: 'completed', date: '2024-01-20', items: 3 },
-    { id: '#1235', customer: 'Jane Smith', amount: 85.50, status: 'pending', date: '2024-01-19', items: 2 },
-    { id: '#1236', customer: 'Bob Johnson', amount: 200.00, status: 'completed', date: '2024-01-18', items: 5 },
+    { id: '#1234', customer: 'Ahmed Al-Rashid', amount: 120.00, status: 'completed', date: '2024-01-20', items: 3 },
+    { id: '#1235', customer: 'Mohammed Al-Saudi', amount: 85.50, status: 'pending', date: '2024-01-19', items: 2 },
+    { id: '#1236', customer: 'Omar Al-Kuwaiti', amount: 200.00, status: 'completed', date: '2024-01-18', items: 5 },
   ];
 
   const columns = [
@@ -24,9 +24,9 @@ const SalesPage: React.FC = () => {
     { key: 'amount', header: 'Amount', render: (value: number) => `$${value.toFixed(2)}` },
     { key: 'status', header: 'Status',       render: (value: string) => (
       <span className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border ${
-        value === 'completed' ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200' : 
-        value === 'pending' ? 'bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-yellow-200' : 
-        'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-red-200'
+        value === 'completed' ? 'bg-gradient-to-r from-green-900/50 to-emerald-900/50 text-green-300 border-green-500/50' : 
+        value === 'pending' ? 'bg-gradient-to-r from-yellow-900/50 to-amber-900/50 text-yellow-300 border-yellow-500/50' : 
+        'bg-gradient-to-r from-red-900/50 to-pink-900/50 text-red-300 border-red-500/50'
       }`}>
         {value}
       </span>
@@ -56,41 +56,41 @@ const SalesPage: React.FC = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-600/8 to-emerald-600/8 rounded-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-amber-600/10 rounded-xl"></div>
         <div className="relative p-4">
           <div className="flex items-center">
-            <div className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-md mr-3">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2.5 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg shadow-lg mr-3">
+              <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
             </div>
-                          <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-700 via-green-700 to-emerald-700 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Your Sales
-                </h1>
-                <p className="text-sm text-slate-500 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Track your personal sales performance.
-                </p>
-              </div>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-amber-600 to-yellow-500 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                Your Sales
+              </h1>
+              <p className="text-sm text-gray-600 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                Track your personal automotive sales performance.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Sales Table */}
-      <div className="bg-gradient-to-br from-white to-green-50 shadow-lg rounded-xl border border-green-100 overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 to-black shadow-2xl rounded-xl border border-amber-500/30 overflow-hidden">
         <div className="px-5 py-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg mr-3">
+                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-700">
+              <h3 className="text-lg font-bold text-amber-400">
                 Sales List ({sales.length})
               </h3>
             </div>
-            <div className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+            <div className="text-sm font-medium text-amber-400 bg-gray-800 border border-amber-500/50 px-3 py-1.5 rounded-full">
               Total sales in the system
             </div>
           </div>

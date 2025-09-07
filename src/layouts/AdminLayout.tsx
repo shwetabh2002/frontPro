@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
 import Button from '../components/Button';
+import Logo from '../components/Logo';
 
 interface MenuItem {
   name: string;
@@ -111,16 +112,19 @@ const AdminLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800">
       {/* Sidebar */}
-      <div className={`bg-white shadow-lg transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className={`bg-gradient-to-br from-gray-900 to-black shadow-2xl border-r border-amber-500/30 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+        <div className="flex items-center justify-between p-4 border-b border-amber-500/30">
           {!sidebarCollapsed && (
-            <h1 className="text-xl font-bold text-gray-800">POS Admin</h1>
+            <Logo size="sm" showText={true} />
+          )}
+          {sidebarCollapsed && (
+            <Logo size="sm" showText={false} />
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 transition-all duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -133,10 +137,10 @@ const AdminLayout: React.FC = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center px-4 py-3 text-left transition-colors duration-200 ${
+              className={`w-full flex items-center px-4 py-3 text-left transition-all duration-200 ${
                 isActiveRoute(item.path)
-                  ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-gradient-to-r from-amber-600/20 to-yellow-500/20 text-amber-400 border-r-2 border-amber-500 shadow-lg'
+                  : 'text-gray-400 hover:bg-amber-500/10 hover:text-amber-300 hover:shadow-md'
               }`}
             >
               <span className="flex-shrink-0">{item.icon}</span>
@@ -151,16 +155,16 @@ const AdminLayout: React.FC = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b px-6 py-4">
+        <header className="bg-gradient-to-r from-gray-800 to-black shadow-lg border-b border-amber-500/30 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
                 {menuItems.find(item => isActiveRoute(item.path))?.name || 'Dashboard'}
               </h2>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-700">
-                Welcome, <span className="font-medium">{user?.name}</span>
+              <div className="text-sm text-gray-300">
+                Welcome, <span className="font-medium text-amber-400">{user?.name}</span>
               </div>
               <Button
                 variant="outline"
@@ -174,7 +178,7 @@ const AdminLayout: React.FC = () => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-900/50 to-black/50">
           <Outlet />
         </main>
       </div>

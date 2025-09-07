@@ -18,7 +18,7 @@ function App() {
     <Provider store={store}>
       <ErrorBoundary>
         <SessionManager>
-          <div className="App min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+          <div className="App min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800">
             <AppRoutes />
           </div>
         </SessionManager>

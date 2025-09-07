@@ -86,10 +86,10 @@ const CustomersPage: React.FC = () => {
       key: 'custId', 
       header: 'Customer ID',
       render: (value: string) => (
-        <div className="text-blue-700 text-xs font-bold font-mono bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-3 py-2 rounded-lg shadow-sm">
+        <div className="text-amber-400 text-xs font-bold font-mono bg-gradient-to-r from-gray-900 to-black border border-amber-500 px-3 py-2 rounded-lg shadow-lg">
           <div className="flex items-center">
-            <svg className="w-3 h-3 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            <svg className="w-3 h-3 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
             {value}
           </div>
@@ -100,7 +100,7 @@ const CustomersPage: React.FC = () => {
       key: 'name', 
       header: 'Customer Name',
       render: (value: string) => (
-        <div className="font-semibold text-slate-800">
+        <div className="font-semibold text-gray-100">
           {value}
         </div>
       )
@@ -109,7 +109,7 @@ const CustomersPage: React.FC = () => {
       key: 'email', 
       header: 'Email Address',
       render: (value: string) => (
-        <div className="text-slate-600 text-sm">
+        <div className="text-gray-300 text-sm">
           {value}
         </div>
       )
@@ -118,7 +118,7 @@ const CustomersPage: React.FC = () => {
       key: 'phone', 
       header: 'Phone Number',
       render: (value: string) => (
-        <div className="text-slate-600 text-sm font-mono">
+        <div className="text-gray-300 text-sm font-mono">
           {value}
         </div>
       )
@@ -129,11 +129,11 @@ const CustomersPage: React.FC = () => {
       render: (value: string) => (
         <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
           value === 'active' 
-            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200' 
-            : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border-red-200'
+            ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-300 shadow-md' 
+            : 'bg-gradient-to-r from-gray-800 to-black text-gray-300 border-gray-600 shadow-md'
         }`}>
           <div className={`w-2 h-2 rounded-full mr-2 ${
-            value === 'active' ? 'bg-green-500' : 'bg-red-500'
+            value === 'active' ? 'bg-amber-500' : 'bg-gray-500'
           }`}></div>
           {value.charAt(0).toUpperCase() + value.slice(1)}
         </span>
@@ -143,7 +143,7 @@ const CustomersPage: React.FC = () => {
       key: 'address', 
       header: 'Address',
       render: (value: string) => (
-        <div className="text-slate-600 text-sm max-w-xs">
+        <div className="text-gray-300 text-sm max-w-xs">
           <div className="break-words leading-relaxed" title={value}>
             {value}
           </div>
@@ -154,7 +154,7 @@ const CustomersPage: React.FC = () => {
       key: 'createdAt', 
       header: 'Created Date',
       render: (value: string) => (
-        <div className="text-slate-600 text-sm">
+        <div className="text-gray-300 text-sm">
           {new Date(value).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -168,20 +168,20 @@ const CustomersPage: React.FC = () => {
       header: 'Actions',
       render: () => (
         <div className="flex items-center space-x-1">
-          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg text-xs px-2 py-1">
+          <Button variant="outline" size="sm" className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Edit
           </Button>
-          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg text-xs px-2 py-1">
+          <Button variant="outline" size="sm" className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             View
           </Button>
-          <Button variant="danger" size="sm" className="shadow-md hover:shadow-lg text-xs px-2 py-1">
+          <Button variant="danger" size="sm" className="bg-red-900 border-red-600 text-red-300 hover:bg-red-600 hover:text-white shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -194,22 +194,22 @@ const CustomersPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center">
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/8 to-indigo-600/8 rounded-xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-amber-600/10 rounded-xl"></div>
           <div className="relative p-4">
             <div className="flex items-center">
-              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <div className="p-2.5 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg shadow-lg mr-3">
+                <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-700 via-blue-700 to-indigo-700 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Customers
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-amber-600 to-yellow-500 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                  All Customer 
                 </h1>
-                <p className="text-sm text-slate-500 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Manage your customer database and relationships.
+                <p className="text-sm text-gray-600 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                  Manage your automotive customer relationships and data.
                 </p>
               </div>
             </div>
@@ -218,7 +218,7 @@ const CustomersPage: React.FC = () => {
         <Button 
           variant="primary"
           onClick={() => setIsAddCustomerModalOpen(true)}
-          className="shadow-xl hover:shadow-2xl"
+          className="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-700 hover:to-yellow-600 text-black font-bold shadow-xl hover:shadow-2xl border border-amber-400"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -228,7 +228,7 @@ const CustomersPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg rounded-xl border border-emerald-100 p-5">
+      <div className="bg-gradient-to-br from-gray-900 to-black shadow-lg rounded-xl border border-amber-500/30 p-5">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -239,7 +239,7 @@ const CustomersPage: React.FC = () => {
             />
           </div>
           <div className="flex items-end">
-            <Button variant="secondary" className="shadow-lg hover:shadow-xl">
+            <Button variant="secondary" className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-lg hover:shadow-xl">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
@@ -249,23 +249,23 @@ const CustomersPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-white to-blue-50 shadow-lg rounded-xl border border-blue-100 overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 to-black shadow-lg rounded-xl border border-amber-500/30 overflow-hidden">
         <div className="px-5 py-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-gradient-to-br from-amber-600 to-yellow-500 rounded-lg mr-3">
+                <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-700">
+              <h3 className="text-lg font-bold text-amber-400">
                 Customer List ({filteredCustomers.length})
               </h3>
             </div>
-            <div className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
+            <div className="text-sm font-medium text-amber-400 bg-gray-800 px-3 py-1.5 rounded-full border border-amber-500">
               {isLoading ? (
                 <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

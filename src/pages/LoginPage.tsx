@@ -5,6 +5,7 @@ import { login, clearError } from '../features/auth/authSlice';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import Toast from '../components/Toast';
+import Logo from '../components/Logo';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -87,15 +88,34 @@ const LoginPage: React.FC = () => {
   // Show loading while initializing
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto shadow-lg"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-400 animate-ping"></div>
+              {/* Automotive-themed loader */}
+              <svg className="animate-spin h-16 w-16 mx-auto shadow-lg" fill="none" viewBox="0 0 24 24">
+                {/* Outer ring - steering wheel rim */}
+                <circle className="opacity-30" cx="12" cy="12" r="10" stroke="url(#loginGradient)" strokeWidth="2"></circle>
+                {/* Inner ring - steering wheel spokes */}
+                <circle className="opacity-60" cx="12" cy="12" r="6" stroke="url(#loginGradient)" strokeWidth="1.5"></circle>
+                {/* Center hub */}
+                <circle className="opacity-90" cx="12" cy="12" r="2" fill="url(#loginGradient)"></circle>
+                {/* Spokes */}
+                <path className="opacity-80" stroke="url(#loginGradient)" strokeWidth="1" d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12"></path>
+              </svg>
+              <svg className="absolute inset-0 w-full h-full">
+                <defs>
+                  <linearGradient id="loginGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#F59E0B" />
+                    <stop offset="50%" stopColor="#EAB308" />
+                    <stop offset="100%" stopColor="#F59E0B" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-400 animate-ping opacity-20"></div>
             </div>
-            <p className="mt-6 text-lg font-semibold text-slate-700">Initializing...</p>
-            <p className="mt-2 text-sm text-slate-500">Please wait while we set up your session</p>
+            <p className="mt-6 text-lg font-semibold text-amber-400">Initializing Automotive POS...</p>
+            <p className="mt-2 text-sm text-gray-400">Please wait while we set up your session</p>
           </div>
         </div>
       </div>
@@ -108,29 +128,28 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-yellow-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-600/10 to-yellow-600/10 rounded-full blur-3xl"></div>
       
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl mb-6">
-            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h3a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h3m0 0V6a2 2 0 012-2h.01M12 6h.01M15 6h.01M12 3h.01M15 3h.01M12 9h.01M15 9h.01" />
-            </svg>
+          {/* Automotive Logo */}
+          <div className="mx-auto mb-8">
+            <Logo size="xl" showText={true} />
           </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent">
-            POS System
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+            Automotive POS
           </h2>
-          <p className="mt-3 text-lg text-slate-600 font-medium">
-            Sign in to your account
+          <p className="mt-3 text-lg text-gray-300 font-medium">
+            Sign in to your automotive business account
           </p>
         </div>
       </div>
 
       <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white/80 backdrop-blur-sm py-10 px-6 shadow-2xl sm:rounded-2xl sm:px-12 border border-white/20">
+        <div className="bg-gradient-to-br from-gray-900/90 to-black/90 backdrop-blur-sm py-10 px-6 shadow-2xl sm:rounded-2xl sm:px-12 border border-amber-500/30">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <Input
               label="Email Address"

@@ -16,36 +16,36 @@ const InventoryPage: React.FC = () => {
   const products: Product[] = [
     {
       id: '1',
-      name: 'Laptop Computer',
-      category: 'Electronics',
-      price: 999.99,
+      name: 'BMW X5 Engine Oil',
+      category: 'Engine Parts',
+      price: 89.99,
       stock: 15,
       status: 'in-stock',
       lastUpdated: '2024-01-20',
     },
     {
       id: '2',
-      name: 'Wireless Mouse',
-      category: 'Electronics',
-      price: 29.99,
+      name: 'Mercedes Brake Pads',
+      category: 'Brake System',
+      price: 129.99,
       stock: 3,
       status: 'low-stock',
       lastUpdated: '2024-01-19',
     },
     {
       id: '3',
-      name: 'Office Chair',
-      category: 'Furniture',
-      price: 199.99,
+      name: 'Audi Air Filter',
+      category: 'Air System',
+      price: 45.99,
       stock: 0,
       status: 'out-of-stock',
       lastUpdated: '2024-01-18',
     },
     {
       id: '4',
-      name: 'Desk Lamp',
-      category: 'Furniture',
-      price: 49.99,
+      name: 'Toyota Spark Plugs',
+      category: 'Engine Parts',
+      price: 24.99,
       stock: 8,
       status: 'in-stock',
       lastUpdated: '2024-01-17',
@@ -66,9 +66,9 @@ const InventoryPage: React.FC = () => {
       header: 'Status',
       render: (value: string) => {
         const statusClasses = {
-          'in-stock': 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-200',
-          'low-stock': 'bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-yellow-200',
-          'out-of-stock': 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-red-200',
+          'in-stock': 'bg-gradient-to-r from-green-900/50 to-emerald-900/50 text-green-300 border-green-500/50',
+          'low-stock': 'bg-gradient-to-r from-yellow-900/50 to-amber-900/50 text-yellow-300 border-yellow-500/50',
+          'out-of-stock': 'bg-gradient-to-r from-red-900/50 to-pink-900/50 text-red-300 border-red-500/50',
         };
         return (
           <span className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border ${statusClasses[value as keyof typeof statusClasses]}`}>
@@ -112,20 +112,20 @@ const InventoryPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex justify-between items-center">
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/8 to-blue-600/8 rounded-xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-amber-600/10 rounded-xl"></div>
           <div className="relative p-4">
             <div className="flex items-center">
-              <div className="p-2.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-md mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2.5 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg shadow-lg mr-3">
+                <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-700 via-cyan-700 to-blue-700 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-amber-600 to-yellow-500 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
                   Inventory
                 </h1>
-                <p className="text-sm text-slate-500 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Manage your product inventory and stock levels.
+                <p className="text-sm text-gray-600 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                  Manage your automotive parts inventory and stock levels.
                 </p>
               </div>
             </div>
@@ -140,20 +140,20 @@ const InventoryPage: React.FC = () => {
       </div>
 
       {/* Inventory Table */}
-      <div className="bg-gradient-to-br from-white to-cyan-50 shadow-lg rounded-xl border border-cyan-100 overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 to-black shadow-2xl rounded-xl border border-amber-500/30 overflow-hidden">
         <div className="px-5 py-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center">
-              <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg mr-3">
+                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-700">
+              <h3 className="text-lg font-bold text-amber-400">
                 Product List ({products.length})
               </h3>
             </div>
-            <div className="text-sm font-medium text-cyan-600 bg-cyan-50 px-3 py-1.5 rounded-full border border-cyan-200">
+            <div className="text-sm font-medium text-amber-400 bg-gray-800 border border-amber-500/50 px-3 py-1.5 rounded-full">
               Total products in inventory
             </div>
           </div>

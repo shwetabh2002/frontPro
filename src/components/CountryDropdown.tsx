@@ -199,7 +199,7 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
       <button
         type="button"
         onClick={toggleDropdown}
-        className="w-full flex items-center justify-between px-4 py-3 border-2 border-slate-300 border-r-0 rounded-l-lg shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white hover:bg-slate-50 hover:border-blue-300 transition-all duration-200 min-w-[160px]"
+        className="w-full flex items-center justify-between px-4 py-3 border-2 border-amber-500/50 border-r-0 rounded-l-lg shadow-sm focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-gray-800 text-gray-100 hover:bg-gray-700 hover:border-amber-400 transition-all duration-200 min-w-[160px]"
       >
         <div className="flex items-center space-x-2">
           {selectedCountry && (
@@ -210,7 +210,7 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
           )}
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-amber-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -223,7 +223,7 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
       {isOpen && createPortal(
         <div 
           data-country-dropdown
-          className="fixed bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-xl shadow-2xl z-[99999] flex flex-col overflow-hidden backdrop-blur-sm"
+          className="fixed bg-gradient-to-br from-gray-900 to-black border-2 border-amber-500/50 rounded-xl shadow-2xl z-[99999] flex flex-col overflow-hidden backdrop-blur-sm"
           style={{
             top: dropdownPosition.top,
             left: dropdownPosition.left,
@@ -237,10 +237,10 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
           }}
         >
           {/* Search Input - Fixed at top */}
-          <div className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 p-4 flex-shrink-0">
+          <div className="bg-gradient-to-r from-gray-800 to-black border-b border-amber-500/30 p-4 flex-shrink-0">
             <div className="relative">
               <svg
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-amber-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -253,7 +253,7 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                 placeholder="Search countries..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white placeholder-slate-400 transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 border-2 border-amber-500/50 rounded-lg focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-gray-800 text-gray-100 placeholder-gray-400 transition-all duration-200"
               />
             </div>
           </div>
@@ -282,8 +282,8 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                 {/* Popular Countries Section */}
                 {searchTerm === '' && (
                   <>
-                    <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
-                      <div className="text-xs font-bold text-blue-700 uppercase tracking-wide flex items-center">
+                    <div className="px-4 py-3 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-amber-500/30">
+                      <div className="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center">
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
@@ -295,33 +295,33 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                         key={`popular-${country.dial_code}`}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
-                        className={`w-full flex items-center px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-indigo-50 focus:outline-none transition-all duration-200 ${
-                          country.dial_code === value ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-l-4 border-blue-500 shadow-sm' : ''
+                        className={`w-full flex items-center px-4 py-3 text-left hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10 focus:bg-gradient-to-r focus:from-amber-500/10 focus:to-yellow-500/10 focus:outline-none transition-all duration-200 ${
+                          country.dial_code === value ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-l-4 border-amber-500 shadow-sm' : ''
                         }`}
                       >
                         <div className="flex items-center space-x-3 flex-1">
                           <span className="text-xl">{getCountryFlag(country.code)}</span>
                           <div className="flex-1 min-w-0">
                             <div 
-                              className="font-medium text-gray-900 truncate"
+                              className="font-medium text-gray-100 truncate"
                               dangerouslySetInnerHTML={{ 
                                 __html: highlightText(country.name, searchTerm) 
                               }}
                             />
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-400">
                               {country.dial_code}
                             </div>
                           </div>
                         </div>
                         {country.dial_code === value && (
-                          <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         )}
                       </button>
                     ))}
-                    <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
-                      <div className="text-xs font-bold text-slate-700 uppercase tracking-wide flex items-center">
+                    <div className="px-4 py-3 bg-gradient-to-r from-gray-800 to-black border-b border-amber-500/30">
+                      <div className="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center">
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>

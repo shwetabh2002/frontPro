@@ -99,12 +99,12 @@ const EmployeeDashboard: React.FC = () => {
   ];
 
   const quickActions = [
-    { name: 'Add Customer', icon: '👥', description: 'Register new customer', color: 'from-emerald-500 to-teal-600' },
-    { name: 'View Reports', icon: '📊', description: 'Customer analytics', color: 'from-blue-500 to-indigo-600' },
-    { name: 'Send Follow-up', icon: '📧', description: 'Follow up with customers', color: 'from-purple-500 to-pink-600' },
-    { name: 'Schedule Meeting', icon: '📅', description: 'Book customer meeting', color: 'from-orange-500 to-amber-600' },
-    { name: 'Export Data', icon: '📤', description: 'Export customer data', color: 'from-cyan-500 to-blue-600' },
-    { name: 'Settings', icon: '⚙️', description: 'Dashboard settings', color: 'from-slate-500 to-gray-600' },
+    { name: 'Add Customer', icon: '👥', description: 'Register new customer', color: 'from-amber-600 to-yellow-500' },
+    { name: 'View Reports', icon: '📊', description: 'Customer analytics', color: 'from-amber-500 to-yellow-400' },
+    { name: 'Send Follow-up', icon: '📧', description: 'Follow up with customers', color: 'from-yellow-500 to-amber-600' },
+    { name: 'Schedule Meeting', icon: '📅', description: 'Book customer meeting', color: 'from-amber-400 to-yellow-500' },
+    { name: 'Export Data', icon: '📤', description: 'Export customer data', color: 'from-yellow-400 to-amber-500' },
+    { name: 'Settings', icon: '⚙️', description: 'Dashboard settings', color: 'from-amber-600 to-yellow-600' },
   ];
 
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
@@ -125,8 +125,8 @@ const EmployeeDashboard: React.FC = () => {
       render: (value: string) => (
         <span className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border ${
           value === 'active' 
-            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200' 
-            : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border-red-200'
+            ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-300' 
+            : 'bg-gradient-to-r from-gray-800 to-black text-gray-300 border-gray-600'
         }`}>
           {value}
         </span>
@@ -166,21 +166,21 @@ const EmployeeDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/8 to-teal-600/8 rounded-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-amber-600/10 rounded-xl"></div>
         <div className="relative p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-md mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2.5 bg-gradient-to-br from-gray-900 to-black border border-amber-500 rounded-lg shadow-lg mr-3">
+                <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-700 via-emerald-700 to-teal-700 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-amber-600 to-yellow-500 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
                   Customer Management
                 </h1>
-                <p className="text-sm text-slate-500 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
-                  Manage your customers and their information.
+                <p className="text-sm text-gray-600 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                  Manage your automotive customers and their information.
                 </p>
               </div>
             </div>
@@ -201,27 +201,27 @@ const EmployeeDashboard: React.FC = () => {
       {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {employeeStats.map((stat, index) => (
-          <div key={stat.name} className="group relative bg-gradient-to-br from-white to-slate-50 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-slate-200">
+          <div key={stat.name} className="group relative bg-gradient-to-br from-gray-900 to-black overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-amber-500/30">
             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300`}></div>
             <div className="relative p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="text-4xl">{stat.icon}</div>
                 <div className={`flex-shrink-0 px-3 py-1.5 rounded-xl ${
                   stat.changeType === 'positive' 
-                    ? 'bg-gradient-to-br from-green-100 to-emerald-100 text-green-700 border border-green-200' 
-                    : 'bg-gradient-to-br from-red-100 to-pink-100 text-red-700 border border-red-200'
+                    ? 'bg-gradient-to-br from-amber-100 to-yellow-100 text-amber-800 border border-amber-300' 
+                    : 'bg-gradient-to-br from-red-900 to-red-800 text-red-300 border border-red-600'
                 }`}>
                   <span className="text-sm font-bold">{stat.change}</span>
                 </div>
               </div>
               <div className="space-y-2">
-                <dt className="text-sm font-bold text-slate-600 truncate">
+                <dt className="text-sm font-bold text-amber-400 truncate">
                   {stat.name}
                 </dt>
-                <dd className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-emerald-800 bg-clip-text text-transparent">
+                <dd className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
                   {stat.value}
                 </dd>
-                <p className="text-xs text-slate-500 font-medium">
+                <p className="text-xs text-gray-400 font-medium">
                   {stat.description}
                 </p>
               </div>
@@ -231,7 +231,7 @@ const EmployeeDashboard: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gradient-to-br from-white to-slate-50 shadow-xl rounded-2xl border border-slate-200 p-6">
+      <div className="bg-gradient-to-br from-gray-900 to-black shadow-xl rounded-2xl border border-amber-500/30 p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
