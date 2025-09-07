@@ -55,10 +55,22 @@ export const ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to fetch inventory data',
     NO_TOKEN: 'No access token found',
   },
+  AUTH: {
+    NO_TOKEN: 'No access token found',
+    TOKEN_EXPIRED: 'Token has expired',
+    UNAUTHORIZED: 'Unauthorized access',
+  },
   GENERAL: {
     NETWORK_ERROR: 'Network error',
     REQUEST_TIMEOUT: 'Request timeout',
     UNKNOWN_ERROR: 'An unknown error occurred',
+  },
+  HTTP: {
+    BAD_REQUEST: 'Bad request',
+    UNAUTHORIZED: 'Unauthorized',
+    FORBIDDEN: 'Forbidden',
+    NOT_FOUND: 'Not found',
+    INTERNAL_SERVER_ERROR: 'Internal server error',
   },
 } as const;
 
@@ -66,5 +78,23 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   CUSTOMER: {
     CREATED: 'Customer saved successfully!',
+    FETCHED: 'Customers loaded successfully!',
   },
+} as const;
+
+// HTTP Status Codes
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+// API Response Types
+export const API_RESPONSE_STATUS = {
+  SUCCESS: 'success',
+  ERROR: 'error',
 } as const;

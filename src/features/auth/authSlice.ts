@@ -69,7 +69,19 @@ export const initializeAuth = createAsyncThunk(
     try {
       const authState = authService.initializeAuthState();
       if (authState) {
-        return authState;
+        // Validate and refresh token if needed
+        const validation = await authService.validateAndRefreshToken();
+        
+        if (validation.isValid) {
+          // Return auth state with potentially updated token
+          return {
+            ...authState,
+            accessToken: validation.newAccessToken || authState.accessToken
+          };
+        } else {
+          console.log('Token validation failed, clearing auth state');
+          return rejectWithValue('Token validation failed');
+        }
       }
       return rejectWithValue('No valid session found');
     } catch (error: any) {
@@ -87,12 +99,12 @@ export const refreshToken = createAsyncThunk(
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+      const response = await fetch(`${getApiBaseUrl()}/auth/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`,
         },
-        body: JSON.stringify({ refreshToken }),
       });
 
       if (!response.ok) {

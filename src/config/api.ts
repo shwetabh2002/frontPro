@@ -12,6 +12,7 @@ export const API_CONFIG = {
     // Users
     USERS: {
       CUSTOMER: '/users/customer',
+      GET_CUSTOMERS: '/users/get-customer',
       PROFILE: '/users/profile',
     },
     
@@ -43,13 +44,13 @@ export const API_CONFIG = {
   },
 } as const;
 
-// Global function to get API base URL based on NODE_ENV
+// Global function to get API base URL based on environment
 export const getApiBaseUrl = (): string => {
   // Use custom environment variable for environment detection
-  const environment = "production";
+  const environment = process.env.REACT_APP_ENVIRONMENT || 'development';
   
   if (environment === 'production') {
-    return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'http://localhost:3000';
+    return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://my-backend-7rrf.onrender.com';
   }
   
   // Development or any other environment

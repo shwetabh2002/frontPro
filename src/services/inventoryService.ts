@@ -18,6 +18,7 @@ export interface InventoryItem {
   inStock: boolean;
   condition: string;
   status: string;
+  color: string;
 }
 
 export interface FilterSummary {
@@ -25,6 +26,7 @@ export interface FilterSummary {
   brand: string[];
   model: string[];
   year: number[];
+  color: string[];
 }
 
 export interface InventoryResponse {
@@ -42,6 +44,7 @@ export interface InventoryFilters {
   brand?: string;
   model?: string;
   year?: string | number;
+  color?: string;
 }
 
 // Inventory Service
@@ -53,6 +56,8 @@ class InventoryService {
    */
   async getRequirementsCars(filters: InventoryFilters): Promise<InventoryResponse> {
     try {
+      console.log('🔍 Received filters:', filters);
+      
       const params: Record<string, string | number> = {
         category: filters.category,
       };
@@ -60,8 +65,18 @@ class InventoryService {
       if (filters.brand) params.brand = filters.brand;
       if (filters.model) params.model = filters.model;
       if (filters.year) params.year = filters.year;
+      if (filters.color && filters.color.trim() !== '') {
+        console.log('🎨 Adding color to params:', filters.color);
+        params.color = filters.color;
+      } else {
+        console.log('🎨 No color or empty color, skipping:', filters.color);
+      }
 
+      console.log('🔍 Final params object:', params);
       const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
+      
+      console.log('🔍 Inventory API URL:', url);
+      console.log('🔍 API Parameters:', params);
       
       const token = localStorage.getItem('accessToken');
       if (!token) {

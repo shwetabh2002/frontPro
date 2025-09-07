@@ -37,8 +37,11 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+            headers: {
+              'Authorization': `Bearer ${refreshToken}`,
+              'Content-Type': 'application/json',
+            },
           });
           
           const { accessToken } = response.data.data;
@@ -53,7 +56,9 @@ api.interceptors.response.use(
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
         localStorage.removeItem('permissions');
-        window.location.href = '/login';
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
     }
     
@@ -111,10 +116,7 @@ export const authService = {
       console.error('Logout error:', error);
     } finally {
       // Clear all stored data
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('permissions');
+      this.clearAuthState();
     }
   },
 
@@ -180,6 +182,49 @@ export const authService = {
     return null;
   },
 
+  // Validate and refresh token if needed
+  async validateAndRefreshToken(): Promise<{ isValid: boolean; newAccessToken?: string }> {
+    const accessToken = this.getAccessToken();
+    const refreshToken = this.getRefreshToken();
+
+    if (!accessToken || !refreshToken) {
+      return { isValid: false };
+    }
+
+    // If token is not expired, it's valid
+    if (!this.isTokenExpired()) {
+      return { isValid: true };
+    }
+
+    // Token is expired, try to refresh
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+        headers: {
+          'Authorization': `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const { accessToken: newAccessToken } = response.data.data;
+      localStorage.setItem('accessToken', newAccessToken);
+      
+      return { isValid: true, newAccessToken };
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // Clear auth state on refresh failure
+      this.clearAuthState();
+      return { isValid: false };
+    }
+  },
+
+  // Clear all auth data
+  clearAuthState(): void {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('permissions');
+  },
+
   // Background token refresh
   startBackgroundRefresh(): void {
     // Check token every 5 minutes
@@ -188,8 +233,11 @@ export const authService = {
         try {
           const refreshToken = this.getRefreshToken();
           if (refreshToken) {
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-              refreshToken,
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+              headers: {
+                'Authorization': `Bearer ${refreshToken}`,
+                'Content-Type': 'application/json',
+              },
             });
             
             const { accessToken } = response.data.data;

@@ -50,13 +50,22 @@ function Table<T extends Record<string, any>>({
 
   return (
     <div className={`overflow-x-auto rounded-xl border border-slate-200 shadow-lg ${className}`}>
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full table-fixed divide-y divide-slate-200">
         <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
           <tr>
-            {columns.map((column) => (
+            {columns.map((column, index) => (
               <th
                 key={column.key}
-                className="px-5 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                className={`px-4 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider ${
+                  index === 0 ? 'w-32' : // Customer ID column
+                  index === 1 ? 'w-48' : // Name column
+                  index === 2 ? 'w-64' : // Email column
+                  index === 3 ? 'w-40' : // Phone column
+                  index === 4 ? 'w-24' : // Status column
+                  index === 5 ? 'w-48' : // Address column
+                  index === 6 ? 'w-32' : // Created column
+                  'w-48' // Actions column
+                }`}
               >
                 {column.header}
               </th>
@@ -66,8 +75,13 @@ function Table<T extends Record<string, any>>({
         <tbody className="bg-white divide-y divide-slate-100">
           {data.map((item, index) => (
             <tr key={index} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200">
-              {columns.map((column) => (
-                <td key={column.key} className="px-5 py-4 whitespace-nowrap text-sm text-slate-700 font-medium">
+              {columns.map((column, colIndex) => (
+                <td 
+                  key={column.key} 
+                  className={`px-4 py-4 text-sm text-slate-700 font-medium ${
+                    colIndex === 5 ? 'break-words leading-relaxed' : 'whitespace-nowrap' // Address column can wrap with better line height
+                  }`}
+                >
                   {column.render
                     ? column.render(item[column.key], item)
                     : item[column.key]}

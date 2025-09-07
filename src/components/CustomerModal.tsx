@@ -54,12 +54,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     brand: '',
     model: '',
     year: '',
+    color: '',
   });
 
   // Inventory state
   const [allInventoryItems, setAllInventoryItems] = useState<InventoryItem[]>([]);
   const [filteredInventoryItems, setFilteredInventoryItems] = useState<InventoryItem[]>([]);
-  const [filterSummary, setFilterSummary] = useState<FilterSummary>({ category: [], brand: [], model: [], year: [] });
+  const [filterSummary, setFilterSummary] = useState<FilterSummary>({ category: [], brand: [], model: [], year: [], color: [] });
   const [isInventoryLoading, setIsInventoryLoading] = useState(false);
   const [isAllItemsLoading, setIsAllItemsLoading] = useState(false);
   
@@ -90,19 +91,26 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     if (showRequirements && requirements.category) {
       fetchInventoryData();
     }
-  }, [requirements.category, requirements.brand, requirements.model, requirements.year]);
+  }, [requirements.category, requirements.brand, requirements.model, requirements.year, requirements.color]);
 
   const fetchInventoryData = async () => {
     if (!requirements.category) return;
     
     setIsInventoryLoading(true);
     try {
-      const response = await inventoryService.getRequirementsCars({
+      const filters = {
         category: requirements.category,
         brand: requirements.brand || undefined,
         model: requirements.model || undefined,
         year: requirements.year || undefined,
-      });
+        color: requirements.color || undefined,
+      };
+      
+      console.log('🔍 Fetching inventory with filters:', filters);
+      console.log('🔍 Requirements state:', requirements);
+      console.log('🔍 Color value specifically:', requirements.color);
+      
+      const response = await inventoryService.getRequirementsCars(filters);
 
       if (response.success) {
         // Only update filtered items, don't overwrite allInventoryItems
@@ -278,12 +286,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     setFormData({ name: '', email: '', phone: '', address: '' });
     setErrors({});
     setShowRequirements(false);
-    setRequirements({ category: '', brand: '', model: '', year: '' });
+    setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
     setSelectedCountryCode('+91');
                 setAllInventoryItems([]);
     setFilteredInventoryItems([]);
     setIsAllItemsLoading(false);
-    setFilterSummary({ category: [], brand: [], model: [], year: [] });
+    setFilterSummary({ category: [], brand: [], model: [], year: [], color: [] });
     setSelectedItems(new Set());
     setItemQuantities({});
     setShowCloseConfirmation(false);
@@ -299,6 +307,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
       if (requirements.brand && item.brand !== requirements.brand) return false;
       if (requirements.model && item.model !== requirements.model) return false;
       if (requirements.year && item.year !== parseInt(requirements.year)) return false;
+      if (requirements.color && item.color !== requirements.color) return false;
       return true;
     });
   };
@@ -358,14 +367,35 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
       >
         <div className="space-y-8">
           {/* Customer Information Section */}
-          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6 shadow-lg border border-blue-100">
-            <h4 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3 shadow-md">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+          <div className={`bg-gradient-to-br rounded-xl p-6 shadow-lg border ${
+            showRequirements 
+              ? 'from-gray-50 to-slate-50 border-gray-200' 
+              : 'from-slate-50 to-blue-50 border-blue-100'
+          }`}>
+            <h4 className={`text-xl font-bold mb-6 flex items-center ${
+              showRequirements ? 'text-gray-600' : 'text-slate-800'
+            }`}>
+              <div className={`p-2 rounded-lg mr-3 shadow-md ${
+                showRequirements 
+                  ? 'bg-gradient-to-br from-gray-400 to-gray-500' 
+                  : 'bg-gradient-to-br from-blue-500 to-blue-600'
+              }`}>
+                {showRequirements ? (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                )}
               </div>
               Customer Information
+              {showRequirements && (
+                <span className="ml-3 text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  ✓ Locked
+                </span>
+              )}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name Input */}
@@ -378,9 +408,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter customer name"
+                  disabled={showRequirements}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 ${
                     errors.name ? 'border-red-400 bg-red-50' : 'border-slate-300 hover:border-blue-300 hover:shadow-md'
-                  }`}
+                  } ${showRequirements ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.name && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -402,9 +433,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
+                  disabled={showRequirements}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-all duration-200 ${
                     errors.email ? 'border-red-400 bg-red-50' : 'border-slate-300 hover:border-green-300 hover:shadow-md'
-                  }`}
+                  } ${showRequirements ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.email && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -426,7 +458,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                     value={selectedCountryCode}
                     onChange={setSelectedCountryCode}
                     countries={countries}
-                    className="min-w-[180px]"
+                    className={`min-w-[180px] ${showRequirements ? 'opacity-75 pointer-events-none' : ''}`}
                     isLoading={countries.length === 0}
                   />
                   <input
@@ -434,9 +466,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="Enter phone number"
+                    disabled={showRequirements}
                     className={`block flex-1 px-4 py-3 border-2 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 ${
                       errors.phone ? 'border-red-400 bg-red-50' : 'border-slate-300 hover:border-purple-300 hover:shadow-md'
-                    }`}
+                    } ${showRequirements ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
                   />
                 </div>
                 {errors.phone && (
@@ -459,9 +492,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="Enter customer address"
                   rows={3}
+                  disabled={showRequirements}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all duration-200 resize-none ${
                     errors.address ? 'border-red-400 bg-red-50' : 'border-slate-300 hover:border-orange-300 hover:shadow-md'
-                  }`}
+                  } ${showRequirements ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.address && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -477,8 +511,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
             <div className="mt-8">
               <button
                 onClick={handleAddRequirement}
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl shadow-xl"
+                disabled={isLoading || showRequirements}
+                className={`w-full px-6 py-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold text-base transition-all duration-300 transform shadow-xl ${
+                  showRequirements
+                    ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed opacity-75'
+                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 hover:scale-[1.02] hover:shadow-2xl focus:ring-blue-500/30'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -487,6 +525,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Saving Customer...
+                  </div>
+                ) : showRequirements ? (
+                  <div className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Customer Added ✓
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
@@ -511,7 +556,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 Requirements
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
                 {/* Category Dropdown */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -522,7 +567,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                     onChange={(e) => {
                       setRequirements(prev => ({ ...prev, category: e.target.value }));
                       // Reset other filters when category changes
-                      setRequirements(prev => ({ ...prev, brand: '', model: '', year: '' }));
+                      setRequirements(prev => ({ ...prev, brand: '', model: '', year: '', color: '' }));
                     }}
                     className="block w-full px-4 py-3 border-2 border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm hover:border-emerald-400 transition-all duration-200 bg-white"
                   >
@@ -584,6 +629,27 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                     <option value="">Select year</option>
                     {filterSummary.year.map(year => (
                       <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Color Dropdown */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Color
+                  </label>
+                  <select
+                    value={requirements.color}
+                    onChange={(e) => {
+                      console.log('🎨 Color selected:', e.target.value);
+                      setRequirements(prev => ({ ...prev, color: e.target.value }));
+                    }}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-gray-400 transition-colors"
+                    disabled={!requirements.category}
+                  >
+                    <option value="">Select color</option>
+                    {filterSummary.color.map(color => (
+                      <option key={color} value={color}>{color}</option>
                     ))}
                   </select>
                 </div>
@@ -681,6 +747,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                   <span>SKU: {item.sku}</span>
                                   <span>Category: {item.category}</span>
                                   <span>Year: {item.year}</span>
+                                  <span>Color: {item.color}</span>
                                 </div>
                               </div>
                               
@@ -791,7 +858,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                           </div>
                           
                           {/* Item Details */}
-                          <div className="grid grid-cols-2 md:grid-cols-7 gap-4 text-sm flex-1">
+                          <div className="grid grid-cols-2 md:grid-cols-8 gap-4 text-sm flex-1">
                             <div>
                               <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">SKU</span>
                               <p className="text-gray-900 font-medium">{item.sku}</p>
@@ -819,6 +886,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                             <div>
                               <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">Year</span>
                               <p className="text-gray-900 font-medium">{item.year}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">Color</span>
+                              <p className="text-gray-900 font-medium">{item.color}</p>
                             </div>
                           </div>
                         </div>

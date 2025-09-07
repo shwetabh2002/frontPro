@@ -1,88 +1,183 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Table from '../../components/Table';
 import CustomerModal from '../../components/CustomerModal';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: 'active' | 'inactive';
-  lastOrder: string;
-}
+import { customerService, type Customer } from '../../services/customerService';
 
 const EmployeeCustomersPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [customers] = useState<Customer[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1 234-567-8900',
-      status: 'active',
-      lastOrder: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+1 234-567-8901',
-      status: 'active',
-      lastOrder: '2024-01-14',
-    },
-    {
-      id: '3',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      phone: '+1 234-567-8902',
-      status: 'inactive',
-      lastOrder: '2024-01-10',
-    },
-  ]);
-
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
-  );
+  // Fetch customers from API
+  const fetchCustomers = async (page: number = 1, search: string = '') => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await customerService.getCustomers({
+        page,
+        limit: 10,
+        search: search || undefined,
+      });
+
+      if (response.success) {
+        setCustomers(response.data.customers);
+        setPagination(response.data.pagination);
+      } else {
+        setError(response.message || 'Failed to fetch customers');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch customers');
+      console.error('Error fetching customers:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load customers on component mount
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  // Handle search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== '') {
+        fetchCustomers(1, searchTerm);
+        setCurrentPage(1);
+      } else {
+        fetchCustomers(1);
+        setCurrentPage(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchCustomers(page, searchTerm);
+  };
+
+  // Handle customer modal close and refresh data
+  const handleCustomerModalClose = () => {
+    setIsAddCustomerModalOpen(false);
+    // Refresh the current page
+    fetchCustomers(currentPage, searchTerm);
+  };
+
+  const filteredCustomers = customers;
 
   const columns = [
-    { key: 'name', header: 'Name' },
-    { key: 'email', header: 'Email' },
-    { key: 'phone', header: 'Phone' },
+    { 
+      key: 'custId', 
+      header: 'Customer ID',
+      render: (value: string) => (
+        <div className="text-blue-700 text-xs font-bold font-mono bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-3 py-2 rounded-lg shadow-sm">
+          <div className="flex items-center">
+            <svg className="w-3 h-3 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            {value}
+          </div>
+        </div>
+      )
+    },
+    { 
+      key: 'name', 
+      header: 'Customer Name',
+      render: (value: string) => (
+        <div className="font-semibold text-slate-800">
+          {value}
+        </div>
+      )
+    },
+    { 
+      key: 'email', 
+      header: 'Email Address',
+      render: (value: string) => (
+        <div className="text-slate-600 text-sm">
+          {value}
+        </div>
+      )
+    },
+    { 
+      key: 'phone', 
+      header: 'Phone Number',
+      render: (value: string) => (
+        <div className="text-slate-600 text-sm font-mono">
+          {value}
+        </div>
+      )
+    },
     { 
       key: 'status', 
       header: 'Status',
       render: (value: string) => (
-        <span className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full border ${
+        <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
           value === 'active' 
             ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200' 
             : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border-red-200'
         }`}>
-          {value}
+          <div className={`w-2 h-2 rounded-full mr-2 ${
+            value === 'active' ? 'bg-green-500' : 'bg-red-500'
+          }`}></div>
+          {value.charAt(0).toUpperCase() + value.slice(1)}
         </span>
       )
     },
-    { key: 'lastOrder', header: 'Last Order' },
+    { 
+      key: 'address', 
+      header: 'Address',
+      render: (value: string) => (
+        <div className="text-slate-600 text-sm max-w-xs">
+          <div className="break-words leading-relaxed" title={value}>
+            {value}
+          </div>
+        </div>
+      )
+    },
+    { 
+      key: 'createdAt', 
+      header: 'Created Date',
+      render: (value: string) => (
+        <div className="text-slate-600 text-sm">
+          {new Date(value).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </div>
+      )
+    },
     {
       key: 'actions',
       header: 'Actions',
       render: () => (
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center space-x-1">
+          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg text-xs px-2 py-1">
+            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Edit
           </Button>
-          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg text-xs px-2 py-1">
+            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
@@ -166,22 +261,107 @@ const EmployeeCustomersPage: React.FC = () => {
               </h3>
             </div>
             <div className="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
-              Showing {filteredCustomers.length} of {customers.length} customers
+              {isLoading ? (
+                <div className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </div>
+              ) : (
+                `Showing ${filteredCustomers.length} of ${pagination.totalItems} customers`
+              )}
             </div>
           </div>
           
-          <Table
-            columns={columns}
-            data={filteredCustomers}
-            emptyMessage="No customers found matching your search criteria."
-          />
+          {error ? (
+            <div className="text-center py-8 text-red-600 bg-red-50 rounded-lg border border-red-200">
+              <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <p className="text-lg font-medium">Error loading customers</p>
+              <p className="text-sm">{error}</p>
+              <Button 
+                variant="outline" 
+                onClick={() => fetchCustomers(currentPage, searchTerm)}
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Table
+                columns={columns}
+                data={filteredCustomers}
+                emptyMessage="No customers found matching your search criteria."
+              />
+              
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between px-5 py-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span>
+                      Page {pagination.currentPage} of {pagination.totalPages} 
+                      ({pagination.totalItems} total customers)
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={!pagination.hasPrevPage || isLoading}
+                      className="shadow-md hover:shadow-lg"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Previous
+                    </Button>
+                    
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "primary" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={isLoading}
+                          className="shadow-md hover:shadow-lg"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={!pagination.hasNextPage || isLoading}
+                      className="shadow-md hover:shadow-lg"
+                    >
+                      Next
+                      <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
       {/* Add Customer Modal */}
       <CustomerModal
         isOpen={isAddCustomerModalOpen}
-        onClose={() => setIsAddCustomerModalOpen(false)}
+        onClose={handleCustomerModalClose}
       />
     </div>
   );
