@@ -37,6 +37,20 @@ export const APP_CONSTANTS = {
       model: [],
       year: [],
     },
+    PAGINATION: {
+      DEFAULT_PAGE: 1,
+      DEFAULT_LIMIT: 20,
+      MAX_LIMIT: 100,
+      ITEMS_PER_PAGE_OPTIONS: [20, 50, 100, 200],
+    },
+  },
+
+  // External API Keys
+  EXTERNAL_APIS: {
+    OPENEXCHANGERATES: {
+      APP_ID: process.env.REACT_APP_OPENEXCHANGERATES_APP_ID ,
+      BASE_URL: process.env.REACT_APP_OPENEXCHANGERATES_BASE_URL,
+    },
   },
 } as const;
 

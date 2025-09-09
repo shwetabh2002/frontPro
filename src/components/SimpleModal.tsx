@@ -21,7 +21,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, title, child
         ></div>
 
         {/* Modal panel */}
-        <div className={`inline-block align-bottom bg-gradient-to-br from-gray-900 to-black rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all duration-300 sm:my-8 sm:align-middle ${maxWidth} w-full border border-amber-500/50`}>
+        <div className={`inline-block align-bottom bg-gradient-to-br from-gray-900 to-black rounded-2xl text-left overflow-visible shadow-2xl transform transition-all duration-300 sm:my-8 sm:align-middle ${maxWidth} w-full border border-amber-500/50`}>
           {/* Header */}
           <div className="bg-gradient-to-r from-gray-800 to-black px-6 py-5 border-b border-amber-500/30">
             <div className="flex items-center justify-between">
@@ -38,7 +38,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, title, child
           </div>
 
           {/* Content */}
-          <div className="px-6 py-6 bg-gray-900">
+          <div className="px-6 py-6 bg-gray-900 overflow-visible">
             {children}
           </div>
         </div>

@@ -14,6 +14,8 @@ export interface InventoryItem {
   description: string;
   costPrice: number;
   sellingPrice: number;
+  newSellingPrice?: number;
+  currencyType?: string;
   quantity: number;
   inStock: boolean;
   condition: string;
@@ -35,7 +37,19 @@ export interface InventoryResponse {
   data: {
     items: InventoryItem[];
     summary: FilterSummary;
-    totalItems: number;
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+    currencyInfo?: {
+      currency: string;
+      exchangeRate: number;
+      baseCurrency: string;
+    };
   };
 }
 
@@ -45,6 +59,9 @@ export interface InventoryFilters {
   model?: string;
   year?: string | number;
   color?: string;
+  currencyType?: string;
+  page?: number;
+  limit?: number;
 }
 
 // Inventory Service
@@ -70,6 +87,18 @@ class InventoryService {
         params.color = filters.color;
       } else {
         console.log('🎨 No color or empty color, skipping:', filters.color);
+      }
+      if (filters.currencyType) {
+        console.log('💰 Adding currencyType to params:', filters.currencyType);
+        params.currencyType = filters.currencyType;
+      }
+      if (filters.page) {
+        console.log('📄 Adding page to params:', filters.page);
+        params.page = filters.page;
+      }
+      if (filters.limit) {
+        console.log('📊 Adding limit to params:', filters.limit);
+        params.limit = filters.limit;
       }
 
       console.log('🔍 Final params object:', params);
@@ -106,12 +135,22 @@ class InventoryService {
 
   /**
    * Fetch all inventory items without any filters using requirements-cars endpoint
-   * @returns Promise with all inventory items
+   * @param currencyType - Optional currency type for pricing
+   * @param page - Page number for pagination (default: 1)
+   * @param limit - Items per page (default: 20)
+   * @returns Promise with paginated inventory items
    */
-  async getAllItems(): Promise<InventoryResponse> {
+  async getAllItems(currencyType?: string, page: number = 1, limit: number = 20): Promise<InventoryResponse> {
     try {
       // Use requirements-cars endpoint without any filters to get all items
-      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS);
+      const params: Record<string, string | number> = {
+        page,
+        limit
+      };
+      if (currencyType) {
+        params.currencyType = currencyType;
+      }
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
       
       const token = localStorage.getItem('accessToken');
       if (!token) {

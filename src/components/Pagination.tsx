@@ -1,0 +1,165 @@
+import React from 'react';
+import { APP_CONSTANTS } from '../constants';
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  isLoading?: boolean;
+  className?: string;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  totalItems,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+  hasNextPage,
+  hasPrevPage,
+  isLoading = false,
+  className = ""
+}) => {
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) {
+          pages.push('...');
+        }
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pages.push('...');
+        }
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  return (
+    <div className={`bg-gray-800 border border-amber-500/30 rounded-lg p-4 ${className}`}>
+      {/* Items per page selector */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <label className="text-sm font-medium text-amber-300">Items per page:</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+            disabled={isLoading}
+            className="px-3 py-1 bg-gray-700 border border-amber-500/50 rounded text-amber-100 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50"
+          >
+            {APP_CONSTANTS.DEFAULTS.PAGINATION.ITEMS_PER_PAGE_OPTIONS.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="text-sm text-amber-300">
+          Showing {startItem}-{endItem} of {totalItems.toLocaleString()} items
+        </div>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between">
+        {/* Previous button */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!hasPrevPage || isLoading}
+          className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            hasPrevPage && !isLoading
+              ? 'bg-amber-600 text-black hover:bg-amber-700 hover:scale-105'
+              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Previous
+        </button>
+
+        {/* Page numbers */}
+        <div className="flex items-center space-x-1">
+          {pageNumbers.map((page, index) => (
+            <React.Fragment key={index}>
+              {page === '...' ? (
+                <span className="px-3 py-2 text-amber-400">...</span>
+              ) : (
+                <button
+                  onClick={() => onPageChange(page as number)}
+                  disabled={isLoading}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    page === currentPage
+                      ? 'bg-amber-500 text-black font-bold'
+                      : 'bg-gray-700 text-amber-300 hover:bg-amber-600 hover:text-black hover:scale-105'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {page}
+                </button>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Next button */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasNextPage || isLoading}
+          className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            hasNextPage && !isLoading
+              ? 'bg-amber-600 text-black hover:bg-amber-700 hover:scale-105'
+              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Next
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="mt-3 text-center">
+          <div className="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 rounded-lg text-sm">
+            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading page {currentPage}...
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Pagination;
