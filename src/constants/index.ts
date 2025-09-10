@@ -69,6 +69,11 @@ export const ERROR_MESSAGES = {
     FETCH_FAILED: 'Failed to fetch inventory data',
     NO_TOKEN: 'No access token found',
   },
+  COMPANY: {
+    FETCH_FAILED: 'Failed to fetch company information',
+    CACHE_FAILED: 'Failed to cache company information',
+    NO_TOKEN: 'No access token found',
+  },
   AUTH: {
     NO_TOKEN: 'No access token found',
     TOKEN_EXPIRED: 'Token has expired',

@@ -18,6 +18,7 @@ export interface InventoryItem {
   currencyType?: string;
   quantity: number;
   inStock: boolean;
+  minStockLevel: number;
   condition: string;
   status: string;
   color: string;

@@ -29,6 +29,11 @@ export const API_CONFIG = {
       INVOICES: '/sales/invoices',
       QUOTATIONS: '/sales/quotations',
     },
+    
+    // Companies
+    COMPANIES: {
+      GET_COMPANY_DOCUMENTS: '/companies/owner/company/documents',
+    },
   },
   
   // HTTP Headers

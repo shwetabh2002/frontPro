@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { initializeAuth } from '../features/auth/authSlice';
 import { authService } from '../services/authService';
+import { companyService } from '../services/companyService';
 
 const SessionManager: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
@@ -18,8 +19,23 @@ const SessionManager: React.FC<{ children: React.ReactNode }> = ({ children }) =
     if (isAuthenticated) {
       // Start background token refresh when authenticated
       authService.startBackgroundRefresh();
+      
+      // Load company information when authenticated
+      loadCompanyInfo();
     }
   }, [isAuthenticated]);
+
+  // Load company information
+  const loadCompanyInfo = async () => {
+    try {
+      console.log('🏢 Loading company information...');
+      await companyService.getCompany();
+      console.log('✅ Company information loaded successfully');
+    } catch (error) {
+      console.error('❌ Failed to load company information:', error);
+      // Don't show error to user as this is background loading
+    }
+  };
 
   // Show loading while initializing auth state
   if (!isInitialized) {

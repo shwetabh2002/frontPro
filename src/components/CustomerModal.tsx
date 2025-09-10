@@ -5,6 +5,7 @@ import { customerService, type CreateCustomerData } from '../services/customerSe
 import { countriesService, type Country } from '../services/countriesService';
 import { currencyService, type Currency } from '../services/currencyService';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
+import { getCompanyName, getCompanyCurrency } from '../utils/companyUtils';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
 import CountryDropdown from './CountryDropdown';
 import CurrencyDropdown from './CurrencyDropdown';
@@ -512,6 +513,20 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
   // Cart management functions
   const handleItemSelect = (itemId: string, checked: boolean) => {
     if (checked) {
+      const item = allInventoryItems.find(invItem => invItem._id === itemId);
+      if (!item) return;
+      
+      // Check if adding this item would exceed minStockLevel
+      const currentQuantity = itemQuantities[itemId] || 0;
+      const newQuantity = currentQuantity + 1;
+      
+      if (newQuantity > item.minStockLevel) {
+        setToastMessage(`Cannot add more than ${item.minStockLevel} units of ${item.name}. This exceeds the minimum stock level.`);
+        setToastType('error');
+        setShowToast(true);
+        return;
+      }
+      
       setSelectedItems(prev => new Set(Array.from(prev).concat(itemId)));
       setItemQuantities(prev => ({ ...prev, [itemId]: 1 }));
     } else {
@@ -529,9 +544,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleQuantityChange = (itemId: string, change: number) => {
+    const item = allInventoryItems.find(invItem => invItem._id === itemId);
+    if (!item) return;
+    
     setItemQuantities(prev => {
       const currentQty = prev[itemId] || 1;
       const newQty = Math.max(1, currentQty + change);
+      
+      // Check if new quantity would exceed minStockLevel
+      if (newQty > item.minStockLevel) {
+        setToastMessage(`Cannot add more than ${item.minStockLevel} units of ${item.name}. This exceeds the minimum stock level.`);
+        setToastType('error');
+        setShowToast(true);
+        return prev; // Return previous state without changes
+      }
+      
       return { ...prev, [itemId]: newQty };
     });
   };
@@ -667,6 +694,27 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
         maxWidth="max-w-6xl"
       >
         <div className="space-y-8">
+          {/* Company Information Header */}
+          <div className="bg-gradient-to-r from-amber-600/10 to-yellow-500/10 rounded-lg p-4 border border-amber-500/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-gradient-to-br from-amber-600 to-yellow-500 rounded-lg shadow-md">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-amber-400">{getCompanyName()}</h3>
+                  <p className="text-sm text-gray-300">Default Currency: <span className="font-medium text-amber-300">{getCompanyCurrency()}</span></p>
+                </div>
+              </div>
+              <div className="text-right text-sm text-gray-400">
+                <div>Customer Registration</div>
+                <div className="text-xs">POS System</div>
+              </div>
+            </div>
+          </div>
+
           {/* Customer Information Section */}
           <div className={`bg-gradient-to-br rounded-xl p-6 shadow-lg border ${
             showRequirements 
@@ -1157,13 +1205,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                   </span>
                                   <button
                                     onClick={() => handleQuantityChange(itemId, 1)}
+                                    disabled={quantity >= item.minStockLevel}
                                     className={`w-8 h-8 rounded-full hover:scale-105 transition-all flex items-center justify-center text-sm font-bold ${
-                                      isInCurrentFilter ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                                      quantity >= item.minStockLevel 
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        : isInCurrentFilter 
+                                          ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
+                                          : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
                                     }`}
                                   >
                                     +
                                   </button>
                                 </div>
+                                <span className="text-xs text-gray-500">
+                                  Max: {item.minStockLevel}
+                                </span>
                               </div>
                               
                               {/* Total Price */}
@@ -1362,7 +1418,16 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                               id={`item-${item._id}`}
                               checked={isItemSelected(item._id)}
                               onChange={(e) => handleItemSelect(item._id, e.target.checked)}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              disabled={!isItemSelected(item._id) && item.minStockLevel <= 0}
+                              className={`w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
+                                !isItemSelected(item._id) && item.minStockLevel <= 0 
+                                  ? 'opacity-50 cursor-not-allowed' 
+                                  : ''
+                              }`}
+                              title={!isItemSelected(item._id) && item.minStockLevel <= 0 
+                                ? `Cannot add item - minimum stock level is ${item.minStockLevel}` 
+                                : ''
+                              }
                             />
                           </div>
                           

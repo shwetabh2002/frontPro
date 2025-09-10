@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
 import Button from '../components/Button';
 import Logo from '../components/Logo';
+import CompanyInfo from '../components/CompanyInfo';
 
 interface MenuItem {
   name: string;
@@ -157,10 +158,13 @@ const AdminLayout: React.FC = () => {
         {/* Header */}
         <header className="bg-gradient-to-r from-gray-800 to-black shadow-lg border-b border-amber-500/30 px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex items-center space-x-6">
               <h2 className="text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
                 {menuItems.find(item => isActiveRoute(item.path))?.name || 'Dashboard'}
               </h2>
+              <div className="hidden md:block">
+                <CompanyInfo showDetails={false} className="text-sm" />
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-300">

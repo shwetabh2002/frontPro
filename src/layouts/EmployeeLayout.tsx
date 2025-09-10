@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
 import Button from '../components/Button';
 import Logo from '../components/Logo';
+import CompanyInfo from '../components/CompanyInfo';
 
 const EmployeeLayout: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -21,8 +22,11 @@ const EmployeeLayout: React.FC = () => {
       <nav className="bg-gradient-to-r from-gray-800 to-black shadow-lg border-b border-amber-500/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-6">
               <Logo size="sm" showText={true} />
+              <div className="hidden md:block">
+                <CompanyInfo showDetails={false} className="text-sm" />
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
