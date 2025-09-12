@@ -78,7 +78,8 @@ export const customerService = {
       throw new ApiError(
         ERROR_MESSAGES.AUTH.NO_TOKEN,
         401,
-        'Unauthorized'
+        'Unauthorized',
+        undefined
       );
     }
 
@@ -99,7 +100,8 @@ export const customerService = {
         throw new ApiError(
           ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
           500,
-          'Invalid response format'
+          'Invalid response format',
+          undefined
         );
       }
 
@@ -129,7 +131,8 @@ export const customerService = {
       throw new ApiError(
         ERROR_MESSAGES.AUTH.NO_TOKEN,
         401,
-        'Unauthorized'
+        'Unauthorized',
+        undefined
       );
     }
 
@@ -156,7 +159,8 @@ export const customerService = {
         throw new ApiError(
           ERROR_MESSAGES.INVENTORY.FETCH_FAILED,
           500,
-          'Invalid response format'
+          'Invalid response format',
+          undefined
         );
       }
 
@@ -186,7 +190,8 @@ export const customerService = {
       throw new ApiError(
         ERROR_MESSAGES.AUTH.NO_TOKEN,
         401,
-        'Unauthorized'
+        'Unauthorized',
+        undefined
       );
     }
 
@@ -205,7 +210,8 @@ export const customerService = {
         throw new ApiError(
           ERROR_MESSAGES.HTTP.NOT_FOUND,
           404,
-          'Customer not found'
+          'Customer not found',
+          undefined
         );
       }
 
@@ -236,7 +242,8 @@ export const customerService = {
       throw new ApiError(
         ERROR_MESSAGES.AUTH.NO_TOKEN,
         401,
-        'Unauthorized'
+        'Unauthorized',
+        undefined
       );
     }
 
@@ -257,7 +264,8 @@ export const customerService = {
         throw new ApiError(
           ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
           500,
-          'Invalid response format'
+          'Invalid response format',
+          undefined
         );
       }
 
@@ -287,7 +295,8 @@ export const customerService = {
       throw new ApiError(
         ERROR_MESSAGES.AUTH.NO_TOKEN,
         401,
-        'Unauthorized'
+        'Unauthorized',
+        undefined
       );
     }
 

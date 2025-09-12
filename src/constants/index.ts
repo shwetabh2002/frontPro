@@ -99,6 +99,12 @@ export const SUCCESS_MESSAGES = {
     CREATED: 'Customer saved successfully!',
     FETCHED: 'Customers loaded successfully!',
   },
+  QUOTATION: {
+    CREATED: 'Quotation created and sent successfully!',
+    FETCHED: 'Quotations loaded successfully!',
+    UPDATED: 'Quotation updated successfully!',
+    DELETED: 'Quotation deleted successfully!',
+  },
 } as const;
 
 // HTTP Status Codes

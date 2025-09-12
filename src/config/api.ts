@@ -34,6 +34,15 @@ export const API_CONFIG = {
     COMPANIES: {
       GET_COMPANY_DOCUMENTS: '/companies/owner/company/documents',
     },
+    
+    // Quotations
+    QUOTATIONS: {
+      CREATE: '/quotations',
+      GET_ALL: '/quotations',
+      GET_BY_ID: '/quotations',
+      UPDATE: '/quotations',
+      DELETE: '/quotations',
+    },
   },
   
   // HTTP Headers

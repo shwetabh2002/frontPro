@@ -2,6 +2,11 @@ import { API_CONFIG, buildApiUrl } from '../config/api';
 import { ERROR_MESSAGES } from '../constants';
 
 // Types
+export interface VinNumber {
+  status: string;
+  chasisNumber: string;
+}
+
 export interface InventoryItem {
   _id: string;
   name: string;
@@ -22,6 +27,8 @@ export interface InventoryItem {
   condition: string;
   status: string;
   color: string;
+  interiorColor?: string;
+  vinNumber?: VinNumber[];
 }
 
 export interface FilterSummary {

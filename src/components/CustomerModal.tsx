@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import SimpleModal from './SimpleModal';
-import { inventoryService, type InventoryItem, type FilterSummary } from '../services/inventoryService';
+import { inventoryService, type InventoryItem, type FilterSummary, type VinNumber } from '../services/inventoryService';
 import { customerService, type CreateCustomerData } from '../services/customerService';
 import { countriesService, type Country } from '../services/countriesService';
 import { currencyService, type Currency } from '../services/currencyService';
+import { createQuotation, type CreateQuotationData, type QuotationItem } from '../services/quotationService';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
 import { getCompanyName, getCompanyCurrency } from '../utils/companyUtils';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
@@ -16,6 +17,80 @@ interface CustomerModalProps {
   onClose: () => void;
 }
 
+// Chassis Selection Component
+interface ChassisSelectionProps {
+  item: InventoryItem;
+  selectedChassis: string[];
+  onChassisChange: (chassisNumbers: string[]) => void;
+  maxSelections: number;
+}
+
+const ChassisSelection: React.FC<ChassisSelectionProps> = ({
+  item,
+  selectedChassis,
+  onChassisChange,
+  maxSelections
+}) => {
+  if (!item.vinNumber || item.vinNumber.length === 0) {
+    return null;
+  }
+
+  const availableChassis = item.vinNumber.filter(vin => vin.status === 'active');
+
+  const handleChassisToggle = (chassisNumber: string) => {
+    if (selectedChassis.includes(chassisNumber)) {
+      // Remove chassis
+      onChassisChange(selectedChassis.filter(chassis => chassis !== chassisNumber));
+    } else if (selectedChassis.length < maxSelections) {
+      // Add chassis
+      onChassisChange([...selectedChassis, chassisNumber]);
+    }
+  };
+
+  return (
+    <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+      <div className="flex items-center justify-between mb-2">
+        <h6 className="text-sm font-semibold text-gray-700">Select Chassis Numbers</h6>
+        <span className="text-xs text-gray-500">
+          {selectedChassis.length}/{maxSelections} selected (cart quantity: {maxSelections})
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-2">
+        {availableChassis.map((vin, index) => (
+          <label
+            key={index}
+            className={`flex items-center p-2 rounded border cursor-pointer transition-colors ${
+              selectedChassis.includes(vin.chasisNumber)
+                ? 'bg-blue-100 border-blue-300 text-blue-900'
+                : selectedChassis.length >= maxSelections
+                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={selectedChassis.includes(vin.chasisNumber)}
+              onChange={() => handleChassisToggle(vin.chasisNumber)}
+              disabled={selectedChassis.length >= maxSelections && !selectedChassis.includes(vin.chasisNumber)}
+              className="mr-2"
+            />
+            <span className="text-sm font-mono">{vin.chasisNumber}</span>
+            <span className="ml-2 text-xs text-gray-500">({vin.status})</span>
+          </label>
+        ))}
+      </div>
+      {selectedChassis.length === 0 && (
+        <p className="text-xs text-amber-600 mt-2">
+          ⚠️ Please select at least one chassis number for this item
+        </p>
+      )}
+      <p className="text-xs text-gray-500 mt-2">
+        💡 Select one chassis number for each unit in your cart ({maxSelections} units)
+      </p>
+    </div>
+  );
+};
+
 
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
@@ -24,6 +99,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     email: '',
     phone: '',
     address: '',
+    notes: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -72,8 +148,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
   // Cart state
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
+  const [selectedChassisNumbers, setSelectedChassisNumbers] = useState<Record<string, string[]>>({});
   const [discount, setDiscount] = useState<number>(0);
-  const [discountType, setDiscountType] = useState<'amount' | 'percentage'>('amount');
+  const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
 
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>(APP_CONSTANTS.DEFAULTS.COUNTRY_CODE);
 
@@ -102,6 +179,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
   const [previousCurrency, setPreviousCurrency] = useState<Currency | null>(null);
+  
+  // Quotation creation state
+  const [isCreatingQuotation, setIsCreatingQuotation] = useState(false);
+  const [createdCustomerId, setCreatedCustomerId] = useState<string>('');
 
   // Handle currency selection
   const handleCurrencySelect = (currency: Currency) => {
@@ -170,7 +251,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
       item.brand.toLowerCase().includes(term.toLowerCase()) ||
       item.model.toLowerCase().includes(term.toLowerCase()) ||
       item.sku.toLowerCase().includes(term.toLowerCase()) ||
-      item.category.toLowerCase().includes(term.toLowerCase())
+      item.category.toLowerCase().includes(term.toLowerCase()) ||
+      item.color.toLowerCase().includes(term.toLowerCase()) ||
+      (item.interiorColor && item.interiorColor.toLowerCase().includes(term.toLowerCase()))
     );
     
     setSearchResults(results);
@@ -466,6 +549,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
       const response = await customerService.createCustomer(customerData);
 
       if (response.success) {
+        // Store the created customer ID for quotation creation
+        setCreatedCustomerId(response.data._id);
+        
         // Success: Show green toast and open requirements section
         setToastMessage(SUCCESS_MESSAGES.CUSTOMER.CREATED);
         setToastType('success');
@@ -516,12 +602,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
       const item = allInventoryItems.find(invItem => invItem._id === itemId);
       if (!item) return;
       
-      // Check if adding this item would exceed minStockLevel
+      // Check if adding this item would exceed available quantity
       const currentQuantity = itemQuantities[itemId] || 0;
       const newQuantity = currentQuantity + 1;
       
-      if (newQuantity > item.minStockLevel) {
-        setToastMessage(`Cannot add more than ${item.minStockLevel} units of ${item.name}. This exceeds the minimum stock level.`);
+      if (newQuantity > item.quantity) {
+        setToastMessage(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`);
         setToastType('error');
         setShowToast(true);
         return;
@@ -547,24 +633,55 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     const item = allInventoryItems.find(invItem => invItem._id === itemId);
     if (!item) return;
     
+    console.log('🔄 Quantity change:', { itemId, change, itemName: item.name });
+    
     setItemQuantities(prev => {
       const currentQty = prev[itemId] || 1;
       const newQty = Math.max(1, currentQty + change);
       
-      // Check if new quantity would exceed minStockLevel
-      if (newQty > item.minStockLevel) {
-        setToastMessage(`Cannot add more than ${item.minStockLevel} units of ${item.name}. This exceeds the minimum stock level.`);
+      console.log('📊 Quantity update:', { currentQty, newQty, available: item.quantity });
+      
+      // Check if new quantity would exceed available quantity
+      if (newQty > item.quantity) {
+        setToastMessage(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`);
         setToastType('error');
         setShowToast(true);
         return prev; // Return previous state without changes
       }
       
-      return { ...prev, [itemId]: newQty };
+      // If quantity is being reduced, trim selected chassis numbers to match new quantity
+      if (newQty < currentQty) {
+        const currentSelectedChassis = getSelectedChassis(itemId);
+        if (currentSelectedChassis.length > newQty) {
+          const trimmedChassis = currentSelectedChassis.slice(0, newQty);
+          setSelectedChassisNumbers(prev => ({
+            ...prev,
+            [itemId]: trimmedChassis
+          }));
+        }
+      }
+      
+      const newState = { ...prev, [itemId]: newQty };
+      console.log('✅ New quantities state:', newState);
+      return newState;
     });
   };
 
   const getSelectedItem = (itemId: string) => {
     return allInventoryItems.find(item => item._id === itemId);
+  };
+
+  // Handle chassis number selection
+  const handleChassisChange = (itemId: string, chassisNumbers: string[]) => {
+    setSelectedChassisNumbers(prev => ({
+      ...prev,
+      [itemId]: chassisNumbers
+    }));
+  };
+
+  // Get selected chassis numbers for an item
+  const getSelectedChassis = (itemId: string): string[] => {
+    return selectedChassisNumbers[itemId] || [];
   };
 
   const getTotalSelectedItems = () => {
@@ -596,9 +713,132 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     return Math.max(0, subtotal - discountAmount); // Total cannot be negative
   };
 
+  // Convert selected items to quotation items format
+  const convertToQuotationItems = (): QuotationItem[] => {
+    const quotationItems = getAllSelectedItems()
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .map(item => {
+        const selectedChassis = getSelectedChassis(item._id);
+        console.log('🔧 Converting item to quotation:', {
+          itemName: item.name,
+          selectedChassis,
+          interiorColor: item.interiorColor
+        });
+        
+        return {
+        itemId: item._id,
+        name: item.name,
+        type: item.type || 'car',
+        category: item.category || 'sedan',
+        brand: item.brand || 'Unknown',
+        model: item.model || 'Unknown',
+        year: item.year || new Date().getFullYear(),
+        color: item.color || 'Unknown',
+        sku: item.sku || `SKU-${item._id.slice(-6)}`,
+        description: item.description || `${item.name} - ${item.year}`,
+        specifications: {
+          engine: 'Standard',
+          transmission: 'Automatic',
+          fuelType: 'Gasoline',
+        },
+        sellingPrice: item.newSellingPrice || item.sellingPrice,
+        condition: item.condition || 'new',
+        status: item.status || 'active',
+        dimensions: (item as any).dimensions || {
+          length: 0,
+          width: 0,
+          height: 0,
+          weight: 0,
+        },
+        tags: (item as any).tags || [],
+        quantity: item.quantity,
+        vinNumbers: selectedChassis.map(chassisNumber => ({
+          status: 'active',
+          chasisNumber: chassisNumber
+        })),
+        interiorColor: item.interiorColor,
+        };
+      });
+    
+    console.log('📋 Final quotation items:', quotationItems);
+    return quotationItems;
+  };
+
+  // Create quotation
+  const handleCreateQuotation = async () => {
+    if (!createdCustomerId) {
+      setToastMessage('Customer ID not found. Please create customer first.');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    if (selectedItems.size === 0) {
+      setToastMessage('Please select at least one item for quotation.');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    // Validate chassis number selection
+    const itemsWithMissingChassis = getAllSelectedItems().filter(item => {
+      if (!item) return false;
+      const hasVinNumbers = item.vinNumber && item.vinNumber.length > 0;
+      const selectedChassis = getSelectedChassis(item._id);
+      return hasVinNumbers && selectedChassis.length === 0;
+    });
+
+    if (itemsWithMissingChassis.length > 0) {
+      setToastMessage('Please select chassis numbers for all items that have VIN numbers available.');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    setIsCreatingQuotation(true);
+
+    try {
+      const quotationData: CreateQuotationData = {
+        custId: createdCustomerId,
+        items: convertToQuotationItems(),
+        discount: discount || 0,
+        discountType: discountType,
+        VAT: 5, // Default VAT rate
+        currency: selectedCurrency?.code || 'USD',
+        notes: formData.notes || undefined,
+      };
+
+      console.log('📋 Creating quotation with data:', quotationData);
+
+      const response = await createQuotation(quotationData);
+      console.log('✅ Quotation creation response:', response);
+
+      if (response.success) {
+        const quotationNumber = response.data?.quotationNumber || response.data?.quotationId || 'N/A';
+        setToastMessage(`Quotation created successfully! Quotation #: ${quotationNumber}`);
+        setToastType('success');
+        setShowToast(true);
+        
+        // Reset form and close modal
+        confirmClose();
+      } else {
+        setToastMessage(response.message || 'Failed to create quotation');
+        setToastType('error');
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error('Error creating quotation:', error);
+      setToastMessage('Failed to create quotation. Please try again.');
+      setToastType('error');
+      setShowToast(true);
+    } finally {
+      setIsCreatingQuotation(false);
+    }
+  };
+
   const confirmClose = () => {
     // Reset form state
-    setFormData({ name: '', email: '', phone: '', address: '' });
+    setFormData({ name: '', email: '', phone: '', address: '', notes: '' });
     setErrors({});
     setShowRequirements(false);
     setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
@@ -608,8 +848,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     setIsAllItemsLoading(false);
     setSelectedItems(new Set());
     setItemQuantities({});
+    setSelectedChassisNumbers({});
     setDiscount(0);
-    setDiscountType('amount');
+    setDiscountType('fixed');
     setSelectedCurrency(null);
     setFilterSummary({ category: [], brand: [], model: [], year: [], color: [] });
     setCurrentPage(APP_CONSTANTS.DEFAULTS.PAGINATION.DEFAULT_PAGE);
@@ -623,6 +864,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
     setShowRefreshAlert(false);
     setPreviousCurrency(null);
     setShowCloseConfirmation(false);
+    setIsCreatingQuotation(false);
+    setCreatedCustomerId('');
     onClose();
   };
 
@@ -1144,7 +1387,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                       if (!item) return null;
                       
                       const itemId = item._id;
-                      const quantity = item.quantity;
+                      const quantity = itemQuantities[itemId] || 1;
                       const unitPrice = item.newSellingPrice || item.sellingPrice;
                       const totalPrice = unitPrice * quantity;
                       const isInCurrentFilter = filteredItems.some(filteredItem => filteredItem._id === itemId);
@@ -1173,6 +1416,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                   <span>Category: {item.category}</span>
                                   <span>Year: {item.year}</span>
                                   <span>Color: {item.color}</span>
+                                  {item.interiorColor && (
+                                    <span>Interior: {item.interiorColor}</span>
+                                  )}
                                 </div>
                               </div>
                               
@@ -1205,9 +1451,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                   </span>
                                   <button
                                     onClick={() => handleQuantityChange(itemId, 1)}
-                                    disabled={quantity >= item.minStockLevel}
+                                    disabled={quantity >= (allInventoryItems.find(invItem => invItem._id === itemId)?.quantity || 0)}
                                     className={`w-8 h-8 rounded-full hover:scale-105 transition-all flex items-center justify-center text-sm font-bold ${
-                                      quantity >= item.minStockLevel 
+                                      quantity >= (allInventoryItems.find(invItem => invItem._id === itemId)?.quantity || 0)
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                                         : isInCurrentFilter 
                                           ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' 
@@ -1218,7 +1464,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                   </button>
                                 </div>
                                 <span className="text-xs text-gray-500">
-                                  Max: {item.minStockLevel}
+                                  Max: {allInventoryItems.find(invItem => invItem._id === itemId)?.quantity || 0}
                                 </span>
                               </div>
                               
@@ -1230,6 +1476,14 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                                 </div>
                               </div>
                             </div>
+                            
+                            {/* Chassis Selection */}
+                            <ChassisSelection
+                              item={item}
+                              selectedChassis={getSelectedChassis(itemId)}
+                              onChassisChange={(chassisNumbers) => handleChassisChange(itemId, chassisNumbers)}
+                              maxSelections={quantity}
+                            />
                           </div>
                         </div>
                       );
@@ -1261,11 +1515,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                             <button
                               type="button"
                               onClick={() => {
-                                setDiscountType('amount');
+                                setDiscountType('fixed');
                                 setDiscount(0);
                               }}
                               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                                discountType === 'amount'
+                                discountType === 'fixed'
                                   ? 'bg-amber-500 text-black'
                                   : 'text-amber-300 hover:text-amber-200'
                               }`}
@@ -1290,7 +1544,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                           
                           {/* Discount Input */}
                           <div className="flex items-center space-x-1">
-                            {discountType === 'amount' && (
+                            {discountType === 'fixed' && (
                               <span className="text-amber-400">
                                 {getCurrencySymbol(selectedCurrency?.code || 'USD')}
                               </span>
@@ -1298,12 +1552,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                             <input
                               type="number"
                               min="0"
-                              max={discountType === 'amount' ? getSubtotal() : 100}
-                              step={discountType === 'amount' ? "0.01" : "1"}
+                              max={discountType === 'fixed' ? getSubtotal() : 100}
+                              step={discountType === 'fixed' ? "0.01" : "1"}
                               value={discount}
                               onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
                               className="w-20 px-2 py-1 text-sm bg-gray-800 border border-amber-500/50 rounded text-amber-100 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                              placeholder={discountType === 'amount' ? "0.00" : "0"}
+                              placeholder={discountType === 'fixed' ? "0.00" : "0"}
                             />
                             {discountType === 'percentage' && <span className="text-amber-400">%</span>}
                           </div>
@@ -1418,14 +1672,14 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                               id={`item-${item._id}`}
                               checked={isItemSelected(item._id)}
                               onChange={(e) => handleItemSelect(item._id, e.target.checked)}
-                              disabled={!isItemSelected(item._id) && item.minStockLevel <= 0}
+                              disabled={!isItemSelected(item._id) && item.quantity <= 0}
                               className={`w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                                !isItemSelected(item._id) && item.minStockLevel <= 0 
+                                !isItemSelected(item._id) && item.quantity <= 0 
                                   ? 'opacity-50 cursor-not-allowed' 
                                   : ''
                               }`}
-                              title={!isItemSelected(item._id) && item.minStockLevel <= 0 
-                                ? `Cannot add item - minimum stock level is ${item.minStockLevel}` 
+                              title={!isItemSelected(item._id) && item.quantity <= 0 
+                                ? `Cannot add item - out of stock (${item.quantity} available)` 
                                 : ''
                               }
                             />
@@ -1466,6 +1720,18 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                             <div>
                               <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">Color</span>
                               <p className="text-gray-900 font-medium">{item.color}</p>
+                            </div>
+                            {item.interiorColor && (
+                              <div>
+                                <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">Interior Color</span>
+                                <p className="text-gray-900 font-medium">{item.interiorColor}</p>
+                              </div>
+                            )}
+                            <div>
+                              <span className="font-semibold text-gray-500 text-xs uppercase tracking-wide">Available</span>
+                              <p className={`font-medium ${item.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {item.quantity} units
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1513,6 +1779,35 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
 
+              {/* Notes Input Section - Below Available Items */}
+              {selectedCurrency && (
+                <div className="mt-6 p-4 bg-gradient-to-br from-gray-800 to-black border border-amber-500/30 rounded-lg">
+                  <label className="block text-sm font-bold text-amber-400 mb-3">
+                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Additional Notes (Optional)
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Enter any additional notes about the customer or requirements..."
+                    rows={3}
+                    className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 resize-none bg-gray-700 text-gray-100 ${
+                      errors.notes ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                    }`}
+                  />
+                  {errors.notes && (
+                    <p className="mt-2 text-sm text-red-400 flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.notes}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {requirements.category && filteredItems.length === 0 && !isInventoryLoading && (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                   <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1525,16 +1820,29 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex space-x-4 pt-6 border-t border-slate-200">
                 <button
-                  onClick={() => {
-                    console.log('Saving requirements:', requirements);
-                    // Handle saving requirements
-                  }}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-500/30 focus:ring-offset-2 font-bold transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                  onClick={handleCreateQuotation}
+                  disabled={isCreatingQuotation || selectedItems.size === 0}
+                  className={`flex-1 px-6 py-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold transition-all duration-300 transform shadow-lg ${
+                    isCreatingQuotation || selectedItems.size === 0
+                      ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed opacity-75'
+                      : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 hover:scale-[1.02] hover:shadow-xl focus:ring-green-500/30'
+                  }`}
                 >
-                  <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  Save and Send Quotation
+                  {isCreatingQuotation ? (
+                    <>
+                      <svg className="w-5 h-5 mr-2 inline animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Creating Quotation...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                      Save and Send Quotation
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleClose}
