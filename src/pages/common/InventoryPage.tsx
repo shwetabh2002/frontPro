@@ -106,17 +106,17 @@ const InventoryPage: React.FC = () => {
           weight: 0
         },
         images: [],
-        createdBy: {
-          _id: 'unknown',
-          name: 'Unknown',
-          email: 'unknown@example.com',
-          id: 'unknown'
+        createdBy: item.createdBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
         },
-        updatedBy: {
-          _id: 'unknown',
-          name: 'Unknown',
-          email: 'unknown@example.com',
-          id: 'unknown'
+        updatedBy: item.updatedBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
         },
         compatibility: [],
         __v: 0,

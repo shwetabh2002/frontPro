@@ -76,6 +76,8 @@ export interface InventoryItem {
   interiorColor?: string;
   vinNumber?: VinNumber[];
   tags?: string[];
+  createdBy?: InventoryUser;
+  updatedBy?: InventoryUser;
 }
 
 export interface FilterSummary {
@@ -359,6 +361,23 @@ class InventoryService {
       }
 
       const data = await response.json();
+      
+      // Handle null createdBy and updatedBy in API response
+      if (data.data) {
+        data.data.createdBy = data.data.createdBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        };
+        data.data.updatedBy = data.data.updatedBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        };
+      }
+      
       console.log('✅ Inventory item loaded successfully:', data);
       return data;
     } catch (error) {
