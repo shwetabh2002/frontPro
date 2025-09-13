@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { inventoryService, type AdvancedInventoryFilters, type AdvancedInventoryResponse, type InventoryItem, type DetailedInventoryItem } from '../../services/inventoryService';
+import { inventoryService, type AdvancedInventoryFilters, type AdvancedInventoryResponse, type InventoryItem, type DetailedInventoryItem, type CreateInventoryItemData } from '../../services/inventoryService';
 import InventoryItemPopup from '../../components/InventoryItemPopup';
+import AddProductModal from '../../components/AddProductModal';
+import { useToast } from '../../contexts/ToastContext';
 
 const InventoryPage: React.FC = () => {
+  const { showToast } = useToast();
   const [inventoryData, setInventoryData] = useState<AdvancedInventoryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<AdvancedInventoryFilters>({
     page: 1,
-    limit: 20
+    limit: 10
   });
   
   // Search and filter UI states
@@ -20,6 +23,10 @@ const InventoryPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<DetailedInventoryItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingItem, setIsLoadingItem] = useState(false);
+  
+  // Add product modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
 
   const loadInventoryData = useCallback(async () => {
     setIsLoading(true);
@@ -32,11 +39,13 @@ const InventoryPage: React.FC = () => {
       setInventoryData(data);
     } catch (err) {
       console.error('❌ Error loading inventory:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load inventory');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load inventory';
+      setError(errorMessage);
+      showToast(errorMessage, 'error', 5000);
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, showToast]);
 
   useEffect(() => {
     loadInventoryData();
@@ -142,6 +151,33 @@ const InventoryPage: React.FC = () => {
     setSelectedItem(null);
   };
 
+  // Handle add product
+  const handleAddProduct = async (productData: CreateInventoryItemData) => {
+    setIsCreatingProduct(true);
+    try {
+      console.log('🔍 Creating product:', productData);
+      const response = await inventoryService.createInventoryItem(productData);
+      console.log('✅ Product created successfully:', response);
+      
+      // Refresh inventory data
+      await loadInventoryData();
+      
+      // Close modal
+      setIsAddModalOpen(false);
+      
+      // Show success toast
+      showToast(`Product "${productData.name}" added successfully!`, 'success', 4000);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Error creating product:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create product';
+      setError(errorMessage);
+      showToast(errorMessage, 'error', 5000);
+    } finally {
+      setIsCreatingProduct(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -165,12 +201,23 @@ const InventoryPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <button 
-          className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
-        </button>
+        <div className="flex space-x-3">
+          <button 
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span>Add Product</span>
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -431,7 +478,8 @@ const InventoryPage: React.FC = () => {
           {/* Pagination */}
           {inventoryData.data.pagination.totalPages > 1 && (
             <div className="flex justify-center">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
+                {/* Previous Button */}
                 <button
                   onClick={() => handlePageChange(inventoryData.data.pagination.currentPage - 1)}
                   disabled={!inventoryData.data.pagination.hasPrevPage}
@@ -439,9 +487,89 @@ const InventoryPage: React.FC = () => {
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 text-gray-400">
-                  {inventoryData.data.pagination.currentPage} of {inventoryData.data.pagination.totalPages}
-                </span>
+
+                {/* Page Numbers */}
+                {(() => {
+                  const currentPage = inventoryData.data.pagination.currentPage;
+                  const totalPages = inventoryData.data.pagination.totalPages;
+                  const pages = [];
+                  
+                  // Always show first page
+                  pages.push(
+                    <button
+                      key={1}
+                      onClick={() => handlePageChange(1)}
+                      className={`px-3 py-2 rounded-lg transition-colors ${
+                        currentPage === 1
+                          ? 'bg-amber-500 text-black font-semibold'
+                          : 'bg-gray-800 text-white hover:bg-gray-700'
+                      }`}
+                    >
+                      1
+                    </button>
+                  );
+
+                  // Show ellipsis if current page is far from start
+                  if (currentPage > 4) {
+                    pages.push(
+                      <span key="ellipsis1" className="px-2 text-gray-400">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  // Show pages around current page
+                  const startPage = Math.max(2, currentPage - 1);
+                  const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                  for (let i = startPage; i <= endPage; i++) {
+                    if (i !== 1 && i !== totalPages) {
+                      pages.push(
+                        <button
+                          key={i}
+                          onClick={() => handlePageChange(i)}
+                          className={`px-3 py-2 rounded-lg transition-colors ${
+                            currentPage === i
+                              ? 'bg-amber-500 text-black font-semibold'
+                              : 'bg-gray-800 text-white hover:bg-gray-700'
+                          }`}
+                        >
+                          {i}
+                        </button>
+                      );
+                    }
+                  }
+
+                  // Show ellipsis if current page is far from end
+                  if (currentPage < totalPages - 3) {
+                    pages.push(
+                      <span key="ellipsis2" className="px-2 text-gray-400">
+                        ...
+                      </span>
+                    );
+                  }
+
+                  // Always show last page (if more than 1 page)
+                  if (totalPages > 1) {
+                    pages.push(
+                      <button
+                        key={totalPages}
+                        onClick={() => handlePageChange(totalPages)}
+                        className={`px-3 py-2 rounded-lg transition-colors ${
+                          currentPage === totalPages
+                            ? 'bg-amber-500 text-black font-semibold'
+                            : 'bg-gray-800 text-white hover:bg-gray-700'
+                        }`}
+                      >
+                        {totalPages}
+                      </button>
+                    );
+                  }
+
+                  return pages;
+                })()}
+
+                {/* Next Button */}
                 <button
                   onClick={() => handlePageChange(inventoryData.data.pagination.currentPage + 1)}
                   disabled={!inventoryData.data.pagination.hasNextPage}
@@ -460,6 +588,14 @@ const InventoryPage: React.FC = () => {
         item={selectedItem}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+      />
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddProduct}
+        isLoading={isCreatingProduct}
       />
     </div>
   );

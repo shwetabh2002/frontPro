@@ -38,6 +38,35 @@ export interface InventoryUser {
   id: string;
 }
 
+export interface CreateInventoryItemData {
+  name: string;
+  type: 'car' | 'part';
+  category: string;
+  subcategory?: string;
+  brand: string;
+  model: string;
+  year: number;
+  color: string;
+  interiorColor?: string;
+  description: string;
+  costPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  inStock: boolean;
+  condition: 'new' | 'used' | 'refurbished';
+  status: 'active' | 'inactive';
+  vinNumber: Array<{
+    status: 'active' | 'hold';
+    chasisNumber: string;
+  }>;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+    weight: number;
+  };
+}
+
 export interface DetailedInventoryItem extends InventoryItem {
   dimensions: InventoryDimensions;
   images: InventoryImage[];
@@ -312,6 +341,80 @@ class InventoryService {
    * @param filters - Advanced inventory filter criteria
    * @returns Promise with inventory data and summary
    */
+  // Create new inventory item
+  async createInventoryItem(itemData: CreateInventoryItemData): Promise<{ success: boolean; message: string; data: DetailedInventoryItem }> {
+    try {
+      console.log('🔍 Creating inventory item:', itemData);
+      
+      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY}`;
+      console.log('🔍 Create inventory API URL:', url);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(itemData),
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        console.error('❌ API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: contentType,
+          url: url
+        });
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } else {
+          const responseText = await response.text().catch(() => 'Unable to read response');
+          console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+          throw new Error(`HTTP error! status: ${response.status} - Server returned non-JSON response. Check console for details.`);
+        }
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text().catch(() => 'Unable to read response');
+        console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+        throw new Error('Server returned non-JSON response. Check console for details.');
+      }
+
+      const data = await response.json();
+      
+      // Handle null createdBy and updatedBy in API response
+      if (data.data) {
+        data.data.createdBy = data.data.createdBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        };
+        data.data.updatedBy = data.data.updatedBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        };
+      }
+      
+      console.log('✅ Inventory item created successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error creating inventory item:', error);
+      throw error;
+    }
+  }
+
   // Get individual inventory item by ID
   async getInventoryItemById(itemId: string): Promise<{ success: boolean; message: string; data: DetailedInventoryItem }> {
     try {

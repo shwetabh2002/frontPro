@@ -4,6 +4,7 @@ import { store } from './app/store';
 import AppRoutes from './routes';
 import ErrorBoundary from './components/ErrorBoundary';
 import SessionManager from './components/SessionManager';
+import { ToastProvider } from './contexts/ToastContext';
 import { getApiBaseUrl } from './config/api';
 import './App.css';
 
@@ -17,11 +18,13 @@ function App() {
   return (
     <Provider store={store}>
       <ErrorBoundary>
-        <SessionManager>
-          <div className="App min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800">
-            <AppRoutes />
-          </div>
-        </SessionManager>
+        <ToastProvider>
+          <SessionManager>
+            <div className="App min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800">
+              <AppRoutes />
+            </div>
+          </SessionManager>
+        </ToastProvider>
       </ErrorBoundary>
     </Provider>
   );
