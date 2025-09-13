@@ -6,18 +6,17 @@ import RoleBasedRoute from './RoleBasedRoute';
 import LoginPage from '../pages/LoginPage';
 import AdminLayout from '../layouts/AdminLayout';
 import EmployeeLayout from '../layouts/EmployeeLayout';
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import EmployeesPage from '../pages/admin/EmployeesPage';
-import InventoryPage from '../pages/admin/InventoryPage';
-import SalesPage from '../pages/admin/SalesPage';
-import AllSalesPage from '../pages/admin/AllSalesPage';
-import CustomersPage from '../pages/admin/CustomersPage';
-import QuotationsPage from '../pages/admin/QuotationsPage';
-import InvoicesPage from '../pages/admin/InvoicesPage';
-import OrdersPage from '../pages/admin/OrdersPage';
-import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
-import EmployeeCustomersPage from '../pages/employee/CustomersPage';
+import AdminDashboard from '../pages/common/AdminDashboard';
+import EmployeesPage from '../pages/common/EmployeesPage';
+import SalesPage from '../pages/common/SalesPage';
+import AllSalesPage from '../pages/common/AllSalesPage';
+import CustomersPage from '../pages/common/CustomersPage';
+import QuotationsPage from '../pages/common/QuotationsPage';
+import InvoicesPage from '../pages/common/InvoicesPage';
+import OrdersPage from '../pages/common/OrdersPage';
+import EmployeeDashboard from '../pages/common/EmployeeDashboard';
 import Loader from '../components/Loader';
+import InventoryPage from '../pages/common/InventoryPage';
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.auth);
@@ -94,7 +93,7 @@ const AppRoutes: React.FC = () => {
         >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<EmployeeDashboard />} />
-          <Route path="customers" element={<EmployeeCustomersPage />} />
+          <Route path="customers" element={<CustomersPage />} />
         </Route>
 
         {/* Catch all route */}

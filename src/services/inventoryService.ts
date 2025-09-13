@@ -1,10 +1,56 @@
-import { API_CONFIG, buildApiUrl } from '../config/api';
+import { API_CONFIG, buildApiUrl, getApiBaseUrl } from '../config/api';
 import { ERROR_MESSAGES } from '../constants';
 
 // Types
 export interface VinNumber {
   status: string;
   chasisNumber: string;
+  _id: string;
+  id: string;
+  quotation?: {
+    quotationId: string;
+    quotationNumber: string;
+    status: string;
+    createdAt: string;
+    customerName: string;
+  };
+}
+
+export interface InventoryImage {
+  url: string;
+  alt: string;
+  isPrimary: boolean;
+  _id: string;
+  id: string;
+}
+
+export interface InventoryDimensions {
+  length: number;
+  width: number;
+  height: number;
+  weight: number;
+}
+
+export interface InventoryUser {
+  _id: string;
+  name: string;
+  email: string;
+  id: string;
+}
+
+export interface DetailedInventoryItem extends InventoryItem {
+  dimensions: InventoryDimensions;
+  images: InventoryImage[];
+  createdBy: InventoryUser;
+  updatedBy: InventoryUser;
+  compatibility: any[];
+  __v: number;
+  createdAt: string;
+  updatedAt: string;
+  profitMargin: string;
+  stockStatus: string;
+  totalValue: number;
+  id: string;
 }
 
 export interface InventoryItem {
@@ -29,6 +75,7 @@ export interface InventoryItem {
   color: string;
   interiorColor?: string;
   vinNumber?: VinNumber[];
+  tags?: string[];
 }
 
 export interface FilterSummary {
@@ -61,6 +108,59 @@ export interface InventoryResponse {
   };
 }
 
+// Separate interface for /inventory API endpoint
+export interface AdvancedInventoryResponse {
+  success: boolean;
+  message: string;
+  data: {
+    items: InventoryItem[];
+    summary: {
+      types: string[];
+      categories: string[];
+      subcategories: string[];
+      brands: string[];
+      models: string[];
+      years: number[];
+      colors: string[];
+      interiorColors: string[];
+      conditions: string[];
+      statuses: string[];
+      warehouses: string[];
+      allTags: string[];
+    };
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+    filters: {
+      applied: Record<string, any>;
+      available: {
+        types: string[];
+        categories: string[];
+        subcategories: string[];
+        brands: string[];
+        models: string[];
+        years: number[];
+        colors: string[];
+        interiorColors: string[];
+        conditions: string[];
+        statuses: string[];
+        warehouses: string[];
+        allTags: string[];
+      };
+    };
+    currencyInfo?: {
+      currency: string;
+      exchangeRate: number;
+      baseCurrency: string;
+    };
+  };
+}
+
 export interface InventoryFilters {
   category: string;
   brand?: string;
@@ -68,6 +168,25 @@ export interface InventoryFilters {
   year?: string | number;
   color?: string;
   currencyType?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AdvancedInventoryFilters {
+  type?: string;
+  category?: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  color?: string;
+  interiorColor?: string;
+  condition?: string;
+  status?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minQuantity?: number;
+  maxQuantity?: number;
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -182,6 +301,124 @@ class InventoryService {
       return data;
     } catch (error) {
       console.error('Error fetching all inventory items:', error);
+      throw new Error(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
+    }
+  }
+
+  /**
+   * Fetch inventory items with advanced filtering
+   * @param filters - Advanced inventory filter criteria
+   * @returns Promise with inventory data and summary
+   */
+  // Get individual inventory item by ID
+  async getInventoryItemById(itemId: string): Promise<{ success: boolean; message: string; data: DetailedInventoryItem }> {
+    try {
+      console.log('🔍 Fetching inventory item by ID:', itemId);
+      
+      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.GET_BY_ID}/${itemId}`;
+      console.log('🔍 Inventory item API URL:', url);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        console.error('❌ API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: contentType,
+          url: url
+        });
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } else {
+          // Try to get the response text for debugging
+          const responseText = await response.text().catch(() => 'Unable to read response');
+          console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+          throw new Error(`HTTP error! status: ${response.status} - Server returned non-JSON response. Check console for details.`);
+        }
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text().catch(() => 'Unable to read response');
+        console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+        throw new Error('Server returned non-JSON response. Check console for details.');
+      }
+
+      const data = await response.json();
+      console.log('✅ Inventory item loaded successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error fetching inventory item:', error);
+      throw error;
+    }
+  }
+
+  async getInventoryItems(filters: AdvancedInventoryFilters = {}): Promise<AdvancedInventoryResponse> {
+    try {
+      console.log('🔍 Fetching inventory with filters:', filters);
+      
+      const params: Record<string, string | number> = {};
+      
+      // Add all filter parameters
+      if (filters.type) params.type = filters.type;
+      if (filters.category) params.category = filters.category;
+      if (filters.brand) params.brand = filters.brand;
+      if (filters.model) params.model = filters.model;
+      if (filters.year) params.year = filters.year;
+      if (filters.color) params.color = filters.color;
+      if (filters.interiorColor) params.interiorColor = filters.interiorColor;
+      if (filters.condition) params.condition = filters.condition;
+      if (filters.status) params.status = filters.status;
+      if (filters.minPrice) params.minPrice = filters.minPrice;
+      if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+      if (filters.minQuantity) params.minQuantity = filters.minQuantity;
+      if (filters.maxQuantity) params.maxQuantity = filters.maxQuantity;
+      if (filters.search) params.search = filters.search;
+      if (filters.page) params.page = filters.page;
+      if (filters.limit) params.limit = filters.limit;
+
+      console.log('🔍 Final params object:', params);
+      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY, params);
+      
+      console.log('🔍 Inventory API URL:', url);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': API_CONFIG.HEADERS.CONTENT_TYPE,
+          'Accept': API_CONFIG.HEADERS.ACCEPT,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Inventory data received:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching inventory items:', error);
       throw new Error(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
     }
   }

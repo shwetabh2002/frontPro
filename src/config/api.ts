@@ -18,9 +18,11 @@ export const API_CONFIG = {
     
     // Inventory
     INVENTORY: {
+      INVENTORY: '/inventory',
       REQUIREMENTS_CARS: '/inventory/requirements-cars',
       ITEMS: '/inventory/items',
       CATEGORIES: '/inventory/categories',
+      GET_BY_ID: '/inventory',
     },
     
     // Sales
