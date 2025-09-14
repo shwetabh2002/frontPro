@@ -71,7 +71,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
     }
   }, [item]);
 
-  // Auto-update stock status and product status based on VIN numbers
+  // Auto-update stock status and product status based on VIN numbers (only for cars)
   useEffect(() => {
     if (formData.type === 'car') {
       const validVinNumbers = vinNumbers.filter(vin => vin.trim() !== '');
@@ -82,6 +82,9 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
         inStock: hasActiveVins,
         status: hasActiveVins ? 'active' : 'out_of_stock'
       }));
+    } else if (formData.type === 'part') {
+      // For parts, stock status and product status are manually controlled
+      // No auto-update based on VIN numbers since parts don't have VINs
     }
   }, [vinNumbers, formData.type]);
 
@@ -327,51 +330,74 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
     }
 
     try {
-      // Prepare VIN numbers - preserve inactive ones and add new active ones
-      const validVinNumbers = vinNumbers.filter(vin => vin.trim() !== '');
-      
-      // Get existing inactive VIN numbers (remove _id field)
-      const existingInactiveVinNumbers = allVinNumbers
-        .filter(vin => vin.status !== 'active')
-        .map(vin => ({
-          status: vin.status,
-          chasisNumber: vin.chasisNumber
+      let updateData: Partial<CreateInventoryItemData>;
+      let debugInfo: any = {};
+
+      if (formData.type === 'car') {
+        // For cars: handle VIN numbers and auto-set status
+        const validVinNumbers = vinNumbers.filter(vin => vin.trim() !== '');
+        
+        // Get existing inactive VIN numbers (remove _id field)
+        const existingInactiveVinNumbers = allVinNumbers
+          .filter(vin => vin.status !== 'active')
+          .map(vin => ({
+            status: vin.status,
+            chasisNumber: vin.chasisNumber
+          }));
+        
+        // Create new active VIN numbers from the editable list
+        const newActiveVinNumbers = validVinNumbers.map(vin => ({
+          status: 'active' as const,
+          chasisNumber: vin.trim()
         }));
-      
-      // Create new active VIN numbers from the editable list
-      const newActiveVinNumbers = validVinNumbers.map(vin => ({
-        status: 'active' as const,
-        chasisNumber: vin.trim()
-      }));
-      
-      // Combine existing inactive + new active VIN numbers
-      const finalVinNumbers = [...existingInactiveVinNumbers, ...newActiveVinNumbers];
-      
-      // Count only active VIN numbers for quantity
-      const activeCount = newActiveVinNumbers.length;
-      
-      // Auto-set stock status and product status based on VIN status
-      const hasActiveVins = finalVinNumbers.some(vin => vin.status === 'active');
-      const autoInStock = hasActiveVins;
-      const autoStatus = hasActiveVins ? 'active' : 'out_of_stock';
+        
+        // Combine existing inactive + new active VIN numbers
+        const finalVinNumbers = [...existingInactiveVinNumbers, ...newActiveVinNumbers];
+        
+        // Count only active VIN numbers for quantity
+        const activeCount = newActiveVinNumbers.length;
+        
+        // Auto-set stock status and product status based on VIN status
+        const hasActiveVins = finalVinNumbers.some(vin => vin.status === 'active');
+        const autoInStock = hasActiveVins;
+        const autoStatus = hasActiveVins ? 'active' : 'out_of_stock';
 
-      const updateData: Partial<CreateInventoryItemData> = {
-        ...formData,
-        vinNumber: finalVinNumbers,
-        quantity: activeCount,
-        inStock: autoInStock,
-        status: autoStatus
-      };
+        updateData = {
+          ...formData,
+          vinNumber: finalVinNumbers,
+          quantity: activeCount,
+          inStock: autoInStock,
+          status: autoStatus
+        };
 
-      console.log('🔍 VIN Update Details (without _id):', {
-        existingInactive: existingInactiveVinNumbers,
-        newActive: newActiveVinNumbers,
-        finalVinNumbers,
-        activeCount,
-        totalVINs: finalVinNumbers.length,
-        hasActiveVins,
-        autoInStock,
-        autoStatus
+        debugInfo = {
+          existingInactive: existingInactiveVinNumbers,
+          newActive: newActiveVinNumbers,
+          finalVinNumbers,
+          activeCount,
+          totalVINs: finalVinNumbers.length,
+          hasActiveVins,
+          autoInStock,
+          autoStatus
+        };
+      } else {
+        // For parts: no VIN numbers, use manual quantity and status
+        updateData = {
+          ...formData,
+          vinNumber: [],
+          quantity: formData.quantity || 0
+        };
+
+        debugInfo = {
+          quantity: formData.quantity,
+          vinNumber: []
+        };
+      }
+
+      console.log('🔍 Update Details:', {
+        type: formData.type,
+        updateData,
+        ...debugInfo
       });
 
       await onSubmit(item._id, updateData);
@@ -724,17 +750,18 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
             </div>
           </div>
 
-          {/* VIN Numbers & Quantity */}
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+          {/* VIN Numbers & Quantity - Only for cars */}
+          {formData.type === 'car' && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-purple-400">VIN Numbers & Quantity</h3>
+                <span className="text-sm text-gray-400">(Only active chassis numbers are editable)</span>
               </div>
-              <h3 className="text-xl font-semibold text-purple-400">VIN Numbers & Quantity</h3>
-              <span className="text-sm text-gray-400">(Only active chassis numbers are editable)</span>
-            </div>
             
             <div className="space-y-4">
               {/* Show all VIN numbers (active + inactive) */}
@@ -843,6 +870,42 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
               </p>}
             </div>
           </div>
+          )}
+
+          {/* Quantity - Only for parts */}
+          {formData.type === 'part' && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-purple-400">Quantity</h3>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Quantity *</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity || ''}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200 ${
+                    errors.quantity ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
+                  }`}
+                  placeholder="Enter quantity"
+                  min="0"
+                />
+                {errors.quantity && <p className="text-red-400 text-xs mt-2 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {errors.quantity}
+                </p>}
+              </div>
+            </div>
+          )}
 
           {/* Status & Condition */}
           <div className="space-y-6">
@@ -859,14 +922,20 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Stock Status * 
-                  <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                  {formData.type === 'car' && (
+                    <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                  )}
                 </label>
                 <select
                   name="inStock"
                   value={formData.inStock ? 'true' : 'false'}
                   onChange={handleInputChange}
-                  disabled
-                  className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/50 rounded-xl text-gray-400 cursor-not-allowed transition-all duration-200"
+                  disabled={formData.type === 'car'}
+                  className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 ${
+                    formData.type === 'car' 
+                      ? 'bg-gray-700/30 border-gray-600/50 text-gray-400 cursor-not-allowed' 
+                      : 'bg-gray-800/50 border-gray-600 text-white focus:border-indigo-500 focus:outline-none'
+                  }`}
                 >
                   <option value="true">In Stock</option>
                   <option value="false">Out of Stock</option>
@@ -891,14 +960,20 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Status * 
-                  <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                  {formData.type === 'car' && (
+                    <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                  )}
                 </label>
                 <select
                   name="status"
                   value={formData.status || ''}
                   onChange={handleInputChange}
-                  disabled
-                  className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/50 rounded-xl text-gray-400 cursor-not-allowed transition-all duration-200"
+                  disabled={formData.type === 'car'}
+                  className={`w-full px-4 py-3 border rounded-xl transition-all duration-200 ${
+                    formData.type === 'car' 
+                      ? 'bg-gray-700/30 border-gray-600/50 text-gray-400 cursor-not-allowed' 
+                      : 'bg-gray-800/50 border-gray-600 text-white focus:border-indigo-500 focus:outline-none'
+                  }`}
                 >
                   <option value="">Select Status</option>
                   <option value="active">Active</option>

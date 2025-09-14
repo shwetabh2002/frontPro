@@ -34,13 +34,14 @@ const InventoryPage: React.FC = () => {
   const [isUpdatingProduct, setIsUpdatingProduct] = useState(false);
   const [editingItem, setEditingItem] = useState<DetailedInventoryItem | null>(null);
 
-  const loadInventoryData = useCallback(async () => {
+  const loadInventoryData = async (customFilters?: AdvancedInventoryFilters) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('🔍 Loading inventory with filters:', filters);
-      const data = await inventoryService.getInventoryItems(filters);
+      const filtersToUse = customFilters || filters;
+      console.log('🔍 Loading inventory with filters:', filtersToUse);
+      const data = await inventoryService.getInventoryItems(filtersToUse);
       console.log('✅ Inventory data loaded successfully:', data);
       setInventoryData(data);
     } catch (err) {
@@ -51,11 +52,11 @@ const InventoryPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, showToast]);
+  };
 
   useEffect(() => {
     loadInventoryData();
-  }, [loadInventoryData]);
+  }, [filters]);
 
   // Handle search
   const handleSearch = (term: string) => {

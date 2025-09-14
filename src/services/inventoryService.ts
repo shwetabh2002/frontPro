@@ -1,5 +1,6 @@
 import { API_CONFIG, buildApiUrl, getApiBaseUrl } from '../config/api';
 import { ERROR_MESSAGES } from '../constants';
+import { apiClientService } from './apiClient';
 
 // Types
 export interface VinNumber {
@@ -347,42 +348,8 @@ class InventoryService {
       console.log('🔍 Updating inventory item:', itemId, itemData);
       const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY}/${itemId}`;
       console.log('🔍 Update inventory API URL:', url);
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemData),
-      });
-      if (!response.ok) {
-        const contentType = response.headers.get('content-type');
-        console.error('❌ API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          contentType: contentType,
-          url: url
-        });
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        } else {
-          const responseText = await response.text().catch(() => 'Unable to read response');
-          console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
-          throw new Error(`HTTP error! status: ${response.status} - Server returned non-JSON response. Check console for details.`);
-        }
-      }
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await response.text().catch(() => 'Unable to read response');
-        console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
-        throw new Error('Server returned non-JSON response. Check console for details.');
-      }
-      const data = await response.json();
+      // Use API client with automatic token refresh
+      const data = await apiClientService.put<{ success: boolean; message: string; data: DetailedInventoryItem }>(url, itemData);
       // Handle null createdBy and updatedBy in API response
       if (data.data) {
         data.data.createdBy = data.data.createdBy || { _id: '', name: '', email: '', id: '' };
@@ -478,47 +445,8 @@ class InventoryService {
       const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.GET_BY_ID}/${itemId}`;
       console.log('🔍 Inventory item API URL:', url);
       
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const contentType = response.headers.get('content-type');
-        console.error('❌ API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          contentType: contentType,
-          url: url
-        });
-        
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        } else {
-          // Try to get the response text for debugging
-          const responseText = await response.text().catch(() => 'Unable to read response');
-          console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
-          throw new Error(`HTTP error! status: ${response.status} - Server returned non-JSON response. Check console for details.`);
-        }
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await response.text().catch(() => 'Unable to read response');
-        console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
-        throw new Error('Server returned non-JSON response. Check console for details.');
-      }
-
-      const data = await response.json();
+      // Use API client with automatic token refresh
+      const data = await apiClientService.get<{ success: boolean; message: string; data: DetailedInventoryItem }>(url);
       
       // Handle null createdBy and updatedBy in API response
       if (data.data) {
@@ -573,25 +501,8 @@ class InventoryService {
       
       console.log('🔍 Inventory API URL:', url);
       
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': API_CONFIG.HEADERS.CONTENT_TYPE,
-          'Accept': API_CONFIG.HEADERS.ACCEPT,
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      // Use API client with automatic token refresh
+      const data = await apiClientService.get<AdvancedInventoryResponse>(url);
       console.log('✅ Inventory data received:', data);
       return data;
     } catch (error) {
