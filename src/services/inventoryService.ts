@@ -54,7 +54,7 @@ export interface CreateInventoryItemData {
   quantity: number;
   inStock: boolean;
   condition: 'new' | 'used' | 'refurbished';
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive'| 'out_of_stock';
   vinNumber: Array<{
     status: 'active' | 'hold';
     chasisNumber: string;
@@ -341,6 +341,61 @@ class InventoryService {
    * @param filters - Advanced inventory filter criteria
    * @returns Promise with inventory data and summary
    */
+  // Update existing inventory item
+  async updateInventoryItem(itemId: string, itemData: Partial<CreateInventoryItemData>): Promise<{ success: boolean; message: string; data: DetailedInventoryItem }> {
+    try {
+      console.log('🔍 Updating inventory item:', itemId, itemData);
+      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY}/${itemId}`;
+      console.log('🔍 Update inventory API URL:', url);
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(itemData),
+      });
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        console.error('❌ API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: contentType,
+          url: url
+        });
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } else {
+          const responseText = await response.text().catch(() => 'Unable to read response');
+          console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+          throw new Error(`HTTP error! status: ${response.status} - Server returned non-JSON response. Check console for details.`);
+        }
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text().catch(() => 'Unable to read response');
+        console.error('❌ Non-JSON Response:', responseText.substring(0, 200));
+        throw new Error('Server returned non-JSON response. Check console for details.');
+      }
+      const data = await response.json();
+      // Handle null createdBy and updatedBy in API response
+      if (data.data) {
+        data.data.createdBy = data.data.createdBy || { _id: '', name: '', email: '', id: '' };
+        data.data.updatedBy = data.data.updatedBy || { _id: '', name: '', email: '', id: '' };
+      }
+      console.log('✅ Inventory item updated successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error updating inventory item:', error);
+      throw error;
+    }
+  }
+
   // Create new inventory item
   async createInventoryItem(itemData: CreateInventoryItemData): Promise<{ success: boolean; message: string; data: DetailedInventoryItem }> {
     try {

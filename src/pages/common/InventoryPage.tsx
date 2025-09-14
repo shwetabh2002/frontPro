@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { inventoryService, type AdvancedInventoryFilters, type AdvancedInventoryResponse, type InventoryItem, type DetailedInventoryItem, type CreateInventoryItemData } from '../../services/inventoryService';
 import InventoryItemPopup from '../../components/InventoryItemPopup';
 import AddProductModal from '../../components/AddProductModal';
+import InventoryEditModal from '../../components/InventoryEditModal';
 import { useToast } from '../../contexts/ToastContext';
 
 const InventoryPage: React.FC = () => {
@@ -27,6 +28,11 @@ const InventoryPage: React.FC = () => {
   // Add product modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  
+  // Edit product modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUpdatingProduct, setIsUpdatingProduct] = useState(false);
+  const [editingItem, setEditingItem] = useState<DetailedInventoryItem | null>(null);
 
   const loadInventoryData = useCallback(async () => {
     setIsLoading(true);
@@ -151,6 +157,58 @@ const InventoryPage: React.FC = () => {
     setSelectedItem(null);
   };
 
+  // Handle edit item - fetch latest data first
+  const handleEditItem = async (item: InventoryItem) => {
+    setIsLoadingItem(true);
+    try {
+      console.log('🔍 Loading latest item data for editing:', item._id);
+      const response = await inventoryService.getInventoryItemById(item._id);
+      setEditingItem(response.data);
+      setIsEditModalOpen(true);
+    } catch (err) {
+      console.error('❌ Error loading latest item data for editing:', err);
+      console.log('🔄 Falling back to basic item data from list');
+      
+      // Fallback: Convert InventoryItem to DetailedInventoryItem format
+      const fallbackItem: DetailedInventoryItem = {
+        ...item,
+        dimensions: {
+          length: 0,
+          width: 0,
+          height: 0,
+          weight: 0
+        },
+        images: [],
+        createdBy: item.createdBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        },
+        updatedBy: item.updatedBy || {
+          _id: '',
+          name: '',
+          email: '',
+          id: ''
+        },
+        compatibility: [],
+        __v: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        profitMargin: '0.00',
+        stockStatus: 'unknown',
+        totalValue: 0,
+        id: item._id
+      };
+      
+      setEditingItem(fallbackItem);
+      setIsEditModalOpen(true);
+      setError('Using basic item data - latest information unavailable');
+    } finally {
+      setIsLoadingItem(false);
+    }
+  };
+
   // Handle add product
   const handleAddProduct = async (productData: CreateInventoryItemData) => {
     setIsCreatingProduct(true);
@@ -175,6 +233,34 @@ const InventoryPage: React.FC = () => {
       showToast(errorMessage, 'error', 5000);
     } finally {
       setIsCreatingProduct(false);
+    }
+  };
+
+  // Handle update product
+  const handleUpdateProduct = async (itemId: string, productData: Partial<CreateInventoryItemData>) => {
+    setIsUpdatingProduct(true);
+    try {
+      console.log('🔍 Updating product:', itemId, productData);
+      const response = await inventoryService.updateInventoryItem(itemId, productData);
+      console.log('✅ Product updated successfully:', response);
+      
+      // Refresh inventory data
+      await loadInventoryData();
+      
+      // Close modal
+      setIsEditModalOpen(false);
+      setEditingItem(null);
+      
+      // Show success toast
+      showToast(`Product "${productData.name}" updated successfully!`, 'success', 4000);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Error updating product:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update product';
+      setError(errorMessage);
+      showToast(errorMessage, 'error', 5000);
+    } finally {
+      setIsUpdatingProduct(false);
     }
   };
 
@@ -424,6 +510,14 @@ const InventoryPage: React.FC = () => {
                   {/* Key Details */}
                   <div className="space-y-2 mt-3 text-xs">
                     <div className="flex justify-between">
+                      <span className="text-gray-400">Type:</span>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        item.type === 'car' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                      }`}>
+                        {item.type?.toUpperCase() || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-gray-400">Color:</span>
                       <span className="text-white">{item.color}</span>
                     </div>
@@ -457,14 +551,32 @@ const InventoryPage: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* View Button */}
-                  <button
-                    onClick={() => handleViewItem(item)}
-                    disabled={isLoadingItem}
-                    className="w-full mt-3 px-3 py-2 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isLoadingItem ? 'Loading...' : 'View Details'}
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="flex space-x-2 mt-3">
+                    <button
+                      onClick={() => handleViewItem(item)}
+                      disabled={isLoadingItem}
+                      className="flex-1 px-3 py-2 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isLoadingItem ? 'Loading...' : 'View Details'}
+                    </button>
+                    <button
+                      onClick={() => handleEditItem(item)}
+                      disabled={isLoadingItem}
+                      className="px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                      title={isLoadingItem ? "Loading..." : "Edit Item"}
+                    >
+                      {isLoadingItem ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -596,6 +708,18 @@ const InventoryPage: React.FC = () => {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddProduct}
         isLoading={isCreatingProduct}
+      />
+
+      {/* Edit Product Modal */}
+      <InventoryEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingItem(null);
+        }}
+        onSubmit={handleUpdateProduct}
+        isLoading={isUpdatingProduct}
+        item={editingItem}
       />
     </div>
   );
