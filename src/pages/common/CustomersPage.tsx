@@ -3,10 +3,15 @@ import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import CustomerModal from '../../components/CustomerModal';
+import CustomerDetailsModal from '../../components/CustomerDetailsModal';
 import { customerService, type Customer } from '../../services/customerService';
 
 const CustomersPage: React.FC = () => {
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
+  const [isCustomerDetailsModalOpen, setIsCustomerDetailsModalOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [isCreateQuotationModalOpen, setIsCreateQuotationModalOpen] = useState(false);
+  const [quotationCustomerData, setQuotationCustomerData] = useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,6 +84,32 @@ const CustomersPage: React.FC = () => {
     fetchCustomers(currentPage, searchTerm);
   };
 
+  const handleViewCustomer = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+    setIsCustomerDetailsModalOpen(true);
+  };
+
+  const handleCustomerDetailsModalClose = () => {
+    setIsCustomerDetailsModalOpen(false);
+    setSelectedCustomerId(null);
+  };
+
+  const handleCreateQuotation = (customerId: string) => {
+    // Find the customer data and populate the modal
+    const customer = customers.find(c => c._id === customerId);
+    if (customer) {
+      setQuotationCustomerData(customer);
+      setIsCreateQuotationModalOpen(true);
+    }
+  };
+
+  const handleQuotationModalClose = () => {
+    setIsCreateQuotationModalOpen(false);
+    setQuotationCustomerData(null);
+    // Refresh customers list after modal closes
+    fetchCustomers(currentPage, searchTerm);
+  };
+
   const filteredCustomers = customers;
 
   const columns = [
@@ -101,15 +132,6 @@ const CustomersPage: React.FC = () => {
       header: 'Customer Name',
       render: (value: string) => (
         <div className="font-semibold text-gray-100">
-          {value}
-        </div>
-      )
-    },
-    { 
-      key: 'email', 
-      header: 'Email Address',
-      render: (value: string) => (
-        <div className="text-gray-300 text-sm">
           {value}
         </div>
       )
@@ -140,17 +162,6 @@ const CustomersPage: React.FC = () => {
       )
     },
     { 
-      key: 'address', 
-      header: 'Address',
-      render: (value: string) => (
-        <div className="text-gray-300 text-sm max-w-xs">
-          <div className="break-words leading-relaxed" title={value}>
-            {value}
-          </div>
-        </div>
-      )
-    },
-    { 
       key: 'createdAt', 
       header: 'Created Date',
       render: (value: string) => (
@@ -166,7 +177,7 @@ const CustomersPage: React.FC = () => {
     {
       key: 'actions',
       header: 'Actions',
-      render: () => (
+      render: (value: any, item: Customer) => (
         <div className="flex items-center space-x-1">
           <Button variant="outline" size="sm" className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,18 +185,28 @@ const CustomersPage: React.FC = () => {
             </svg>
             Edit
           </Button>
-          <Button variant="outline" size="sm" className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-gray-800 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200"
+            onClick={() => handleViewCustomer(item._id)}
+          >
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             View
           </Button>
-          <Button variant="danger" size="sm" className="bg-red-900 border-red-600 text-red-300 hover:bg-red-600 hover:text-white shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-gray-800 border-green-500 text-green-400 hover:bg-green-500 hover:text-black shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200"
+            onClick={() => handleCreateQuotation(item._id)}
+          >
             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Delete
+            Create Quotation
           </Button>
         </div>
       )
@@ -364,6 +385,21 @@ const CustomersPage: React.FC = () => {
       <CustomerModal
         isOpen={isAddCustomerModalOpen}
         onClose={handleCustomerModalClose}
+      />
+
+      {/* Customer Details Modal */}
+      <CustomerDetailsModal
+        isOpen={isCustomerDetailsModalOpen}
+        onClose={handleCustomerDetailsModalClose}
+        customerId={selectedCustomerId}
+      />
+
+      {/* Create Quotation Modal */}
+      <CustomerModal
+        isOpen={isCreateQuotationModalOpen}
+        onClose={handleQuotationModalClose}
+        prePopulatedData={quotationCustomerData}
+        mode="quotation"
       />
     </div>
   );

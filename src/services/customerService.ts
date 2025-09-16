@@ -1,6 +1,6 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, API_RESPONSE_STATUS } from '../constants';
-import { httpClient, getAuthToken, hasAuthToken, validateApiResponse, ApiError } from '../utils/apiUtils';
+import { ERROR_MESSAGES } from '../constants';
+import { apiClientService } from '../services/apiClient';
 
 // Types
 export interface CreateCustomerData {
@@ -8,6 +8,7 @@ export interface CreateCustomerData {
   email: string;
   phone: string;
   address: string;
+  countryCode: string;
 }
 
 export interface Customer {
@@ -16,6 +17,7 @@ export interface Customer {
   name: string;
   email: string;
   phone: string;
+  countryCode: string;
   type: string;
   status: string;
   address: string;
@@ -64,6 +66,40 @@ export interface GetCustomersParams {
   search?: string;
 }
 
+export interface Quotation {
+  _id: string;
+  quotationId: string;
+  quotationNumber: string;
+  validTill: string;
+  status: string;
+  currency: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+}
+
+export interface QuotationsData {
+  data: Quotation[];
+  statistics: {
+    total: number;
+    byStatus: Record<string, number>;
+  };
+}
+
+export interface CustomerDetails {
+  customer: Customer;
+  quotations: QuotationsData;
+}
+
+export interface CustomerDetailsResponse {
+  success: boolean;
+  message: string;
+  data: CustomerDetails;
+}
+
 // Customer Service
 export const customerService = {
   /**
@@ -73,49 +109,16 @@ export const customerService = {
    * @throws ApiError
    */
   async createCustomer(customerData: CreateCustomerData): Promise<CustomerResponse> {
-    // Validate authentication
-    if (!hasAuthToken()) {
-      throw new ApiError(
-        ERROR_MESSAGES.AUTH.NO_TOKEN,
-        401,
-        'Unauthorized',
-        undefined
-      );
-    }
-
-    // Set auth token for this request
-    const token = getAuthToken();
-    if (token) {
-      httpClient.setAuthToken(token);
-    }
-
     try {
-      const response = await httpClient.post<CustomerResponse>(
+      const response = await apiClientService.post<CustomerResponse>(
         API_CONFIG.ENDPOINTS.USERS.CUSTOMER,
         customerData
       );
 
-      // Validate response structure
-      if (!validateApiResponse<CustomerResponse>(response)) {
-        throw new ApiError(
-          ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
-          500,
-          'Invalid response format',
-          undefined
-        );
-      }
-
       return response;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
-        500,
-        'Unknown error',
-        error
-      );
+    } catch (error: any) {
+      console.error('Error creating customer:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create customer');
     }
   },
 
@@ -126,22 +129,6 @@ export const customerService = {
    * @throws ApiError
    */
   async getCustomers(params: GetCustomersParams = {}): Promise<GetCustomersResponse> {
-    // Validate authentication
-    if (!hasAuthToken()) {
-      throw new ApiError(
-        ERROR_MESSAGES.AUTH.NO_TOKEN,
-        401,
-        'Unauthorized',
-        undefined
-      );
-    }
-
-    // Set auth token for this request
-    const token = getAuthToken();
-    if (token) {
-      httpClient.setAuthToken(token);
-    }
-
     try {
       // Build query parameters
       const queryParams: Record<string, string | number> = {};
@@ -149,32 +136,15 @@ export const customerService = {
       if (params.limit) queryParams.limit = params.limit;
       if (params.search) queryParams.search = params.search;
 
-      const response = await httpClient.get<GetCustomersResponse>(
+      const response = await apiClientService.get<GetCustomersResponse>(
         API_CONFIG.ENDPOINTS.USERS.GET_CUSTOMERS,
-        queryParams
+        { params: queryParams }
       );
-
-      // Validate response structure
-      if (!validateApiResponse<GetCustomersResponse>(response)) {
-        throw new ApiError(
-          ERROR_MESSAGES.INVENTORY.FETCH_FAILED,
-          500,
-          'Invalid response format',
-          undefined
-        );
-      }
 
       return response;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        ERROR_MESSAGES.INVENTORY.FETCH_FAILED,
-        500,
-        'Unknown error',
-        error
-      );
+    } catch (error: any) {
+      console.error('Error fetching customers:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch customers');
     }
   },
 
@@ -185,47 +155,19 @@ export const customerService = {
    * @throws ApiError
    */
   async getCustomerById(customerId: string): Promise<Customer> {
-    // Validate authentication
-    if (!hasAuthToken()) {
-      throw new ApiError(
-        ERROR_MESSAGES.AUTH.NO_TOKEN,
-        401,
-        'Unauthorized',
-        undefined
-      );
-    }
-
-    // Set auth token for this request
-    const token = getAuthToken();
-    if (token) {
-      httpClient.setAuthToken(token);
-    }
-
     try {
-      const response = await httpClient.get<{ success: boolean; data: Customer }>(
+      const response = await apiClientService.get<{ success: boolean; data: Customer }>(
         `${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`
       );
 
       if (!response.success || !response.data) {
-        throw new ApiError(
-          ERROR_MESSAGES.HTTP.NOT_FOUND,
-          404,
-          'Customer not found',
-          undefined
-        );
+        throw new Error('Customer not found');
       }
 
       return response.data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        ERROR_MESSAGES.INVENTORY.FETCH_FAILED,
-        500,
-        'Unknown error',
-        error
-      );
+    } catch (error: any) {
+      console.error('Error fetching customer:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch customer');
     }
   },
 
@@ -237,49 +179,35 @@ export const customerService = {
    * @throws ApiError
    */
   async updateCustomer(customerId: string, customerData: Partial<CreateCustomerData>): Promise<CustomerResponse> {
-    // Validate authentication
-    if (!hasAuthToken()) {
-      throw new ApiError(
-        ERROR_MESSAGES.AUTH.NO_TOKEN,
-        401,
-        'Unauthorized',
-        undefined
-      );
-    }
-
-    // Set auth token for this request
-    const token = getAuthToken();
-    if (token) {
-      httpClient.setAuthToken(token);
-    }
-
     try {
-      const response = await httpClient.put<CustomerResponse>(
+      const response = await apiClientService.put<CustomerResponse>(
         `${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`,
         customerData
       );
 
-      // Validate response structure
-      if (!validateApiResponse<CustomerResponse>(response)) {
-        throw new ApiError(
-          ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
-          500,
-          'Invalid response format',
-          undefined
-        );
-      }
+      return response;
+    } catch (error: any) {
+      console.error('Error updating customer:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update customer');
+    }
+  },
+
+  /**
+   * Get customer details with quotations
+   * @param customerId - Customer ID
+   * @returns Promise<CustomerDetailsResponse>
+   * @throws ApiError
+   */
+  async getCustomerDetails(customerId: string): Promise<CustomerDetailsResponse> {
+    try {
+      const response = await apiClientService.get<CustomerDetailsResponse>(
+        `${API_CONFIG.ENDPOINTS.USERS.GET_CUSTOMER_DETAILS}/${customerId}`
+      );
 
       return response;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        ERROR_MESSAGES.CUSTOMER.CREATE_FAILED,
-        500,
-        'Unknown error',
-        error
-      );
+    } catch (error: any) {
+      console.error('Error fetching customer details:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch customer details');
     }
   },
 
@@ -290,34 +218,11 @@ export const customerService = {
    * @throws ApiError
    */
   async deleteCustomer(customerId: string): Promise<void> {
-    // Validate authentication
-    if (!hasAuthToken()) {
-      throw new ApiError(
-        ERROR_MESSAGES.AUTH.NO_TOKEN,
-        401,
-        'Unauthorized',
-        undefined
-      );
-    }
-
-    // Set auth token for this request
-    const token = getAuthToken();
-    if (token) {
-      httpClient.setAuthToken(token);
-    }
-
     try {
-      await httpClient.delete(`${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        ERROR_MESSAGES.GENERAL.UNKNOWN_ERROR,
-        500,
-        'Unknown error',
-        error
-      );
+      await apiClientService.delete(`${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`);
+    } catch (error: any) {
+      console.error('Error deleting customer:', error);
+      throw new Error(error.response?.data?.message || 'Failed to delete customer');
     }
   },
 };

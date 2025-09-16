@@ -64,7 +64,7 @@ class CountriesService {
    * @returns Array of popular countries
    */
   getPopularCountries(): Country[] {
-    const popularCodes = ['+1', '+44', '+91', '+86', '+81', '+49', '+33', '+39', '+34', '+7'];
+    const popularCodes = ['+971', '+1', '+44', '+91', '+86', '+81', '+49', '+33', '+39', '+34', '+7'];
     return this.countries.filter(country => popularCodes.includes(country.dial_code));
   }
 
@@ -74,6 +74,7 @@ class CountriesService {
    */
   private getFallbackCountries(): Country[] {
     return [
+      { name: 'United Arab Emirates', code: 'AE', dial_code: '+971' },
       { name: 'United States', code: 'US', dial_code: '+1' },
       { name: 'United Kingdom', code: 'GB', dial_code: '+44' },
       { name: 'India', code: 'IN', dial_code: '+91' },

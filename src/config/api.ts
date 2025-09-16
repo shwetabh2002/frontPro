@@ -13,6 +13,7 @@ export const API_CONFIG = {
     USERS: {
       CUSTOMER: '/users/customer',
       GET_CUSTOMERS: '/users/get-customer',
+      GET_CUSTOMER_DETAILS: '/users/get-customer',
       PROFILE: '/users/profile',
     },
     

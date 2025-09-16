@@ -9,6 +9,7 @@ interface CountryDropdownProps {
   placeholder?: string;
   className?: string;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const CountryDropdown: React.FC<CountryDropdownProps> = ({
@@ -17,7 +18,8 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
   countries,
   placeholder = "Select country",
   className = "",
-  isLoading = false
+  isLoading = false,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -198,8 +200,13 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={toggleDropdown}
-        className="w-full flex items-center justify-between px-4 py-3 border-2 border-amber-500/50 border-r-0 rounded-l-lg shadow-sm focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 text-sm bg-gray-800 text-gray-100 hover:bg-gray-700 hover:border-amber-400 transition-all duration-200 min-w-[160px]"
+        onClick={disabled ? undefined : toggleDropdown}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-4 py-3 border-2 border-amber-500/50 border-r-0 rounded-l-lg shadow-sm focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 text-sm transition-all duration-200 min-w-[160px] ${
+          disabled 
+            ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-75' 
+            : 'bg-gray-800 text-gray-100 hover:bg-gray-700 hover:border-amber-400'
+        }`}
       >
         <div className="flex items-center space-x-2">
           {selectedCountry && (

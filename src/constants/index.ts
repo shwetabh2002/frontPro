@@ -24,7 +24,7 @@ export const APP_CONSTANTS = {
   
   // Default Values
   DEFAULTS: {
-    COUNTRY_CODE: '+91',
+    COUNTRY_CODE: '+971',
     INVENTORY_FILTERS: {
       category: '',
       brand: '',

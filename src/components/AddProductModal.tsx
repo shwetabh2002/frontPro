@@ -330,7 +330,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-amber-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
                     >
                       <option value="car">Car</option>
-                      <option value="part">Part</option>
+                      {/* <option value="part">Part</option> */}
                     </select>
                   </div>
 
