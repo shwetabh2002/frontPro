@@ -110,6 +110,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showRequirements, setShowRequirements] = useState(false);
+  const [isItemsSectionExpanded, setIsItemsSectionExpanded] = useState(true);
 
 
   // Pre-populate form when prePopulatedData is provided
@@ -1813,10 +1814,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
               {/* Inventory Items Display - Show all items after currency selection */}
               {selectedCurrency && (
                 <div className="bg-gray-50 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  {/* Collapsible Header */}
+                  <div 
+                    className="flex items-center justify-between mb-4 cursor-pointer hover:bg-gray-100 rounded-lg p-2 -m-2 transition-colors duration-200"
+                    onClick={() => setIsItemsSectionExpanded(!isItemsSectionExpanded)}
+                  >
                     <h5 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg 
+                        className={`w-5 h-5 text-green-600 mr-2 transition-transform duration-200 ${
+                          isItemsSectionExpanded ? 'rotate-0' : '-rotate-90'
+                        }`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                       Available Items ({getDisplayItems().length})
                       {searchTerm && (
@@ -1825,18 +1837,26 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         </span>
                       )}
                     </h5>
-                    {selectedItems.size > 0 && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600 font-medium">Cart</span>
-                        <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold">
-                          {getTotalSelectedItems()}
-                        </span>
+                    <div className="flex items-center space-x-3">
+                      {selectedItems.size > 0 && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-600 font-medium">Cart</span>
+                          <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold">
+                            {getTotalSelectedItems()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-gray-400 text-sm font-medium">
+                        {isItemsSectionExpanded ? 'Click to collapse' : 'Click to expand'}
                       </div>
-                    )}
+                    </div>
                   </div>
                   
-                  {/* Search Input */}
-                  <div className="mb-4">
+                  {/* Collapsible Content */}
+                  {isItemsSectionExpanded && (
+                    <>
+                      {/* Search Input */}
+                      <div className="mb-4">
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1990,6 +2010,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         isLoading={isInventoryLoading}
                       />
                     </div>
+                  )}
+                    </>
                   )}
                 </div>
               )}
