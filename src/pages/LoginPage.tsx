@@ -88,7 +88,7 @@ const LoginPage: React.FC = () => {
   // Show loading while initializing
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <div className="relative">
@@ -112,10 +112,10 @@ const LoginPage: React.FC = () => {
                   </linearGradient>
                 </defs>
               </svg>
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-400 animate-ping opacity-20"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-400 animate-ping opacity-20"></div>
             </div>
-            <p className="mt-6 text-lg font-semibold text-amber-400">Initializing Automotive POS...</p>
-            <p className="mt-2 text-sm text-gray-400">Please wait while we set up your session</p>
+            <p className="mt-6 text-lg font-semibold text-blue-400">Initializing Automotive POS...</p>
+            <p className="mt-2 text-sm text-gray-600">Please wait while we set up your session</p>
           </div>
         </div>
       </div>
@@ -128,10 +128,10 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-yellow-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-600/10 to-yellow-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-600/10 to-blue-600/10 rounded-full blur-3xl"></div>
       
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
@@ -139,17 +139,17 @@ const LoginPage: React.FC = () => {
           <div className="mx-auto mb-8">
             <Logo size="xl" showText={true} />
           </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-blue-400 to-blue-500 bg-clip-text text-transparent">
             Automotive POS
           </h2>
-          <p className="mt-3 text-lg text-gray-300 font-medium">
+          <p className="mt-3 text-lg text-gray-700 font-medium">
             Sign in to your automotive business account
           </p>
         </div>
       </div>
 
       <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-gradient-to-br from-gray-900/90 to-black/90 backdrop-blur-sm py-10 px-6 shadow-2xl sm:rounded-2xl sm:px-12 border border-amber-500/30">
+        <div className="bg-gradient-to-br from-blue-100/90 to-white/90 backdrop-blur-sm py-10 px-6 shadow-2xl sm:rounded-2xl sm:px-12 border border-blue-500/30">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <Input
               label="Email Address"

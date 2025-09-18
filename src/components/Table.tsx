@@ -24,10 +24,10 @@ function Table<T extends Record<string, any>>({
   if (isLoading) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="bg-gradient-to-r from-slate-200 to-blue-200 h-10 rounded-xl mb-4 shadow-sm"></div>
+        <div className="bg-gradient-to-r from-slate-200 to-slate-300 h-10 rounded-xl mb-4 shadow-sm"></div>
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-gradient-to-r from-slate-100 to-blue-100 h-14 rounded-xl shadow-sm"></div>
+            <div key={i} className="bg-gradient-to-r from-slate-100 to-slate-200 h-14 rounded-xl shadow-sm"></div>
           ))}
         </div>
       </div>
@@ -37,7 +37,7 @@ function Table<T extends Record<string, any>>({
   if (data.length === 0) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-slate-200 to-blue-200 rounded-full flex items-center justify-center mb-4">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center mb-4">
           <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
           </svg>
@@ -49,14 +49,14 @@ function Table<T extends Record<string, any>>({
   }
 
   return (
-    <div className={`overflow-x-auto rounded-xl border border-amber-500/30 shadow-lg ${className}`}>
-      <table className="min-w-full table-fixed divide-y divide-amber-500/20">
-        <thead className="bg-gradient-to-r from-gray-900 to-black">
+    <div className={`overflow-x-auto rounded-xl border border-slate-300 shadow-lg ${className}`}>
+      <table className="min-w-full table-fixed divide-y divide-slate-200">
+        <thead className="bg-gradient-to-r from-slate-100 to-slate-200">
           <tr>
             {columns.map((column, index) => (
               <th
                 key={column.key}
-                className={`px-4 py-4 text-left text-xs font-bold text-amber-400 uppercase tracking-wider ${
+                className={`px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider ${
                   index === 0 ? 'w-32' : // Customer ID column
                   index === 1 ? 'w-48' : // Name column
                   index === 2 ? 'w-64' : // Email column
@@ -72,13 +72,13 @@ function Table<T extends Record<string, any>>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-gray-800 divide-y divide-amber-500/10">
+        <tbody className="bg-white divide-y divide-slate-200">
           {data.map((item, index) => (
-            <tr key={index} className="hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10 transition-all duration-200">
+            <tr key={index} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 transition-all duration-200">
               {columns.map((column, colIndex) => (
                 <td 
                   key={column.key} 
-                  className={`px-4 py-4 text-sm text-gray-200 font-medium ${
+                  className={`px-4 py-4 text-sm text-gray-800 font-medium ${
                     colIndex === 5 ? 'break-words leading-relaxed' : 'whitespace-nowrap' // Address column can wrap with better line height
                   }`}
                 >

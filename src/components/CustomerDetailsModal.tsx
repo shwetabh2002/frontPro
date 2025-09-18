@@ -55,15 +55,15 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'draft':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        return 'bg-slate-500/20 text-slate-700 border-slate-500/30';
       case 'sent':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+        return 'bg-blue-500/20 text-blue-700 border-blue-500/30';
       case 'accepted':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
+        return 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30';
       case 'rejected':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
+        return 'bg-red-500/20 text-red-700 border-red-500/30';
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        return 'bg-slate-500/20 text-slate-700 border-slate-500/30';
     }
   };
 
@@ -76,27 +76,27 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-blue-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-slate-300">
         {/* Header */}
-        <div className="sticky top-0 bg-gray-900 z-10 rounded-t-2xl shadow-lg border-b border-gray-700">
+        <div className="sticky top-0 bg-gradient-to-r from-slate-100 to-slate-200 z-10 rounded-t-2xl shadow-lg border-b border-slate-300">
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-emerald-500/20 rounded-lg">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Customer Details</h2>
-                <p className="text-gray-400 text-sm">View customer information and quotations</p>
+                <h2 className="text-2xl font-bold text-slate-800">Customer Details</h2>
+                <p className="text-slate-600 text-sm">View customer information and quotations</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -111,7 +111,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                 <svg className="w-8 h-8 animate-spin text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="text-gray-400 text-lg">Loading customer details...</span>
+                <span className="text-slate-600 text-lg">Loading customer details...</span>
               </div>
             </div>
           ) : error ? (
@@ -123,10 +123,10 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Details</h3>
-                <p className="text-gray-400 mb-4">{error}</p>
+                <p className="text-slate-600 mb-4">{error}</p>
                 <button
                   onClick={fetchCustomerDetails}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                 >
                   Try Again
                 </button>
@@ -135,32 +135,32 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
           ) : customerDetails ? (
             <div className="space-y-8">
               {/* Customer Information */}
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-gray-700 shadow-xl">
+              <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-300 shadow-xl">
                 {/* Header with Customer ID Badge */}
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
-                      <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl">
+                      <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Customer Information</h3>
-                      <p className="text-gray-400 text-sm">Complete customer profile details</p>
+                      <h3 className="text-2xl font-bold text-slate-800">Customer Information</h3>
+                      <p className="text-slate-600 text-sm">Complete customer profile details</p>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-xl px-4 py-2">
-                    <span className="text-amber-400 font-mono font-bold text-lg">{customerDetails.customer.custId}</span>
+                  <div className="bg-gradient-to-r from-slate-100 to-slate-200 border border-slate-300 rounded-xl px-4 py-2">
+                    <span className="text-slate-800 font-mono font-bold text-lg">{customerDetails.customer.custId}</span>
                   </div>
                 </div>
 
                 {/* Main Customer Details Card */}
-                <div className="bg-gray-900/50 rounded-xl p-6 border border-gray-600 mb-6">
+                <div className="bg-white rounded-xl p-6 border border-slate-200 mb-6 shadow-sm">
                   <div className="flex items-start space-x-6">
                     {/* Customer Avatar/Icon */}
                     <div className="flex-shrink-0">
-                      <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-gray-600">
-                        <span className="text-2xl font-bold text-white">
+                      <div className="w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-full flex items-center justify-center border-2 border-slate-300">
+                        <span className="text-2xl font-bold text-slate-800">
                           {customerDetails.customer.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -168,28 +168,28 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                     
                     {/* Customer Basic Info */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-2xl font-bold text-white mb-2">{customerDetails.customer.name}</h4>
+                      <h4 className="text-2xl font-bold text-slate-800 mb-2">{customerDetails.customer.name}</h4>
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3">
-                          <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
-                          <span className="text-gray-300">{customerDetails.customer.email}</span>
+                          <span className="text-slate-700">{customerDetails.customer.email}</span>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
-                          <span className="text-gray-300 font-mono">
+                          <span className="text-slate-700 font-mono">
                             {customerDetails.customer.countryCode} {customerDetails.customer.phone}
                           </span>
                         </div>
                         <div className="flex items-start space-x-3">
-                          <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-slate-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span className="text-gray-300 leading-relaxed">{customerDetails.customer.address}</span>
+                          <span className="text-slate-700 leading-relaxed">{customerDetails.customer.address}</span>
                         </div>
                       </div>
                     </div>
@@ -198,30 +198,30 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
 
                 {/* Account Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-700">
+                  <div className="bg-slate-100 rounded-lg p-4 border border-slate-300">
                     <div className="flex items-center space-x-2 mb-2">
                       <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-sm font-medium text-gray-400">Account Created</span>
                     </div>
-                    <p className="text-white font-medium">{formatDate(customerDetails.customer.createdAt)}</p>
+                    <p className="text-slate-800 font-medium">{formatDate(customerDetails.customer.createdAt)}</p>
                   </div>
                   
-                  <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-700">
+                  <div className="bg-slate-100 rounded-lg p-4 border border-slate-300">
                     <div className="flex items-center space-x-2 mb-2">
-                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       <span className="text-sm font-medium text-gray-400">Last Updated</span>
                     </div>
-                    <p className="text-white font-medium">{formatDate(customerDetails.customer.updatedAt)}</p>
+                    <p className="text-slate-800 font-medium">{formatDate(customerDetails.customer.updatedAt)}</p>
                   </div>
                 </div>
               </div>
 
               {/* Quotations Section */}
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-gray-700 shadow-xl">
+              <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-300 shadow-xl">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
@@ -230,8 +230,8 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Quotations</h3>
-                      <p className="text-gray-400 text-sm">Customer quotation history and status</p>
+                      <h3 className="text-2xl font-bold text-slate-800">Quotations</h3>
+                      <p className="text-slate-600 text-sm">Customer quotation history and status</p>
                     </div>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl px-4 py-2">
@@ -242,7 +242,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                 {customerDetails.quotations.data.length > 0 ? (
                   <div className="space-y-6">
                     {customerDetails.quotations.data.map((quotation: Quotation) => (
-                      <div key={quotation._id} className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 rounded-xl p-6 border border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div key={quotation._id} className="bg-gradient-to-r from-slate-100 to-white rounded-xl p-6 border border-slate-300 shadow-lg hover:shadow-xl transition-all duration-300">
                         {/* Quotation Header */}
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-4">
@@ -252,18 +252,18 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                               </svg>
                             </div>
                             <div>
-                              <h4 className="text-xl font-bold text-white">{quotation.quotationNumber}</h4>
-                              <p className="text-gray-400 text-sm font-mono">{quotation.quotationId}</p>
+                              <h4 className="text-xl font-bold text-slate-800">{quotation.quotationNumber}</h4>
+                              <p className="text-slate-600 text-sm font-mono">{quotation.quotationId}</p>
                             </div>
                           </div>
                           <div className="flex items-center space-x-3">
                             <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getStatusColor(quotation.status)}`}>
                               {quotation.status.toUpperCase()}
                             </span>
-                            <div className="bg-gradient-to-r from-amber-500/30 to-yellow-500/30 border-2 border-amber-400/50 rounded-2xl px-6 py-3 shadow-xl">
+                            <div className="bg-gradient-to-r from-blue-500/30 to-blue-500/30 border-2 border-blue-400/50 rounded-2xl px-6 py-3 shadow-xl">
                               <div className="text-center">
-                                <p className="text-xs text-amber-300 font-medium uppercase tracking-wide">Currency</p>
-                                <p className="text-amber-400 font-black text-2xl">{quotation.currency}</p>
+                                <p className="text-xs text-blue-300 font-medium uppercase tracking-wide">Currency</p>
+                                <p className="text-blue-400 font-black text-2xl">{quotation.currency}</p>
                               </div>
                             </div>
                           </div>
@@ -273,12 +273,12 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <div className="flex items-center space-x-3">
-                              <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                               <div>
                                 <p className="text-sm text-gray-400">Valid Until</p>
-                                <p className="text-white font-medium">{formatDate(quotation.validTill)}</p>
+                                <p className="text-slate-800 font-medium">{formatDate(quotation.validTill)}</p>
                               </div>
                             </div>
                             <div className="flex items-center space-x-3">
@@ -287,7 +287,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                               </svg>
                               <div>
                                 <p className="text-sm text-gray-400">Created By</p>
-                                <p className="text-white font-medium">{quotation.createdBy.name}</p>
+                                <p className="text-slate-800 font-medium">{quotation.createdBy.name}</p>
                               </div>
                             </div>
                           </div>
@@ -298,7 +298,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                               </svg>
                               <div>
                                 <p className="text-sm text-gray-400">Created At</p>
-                                <p className="text-white font-medium">{formatDate(quotation.createdAt)}</p>
+                                <p className="text-slate-800 font-medium">{formatDate(quotation.createdAt)}</p>
                               </div>
                             </div>
                           </div>
@@ -308,7 +308,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className="p-4 bg-gray-700/50 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <div className="p-4 bg-slate-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                       <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>

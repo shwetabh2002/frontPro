@@ -65,7 +65,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
             key={index}
             className={`flex items-center p-2 rounded border cursor-pointer transition-colors ${
               selectedChassis.includes(vin.chasisNumber)
-                ? 'bg-blue-100 border-blue-300 text-blue-900'
+                ? 'bg-slate-100 border-slate-300 text-slate-900'
                 : selectedChassis.length >= maxSelections
                 ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
@@ -84,7 +84,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
         ))}
       </div>
       {selectedChassis.length === 0 && (
-        <p className="text-xs text-amber-600 mt-2">
+        <p className="text-xs text-slate-600 mt-2">
           ⚠️ Please select at least one chassis number for this item
         </p>
       )}
@@ -990,17 +990,17 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       >
         <div className="space-y-8">
           {/* Company Information Header */}
-          <div className="bg-gradient-to-r from-amber-600/10 to-yellow-500/10 rounded-lg p-4 border border-amber-500/30">
+          <div className="bg-gradient-to-r from-emerald-600/10 to-teal-500/10 rounded-lg p-4 border border-emerald-500/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="p-2 bg-gradient-to-br from-amber-600 to-yellow-500 rounded-lg shadow-md">
+                <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-500 rounded-lg shadow-md">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-amber-400">{getCompanyName()}</h3>
-                  <p className="text-sm text-gray-300">Default Currency: <span className="font-medium text-amber-300">{getCompanyCurrency()}</span></p>
+                  <h3 className="text-lg font-semibold text-amber-500">{getCompanyName()}</h3>
+                  <p className="text-sm text-gray-600">Default Currency: <span className="font-medium text-amber-500">{getCompanyCurrency()}</span></p>
                 </div>
               </div>
               <div className="text-right text-sm text-gray-400">
@@ -1013,19 +1013,19 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           {/* Customer Information Section */}
           <div className={`bg-gradient-to-br rounded-xl p-6 shadow-lg border ${
             showRequirements 
-              ? 'from-gray-800 to-black border-amber-500/30' 
-              : 'from-gray-900 to-black border-amber-500/50'
+              ? 'from-slate-100 to-white border-slate-300' 
+              : 'from-slate-50 to-white border-slate-300'
           }`}>
             <h4 className={`text-xl font-bold mb-6 flex items-center ${
-              showRequirements ? 'text-amber-300' : 'text-amber-400'
+              showRequirements ? 'text-slate-600' : 'text-slate-700'
             }`}>
               <div className={`p-2 rounded-lg mr-3 shadow-md ${
                 showRequirements 
-                  ? 'bg-gradient-to-br from-gray-600 to-gray-700 border border-amber-500/50' 
-                  : 'bg-gradient-to-br from-amber-600 to-yellow-500'
+                  ? 'bg-gradient-to-br from-slate-200 to-slate-300 border border-slate-500/50' 
+                  : 'bg-gradient-to-br from-emerald-600 to-teal-500'
               }`}>
                 {showRequirements ? (
-                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 ) : (
@@ -1036,7 +1036,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
               </div>
               Customer Information
               {showRequirements && (
-                <span className="ml-3 text-sm font-normal text-amber-300 bg-gray-800 border border-amber-500 px-3 py-1 rounded-full">
+                <span className="ml-3 text-sm font-normal text-blue-300 bg-white border border-blue-500 px-3 py-1 rounded-full">
                   ✓ Locked
                 </span>
               )}
@@ -1044,7 +1044,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name Input */}
               <div>
-                <label className="block text-sm font-bold text-amber-400 mb-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2">
                   Customer Name *
                 </label>
                 <input
@@ -1053,8 +1053,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter customer name"
                   disabled={showRequirements || mode === 'quotation'}
-                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 bg-gray-800 text-gray-100 ${
-                    errors.name ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
+                    errors.name ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
                   } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.name && (
@@ -1069,7 +1069,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-bold text-amber-400 mb-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2">
                   Email Address *
                 </label>
                 <input
@@ -1078,8 +1078,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
                   disabled={showRequirements || mode === 'quotation'}
-                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 bg-gray-800 text-gray-100 ${
-                    errors.email ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
+                    errors.email ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
                   } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.email && (
@@ -1094,7 +1094,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
               {/* Phone Input with Country Code */}
               <div>
-                <label className="block text-sm font-bold text-amber-400 mb-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2">
                   Phone Number *
                 </label>
                 <div className="flex space-x-2">
@@ -1112,8 +1112,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="Enter phone number"
                     disabled={showRequirements || mode === 'quotation'}
-                    className={`block flex-1 px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 bg-gray-800 text-gray-100 ${
-                      errors.phone ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                    className={`block flex-1 px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
+                      errors.phone ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
                     } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                   />
                 </div>
@@ -1129,7 +1129,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
               {/* Address Input */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-amber-400 mb-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2">
                   Address *
                 </label>
                 <textarea
@@ -1138,8 +1138,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   placeholder="Enter customer address"
                   rows={3}
                   disabled={showRequirements || mode === 'quotation'}
-                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 resize-none bg-gray-800 text-gray-100 ${
-                    errors.address ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 resize-none bg-white text-gray-800 ${
+                    errors.address ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
                   } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.address && (
@@ -1159,8 +1159,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                 disabled={isLoading || showRequirements}
                 className={`w-full px-6 py-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold text-base transition-all duration-300 transform shadow-xl ${
                   showRequirements
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-amber-300 cursor-not-allowed opacity-75 border border-amber-500/50'
-                    : 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black hover:from-amber-700 hover:to-yellow-600 hover:scale-[1.02] hover:shadow-2xl focus:ring-amber-500/30 border border-amber-400'
+                    ? 'bg-gradient-to-r from-blue-200 to-blue-300 text-blue-300 cursor-not-allowed opacity-75 border border-blue-500/50'
+                    : 'bg-gradient-to-r from-blue-600 to-blue-500 text-black hover:from-blue-700 hover:to-blue-600 hover:scale-[1.02] hover:shadow-2xl focus:ring-blue-500/30 border border-blue-400'
                 } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isLoading ? (
@@ -1192,9 +1192,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
           {/* Requirements Section - Only shown after successful customer creation */}
           {showRequirements && (
-            <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl p-6 shadow-lg border border-amber-500/50">
-              <h4 className="text-xl font-bold text-amber-400 mb-6 flex items-center">
-                <div className="p-2 bg-gradient-to-br from-amber-600 to-yellow-500 rounded-lg mr-3 shadow-md">
+            <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 shadow-lg border border-blue-500/50">
+              <h4 className="text-xl font-bold text-slate-700 mb-6 flex items-center">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg mr-3 shadow-md">
                   <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -1204,7 +1204,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
               {/* Currency Selection - Required before showing filters */}
               <div className="mb-8">
-                <label className="block text-sm font-bold text-amber-400 mb-3">
+                <label className="block text-sm font-bold text-slate-700 mb-3">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -1237,7 +1237,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       <button
                         onClick={handleRefreshClick}
                         disabled={isRefreshing || isInventoryLoading}
-                        className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-amber-600 to-yellow-500 text-black rounded-lg hover:from-amber-700 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+                        className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-500 text-black rounded-lg hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
                         title="Refresh inventory data"
                       >
                         {isRefreshing ? (
@@ -1254,7 +1254,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   )}
                 </div>
                 {!selectedCurrency && (
-                  <p className="mt-2 text-sm text-amber-300 flex items-center">
+                  <p className="mt-2 text-sm text-blue-300 flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -1262,7 +1262,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   </p>
                 )}
                 {selectedCurrency && isInventoryLoading && (
-                  <p className="mt-2 text-sm text-amber-300 flex items-center">
+                  <p className="mt-2 text-sm text-blue-300 flex items-center">
                     <svg className="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
@@ -1276,7 +1276,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
                 {/* Category Dropdown */}
                 <div>
-                  <label className="block text-sm font-bold text-amber-400 mb-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
                     Category
                   </label>
                   <select
@@ -1286,7 +1286,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       // Reset other filters when category changes
                       setRequirements(prev => ({ ...prev, brand: '', model: '', year: '', color: '' }));
                     }}
-                    className="block w-full px-4 py-3 border-2 border-amber-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm hover:border-amber-400 transition-all duration-200 bg-gray-800 text-gray-100"
+                    className="block w-full px-4 py-3 border-2 border-blue-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-blue-400 transition-all duration-200 bg-white text-gray-800"
                   >
                     <option value="">Select category</option>
                     <option value="Sedan">Sedan</option>
@@ -1298,13 +1298,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
                 {/* Brand Dropdown */}
                 <div>
-                  <label className="block text-sm font-semibold text-amber-400 mb-2">
+                  <label className="block text-sm font-semibold text-blue-400 mb-2">
                     Brand
                   </label>
                   <select
                     value={requirements.brand}
                     onChange={(e) => setRequirements(prev => ({ ...prev, brand: e.target.value }))}
-                    className="block w-full px-4 py-3 border border-amber-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm hover:border-amber-400 transition-colors bg-gray-800 text-gray-100"
+                    className="block w-full px-4 py-3 border border-blue-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-blue-400 transition-colors bg-white text-gray-800"
                     disabled={!requirements.category}
                   >
                     <option value="">Select brand</option>
@@ -1316,13 +1316,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
                 {/* Model Dropdown */}
                 <div>
-                  <label className="block text-sm font-semibold text-amber-400 mb-2">
+                  <label className="block text-sm font-semibold text-blue-400 mb-2">
                     Model
                   </label>
                   <select
                     value={requirements.model}
                     onChange={(e) => setRequirements(prev => ({ ...prev, model: e.target.value }))}
-                    className="block w-full px-4 py-3 border border-amber-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm hover:border-amber-400 transition-colors bg-gray-800 text-gray-100"
+                    className="block w-full px-4 py-3 border border-blue-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-blue-400 transition-colors bg-white text-gray-800"
                     disabled={!requirements.category}
                   >
                     <option value="">Select model</option>
@@ -1334,13 +1334,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
                 {/* Year Dropdown */}
                 <div>
-                  <label className="block text-sm font-semibold text-amber-400 mb-2">
+                  <label className="block text-sm font-semibold text-blue-400 mb-2">
                     Year
                   </label>
                   <select
                     value={requirements.year}
                     onChange={(e) => setRequirements(prev => ({ ...prev, year: e.target.value }))}
-                    className="block w-full px-4 py-3 border border-amber-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm hover:border-amber-400 transition-colors bg-gray-800 text-gray-100"
+                    className="block w-full px-4 py-3 border border-blue-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-blue-400 transition-colors bg-white text-gray-800"
                     disabled={!requirements.category}
                   >
                     <option value="">Select year</option>
@@ -1352,7 +1352,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
                 {/* Color Dropdown */}
                 <div>
-                  <label className="block text-sm font-semibold text-amber-400 mb-2">
+                  <label className="block text-sm font-semibold text-blue-400 mb-2">
                     Color
                   </label>
                   <select
@@ -1361,7 +1361,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       console.log('🎨 Color selected:', e.target.value);
                       setRequirements(prev => ({ ...prev, color: e.target.value }));
                     }}
-                    className="block w-full px-4 py-3 border border-amber-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm hover:border-amber-400 transition-colors bg-gray-800 text-gray-100"
+                    className="block w-full px-4 py-3 border border-blue-500/50 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm hover:border-blue-400 transition-colors bg-white text-gray-800"
                     disabled={!requirements.category}
                   >
                     <option value="">Select color</option>
@@ -1379,7 +1379,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   <button
                     onClick={handleCheckAvailability}
                     disabled={!requirements.category || isInventoryLoading}
-                    className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 text-black px-6 py-4 rounded-xl hover:from-amber-700 hover:to-yellow-600 focus:outline-none focus:ring-4 focus:ring-amber-500/30 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl shadow-xl border border-amber-400"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-black px-6 py-4 rounded-xl hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl shadow-xl border border-blue-400"
                   >
                     {isInventoryLoading ? (
                       <div className="flex items-center justify-center">
@@ -1478,7 +1478,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               {/* Price Section */}
                               <div className="text-right ml-4">
                                 <div className="text-sm text-gray-500 mb-1">Unit Price</div>
-                                <div className="text-lg font-bold text-green-600">
+                                <div className="text-lg font-bold text-emerald-600">
                                   {formatPrice(item.newSellingPrice || item.sellingPrice, item.currencyType || selectedCurrency?.code || 'USD')}
                                 </div>
                               </div>
@@ -1524,7 +1524,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               {/* Total Price */}
                               <div className="text-right">
                                 <div className="text-sm text-gray-500 mb-1">Total</div>
-                                <div className="text-xl font-bold text-green-600">
+                                <div className="text-xl font-bold text-emerald-600">
                                   {formatPrice(totalPrice, item.currencyType || selectedCurrency?.code || 'USD')}
                                 </div>
                               </div>
@@ -1544,15 +1544,15 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   </div>
                   
                   {/* Cart Total Summary */}
-                  <div className="mt-4 pt-4 border-t border-amber-500/30">
+                  <div className="mt-4 pt-4 border-t border-blue-500/30">
                     {/* Subtotal */}
                     <div className="flex items-center justify-between mb-3">
-                      <div className="text-lg font-semibold text-amber-400">Subtotal</div>
+                      <div className="text-lg font-semibold text-slate-700">Subtotal</div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-gray-300">
+                        <div className="text-xl font-bold text-slate-800">
                           {formatPrice(getSubtotal(), selectedCurrency?.code || 'USD')}
                         </div>
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-slate-600">
                           {getTotalSelectedItems()} items selected
                         </div>
                       </div>
@@ -1561,10 +1561,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     {/* Discount Input */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <label className="text-sm font-medium text-amber-300">Discount:</label>
+                        <label className="text-sm font-medium text-slate-700">Discount:</label>
                         <div className="flex items-center space-x-2">
                           {/* Discount Type Toggle */}
-                          <div className="flex bg-gray-800 rounded-lg p-1">
+                          <div className="flex bg-white rounded-lg p-1">
                             <button
                               type="button"
                               onClick={() => {
@@ -1573,8 +1573,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               }}
                               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                                 discountType === 'fixed'
-                                  ? 'bg-amber-500 text-black'
-                                  : 'text-amber-300 hover:text-amber-200'
+                                  ? 'bg-blue-500 text-black'
+                                  : 'text-blue-300 hover:text-blue-200'
                               }`}
                             >
                               $
@@ -1587,8 +1587,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               }}
                               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                                 discountType === 'percentage'
-                                  ? 'bg-amber-500 text-black'
-                                  : 'text-amber-300 hover:text-amber-200'
+                                  ? 'bg-blue-500 text-black'
+                                  : 'text-blue-300 hover:text-blue-200'
                               }`}
                             >
                               %
@@ -1598,7 +1598,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                           {/* Discount Input */}
                           <div className="flex items-center space-x-1">
                             {discountType === 'fixed' && (
-                              <span className="text-amber-400">
+                              <span className="text-slate-600">
                                 {getCurrencySymbol(selectedCurrency?.code || 'USD')}
                               </span>
                             )}
@@ -1609,20 +1609,20 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               step={discountType === 'fixed' ? "0.01" : "1"}
                               value={discount}
                               onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                              className="w-20 px-2 py-1 text-sm bg-gray-800 border border-amber-500/50 rounded text-amber-100 placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                              className="w-20 px-2 py-1 text-sm bg-white border border-slate-300 rounded text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                               placeholder={discountType === 'fixed' ? "0.00" : "0"}
                             />
-                            {discountType === 'percentage' && <span className="text-amber-400">%</span>}
+                            {discountType === 'percentage' && <span className="text-slate-600">%</span>}
                           </div>
                         </div>
                       </div>
                       {discount > 0 && (
                         <div className="text-right">
-                          <div className="text-sm text-red-400 font-medium">
+                          <div className="text-sm text-red-600 font-medium">
                             -{formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}
                           </div>
                           {discountType === 'percentage' && (
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-slate-600">
                               ({discount}% off)
                             </div>
                           )}
@@ -1631,15 +1631,15 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     </div>
 
                     {/* Additional Expenses */}
-                    <div className="mb-4 p-4 bg-gradient-to-r from-gray-700/80 to-gray-800/80 rounded-xl border border-blue-400/60">
+                    <div className="mb-4 p-4 bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl border border-slate-300">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-2">
-                          <div className="p-1.5 bg-blue-500/50 rounded-lg">
-                            <svg className="w-4 h-4 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="p-1.5 bg-emerald-500/50 rounded-lg">
+                            <svg className="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                             </svg>
                           </div>
-                          <label className="text-sm font-black text-white">Additional Expenses</label>
+                          <label className="text-sm font-black text-slate-800">Additional Expenses</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="relative">
@@ -1684,7 +1684,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                                   ...prev,
                                   description: e.target.value
                                 }))}
-                                className={`w-full px-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-300 transition-colors font-semibold ${
+                                 className={`w-full px-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
                                   errors.additionalExpensesDescription 
                                     ? 'border-red-400 focus:border-red-400' 
                                     : 'border-gray-400 focus:border-blue-300'
@@ -1712,7 +1712,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                                     ...prev,
                                     amount: Math.max(0, parseFloat(e.target.value) || 0)
                                   }))}
-                                  className={`w-full pl-8 pr-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-300 transition-colors font-semibold ${
+                                   className={`w-full pl-8 pr-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
                                     errors.additionalExpensesAmount 
                                       ? 'border-red-400 focus:border-red-400' 
                                       : 'border-gray-400 focus:border-blue-300'
@@ -1729,13 +1729,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                             <div className="flex items-center justify-between p-3 bg-blue-500/30 border-2 border-blue-300/60 rounded-lg">
                               <div className="flex items-center space-x-2">
                                 <div className="w-2 h-2 bg-blue-100 rounded-full"></div>
-                                <span className="text-sm font-black text-blue-100">Additional Expense Added</span>
+                                <span className="text-sm font-black text-slate-800">Additional Expense Added</span>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-black text-blue-100">
+                                <div className="text-lg font-black text-slate-800">
                                   +{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}
                                 </div>
-                                <div className="text-xs text-blue-200 font-bold">
+                                <div className="text-xs text-slate-600 font-bold">
                                   {additionalExpenses.expenceType}
                                 </div>
                               </div>
@@ -1746,25 +1746,25 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     </div>
 
                     {/* Final Total */}
-                    <div className="pt-4 border-t border-amber-500/30">
+                    <div className="pt-4 border-t border-blue-500/30">
                       {/* Total Breakdown */}
-                      <div className="space-y-2 mb-4 p-4 bg-gradient-to-r from-gray-700/80 to-gray-800/80 rounded-xl border border-gray-400/60">
+                      <div className="space-y-2 mb-4 p-4 bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl border border-slate-300">
                         <div className="flex justify-between items-center py-1">
                           <div className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                            <span className="text-sm font-black text-white">Subtotal</span>
+                            <div className="w-1.5 h-1.5 bg-slate-600 rounded-full"></div>
+                            <span className="text-sm font-black text-slate-800">Subtotal</span>
                           </div>
-                          <span className="text-sm font-black text-white">{formatPrice(getSubtotal(), selectedCurrency?.code || 'USD')}</span>
+                          <span className="text-sm font-black text-slate-800">{formatPrice(getSubtotal(), selectedCurrency?.code || 'USD')}</span>
                         </div>
                         
                         {additionalExpenses.expenceType !== 'none' && additionalExpenses.amount > 0 && (
                           <div className="flex justify-between items-center py-1">
                             <div className="flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 bg-blue-200 rounded-full"></div>
-                              <span className="text-sm font-black text-blue-100">Additional Expenses</span>
-                              <span className="text-xs text-blue-200 font-bold">({additionalExpenses.expenceType})</span>
+                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                              <span className="text-sm font-black text-slate-800">Additional Expenses</span>
+                              <span className="text-xs text-slate-600 font-bold">({additionalExpenses.expenceType})</span>
                             </div>
-                            <span className="text-sm font-black text-blue-100">+{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}</span>
+                            <span className="text-sm font-black text-slate-800">+{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}</span>
                           </div>
                         )}
                         
@@ -1772,36 +1772,36 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                           <div className="flex justify-between items-center py-1">
                             <div className="flex items-center space-x-2">
                               <div className="w-1.5 h-1.5 bg-red-200 rounded-full"></div>
-                              <span className="text-sm font-black text-red-100">Discount</span>
-                              <span className="text-xs text-red-200 font-bold">({discountType === 'percentage' ? `${discount}%` : 'Fixed'})</span>
+                              <span className="text-sm font-black text-red-700">Discount</span>
+                              <span className="text-xs text-red-600 font-bold">({discountType === 'percentage' ? `${discount}%` : 'Fixed'})</span>
                             </div>
-                            <span className="text-sm font-black text-red-100">-{formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}</span>
+                            <span className="text-sm font-black text-red-700">-{formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}</span>
                           </div>
                         )}
                       </div>
                       
                       {/* Final Total */}
-                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-800/60 to-gray-900/60 rounded-xl border border-amber-500/60 shadow-lg">
+                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border border-slate-300 shadow-lg">
                         <div className="flex items-center space-x-4">
-                          <div className="p-3 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
+                          <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-500 rounded-xl shadow-md">
                             <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                             </svg>
                           </div>
                           <div>
-                            <div className="text-2xl font-black text-white">Final Total</div>
+                            <div className="text-2xl font-black text-amber-600">Final Total</div>
                             {discount > 0 && (
-                              <div className="text-sm text-green-300 font-bold">
+                              <div className="text-sm text-slate-700 font-bold">
                                 You save {formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}
                               </div>
                             )}
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-4xl font-black text-amber-300">
+                            <div className="text-4xl font-black text-amber-600">
                             {formatPrice(getFinalTotal(), selectedCurrency?.code || 'USD')}
                           </div>
-                          <div className="text-sm text-gray-300 font-bold">
+                          <div className="text-sm text-gray-600 font-bold">
                             {getTotalSelectedItems()} item{getTotalSelectedItems() !== 1 ? 's' : ''} selected
                           </div>
                         </div>
@@ -1821,7 +1821,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   >
                     <h5 className="text-lg font-semibold text-gray-900 flex items-center">
                       <svg 
-                        className={`w-5 h-5 text-green-600 mr-2 transition-transform duration-200 ${
+                        className={`w-5 h-5 text-emerald-600 mr-2 transition-transform duration-200 ${
                           isItemsSectionExpanded ? 'rotate-0' : '-rotate-90'
                         }`} 
                         fill="none" 
@@ -1832,7 +1832,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       </svg>
                       Available Items ({getDisplayItems().length})
                       {searchTerm && (
-                        <span className="ml-2 text-sm text-amber-600 font-normal">
+                        <span className="ml-2 text-sm text-blue-600 font-normal">
                           (Search: "{searchTerm}")
                         </span>
                       )}
@@ -1868,11 +1868,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         placeholder="Search items by name, brand, model, SKU, or category..."
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
                       {isSearching && (
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                          <svg className="animate-spin h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -1884,8 +1884,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   {/* Loading State */}
                   {isInventoryLoading && (
                     <div className="text-center py-8">
-                      <div className="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-800 rounded-lg">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -2018,8 +2018,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
               {/* Notes Input Section - Below Available Items */}
               {selectedCurrency && (
-                <div className="mt-6 p-4 bg-gradient-to-br from-gray-800 to-black border border-amber-500/30 rounded-lg">
-                  <label className="block text-sm font-bold text-amber-400 mb-3">
+                <div className="mt-6 p-4 bg-gradient-to-br from-blue-100 to-white border border-blue-500/30 rounded-lg">
+                  <label className="block text-sm font-bold text-slate-700 mb-3">
                     <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -2030,8 +2030,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                     placeholder="Enter any additional notes about the customer or requirements..."
                     rows={3}
-                    className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200 resize-none bg-gray-700 text-gray-100 ${
-                      errors.notes ? 'border-red-400 bg-red-900' : 'border-amber-500/50 hover:border-amber-400 hover:shadow-md'
+                    className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm transition-all duration-200 resize-none bg-white text-slate-800 ${
+                      errors.notes ? 'border-red-400 bg-red-50' : 'border-slate-300 hover:border-slate-400 hover:shadow-md'
                     }`}
                   />
                   {errors.notes && (
@@ -2100,24 +2100,24 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       {/* Close Confirmation Modal */}
       {showCloseConfirmation && (
         <div className="fixed inset-0 bg-gradient-to-br from-gray-900/90 to-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 max-w-md w-full shadow-2xl border border-amber-500/50 transform transition-all duration-300 scale-100">
+          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-blue-500/50 transform transition-all duration-300 scale-100">
             <div className="flex items-center mb-6">
-              <div className="flex-shrink-0 p-3 bg-gradient-to-br from-amber-600 to-yellow-500 rounded-xl shadow-lg mr-4">
+              <div className="flex-shrink-0 p-3 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg mr-4">
                 <svg className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-yellow-400 bg-clip-text text-transparent">
                 Close Modal?
               </h3>
             </div>
-            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               All changes will be lost. Are you sure you want to close this modal?
             </p>
             <div className="flex space-x-4">
               <button
                 onClick={cancelClose}
-                className="flex-1 bg-gradient-to-r from-gray-800 to-black text-amber-400 border border-amber-500/50 px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-900 hover:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:ring-offset-2 font-bold transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                className="flex-1 bg-gradient-to-r from-blue-100 to-white text-blue-400 border border-blue-500/50 px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-900 hover:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:ring-offset-2 font-bold transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
               >
                 <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2126,7 +2126,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
               </button>
               <button
                 onClick={confirmClose}
-                className="flex-1 bg-gradient-to-r from-amber-600 to-yellow-500 text-black px-6 py-3 rounded-xl hover:from-amber-700 hover:to-yellow-600 focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:ring-offset-2 font-bold transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border border-amber-400"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-black px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:ring-offset-2 font-bold transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border border-blue-400"
               >
                 <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -2141,18 +2141,18 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       {/* Refresh/Currency Change Alert Popup */}
       {showRefreshAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border border-amber-500/30 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white border border-blue-500/30 rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <h3 className="text-lg font-medium text-amber-400 mb-2">
+                <h3 className="text-lg font-medium text-blue-400 mb-2">
                   {selectedItems.size > 0 ? 'Currency Change Warning' : 'Refresh Inventory Data'}
                 </h3>
-                <p className="text-sm text-gray-300 mb-4">
+                <p className="text-sm text-gray-600 mb-4">
                   {selectedItems.size > 0 ? (
                     <>
                       Changing currency will refresh the inventory with the latest exchange rates. 
@@ -2167,13 +2167,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                 <div className="flex space-x-3">
                   <button
                     onClick={cancelRefresh}
-                    className="flex-1 bg-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                    className="flex-1 bg-gray-700 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                   >
                     {selectedItems.size > 0 ? 'No, Keep Items' : 'Cancel'}
                   </button>
                   <button
                     onClick={selectedItems.size > 0 ? performCurrencyChangeWithRefresh : performRefresh}
-                    className="flex-1 bg-gradient-to-r from-amber-600 to-yellow-500 text-black px-4 py-2 rounded-lg hover:from-amber-700 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 font-medium"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-black px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 font-medium"
                   >
                     {selectedItems.size > 0 ? 'Yes, Change Currency' : 'Yes, Refresh'}
                   </button>

@@ -259,17 +259,17 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl border border-amber-500/30 max-w-6xl w-full max-h-[95vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl border border-blue-500/30 max-w-6xl w-full max-h-[95vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-amber-500/20 bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
+        <div className="flex justify-between items-center p-6 border-b border-blue-500/20 bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-xl border border-amber-500/30">
-              <svg className="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/20 rounded-xl border border-blue-500/30">
+              <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-blue-400 to-blue-500 bg-clip-text text-transparent">
                 Add New Product
               </h2>
               <p className="text-sm text-gray-300 font-medium">Create a new inventory item with comprehensive details</p>
@@ -291,12 +291,12 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
             {/* Basic Information - 3 Column Layout */}
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2 bg-amber-500/20 rounded-lg">
-                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-amber-400">Basic Information</h3>
+                <h3 className="text-xl font-semibold text-blue-400">Basic Information</h3>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -308,7 +308,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.name ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="Enter product name"
@@ -327,7 +327,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="type"
                       value={formData.type}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-amber-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
                     >
                       <option value="car">Car</option>
                       {/* <option value="part">Part</option> */}
@@ -341,7 +341,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.category ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="e.g., Sedan, SUV, Engine"
@@ -363,7 +363,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="subcategory"
                       value={formData.subcategory}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-amber-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
                       placeholder="e.g., small-size, luxury"
                     />
                   </div>
@@ -375,7 +375,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="brand"
                       value={formData.brand}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.brand ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="e.g., Toyota, Honda"
@@ -395,7 +395,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="model"
                       value={formData.model}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.model ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="e.g., Camry, Civic"
@@ -419,7 +419,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       onChange={handleInputChange}
                       min="1900"
                       max="2030"
-                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-amber-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
                     />
                   </div>
 
@@ -430,7 +430,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="color"
                       value={formData.color}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.color ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="e.g., Silver, Black"
@@ -450,7 +450,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="interiorColor"
                       value={formData.interiorColor}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-amber-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none hover:border-gray-500 transition-all duration-200"
                       placeholder="e.g., Black, Beige"
                     />
                   </div>
@@ -458,7 +458,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-amber-400 mb-4">Appearance & Details</h3>
+                <h3 className="text-lg font-semibold text-blue-400 mb-4">Appearance & Details</h3>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Color *</label>
@@ -467,7 +467,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     name="color"
                     value={formData.color}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                     placeholder="e.g., Silver, Black"
                   />
                   {errors.color && <p className="text-red-400 text-xs mt-1">{errors.color}</p>}
@@ -480,7 +480,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     name="interiorColor"
                     value={formData.interiorColor}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                     placeholder="e.g., Black, Beige"
                   />
                 </div>
@@ -492,7 +492,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                     placeholder="Enter product description"
                   />
                   {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description}</p>}
@@ -504,7 +504,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     name="condition"
                     value={formData.condition}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                   >
                     <option value="new">New</option>
                     <option value="used">Used</option>
@@ -518,7 +518,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -532,7 +532,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       name="inStock"
                       checked={formData.inStock}
                       onChange={handleInputChange}
-                      className="w-4 h-4 text-amber-600 bg-gray-800 border-gray-600 rounded focus:ring-amber-500"
+                      className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-300">In Stock</span>
                   </label>
@@ -565,7 +565,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       onChange={handleInputChange}
                       min="0"
                       step="0.01"
-                      className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.costPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="0.00"
@@ -592,7 +592,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       onChange={handleInputChange}
                       min="0"
                       step="0.01"
-                      className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                      className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                         errors.sellingPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="0.00"
@@ -654,7 +654,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                         type="text"
                         value={vin}
                         onChange={(e) => handleVinNumberChange(index, e.target.value)}
-                        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none transition-all duration-200"
+                        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none transition-all duration-200"
                         placeholder={`VIN Number ${index + 1}`}
                       />
                     </div>
@@ -675,7 +675,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                 <button
                   type="button"
                   onClick={addVinNumber}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 text-white rounded-xl hover:from-amber-700 hover:to-yellow-700 transition-all duration-200 font-medium"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-200 font-medium"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -750,7 +750,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     onChange={handleInputChange}
                     min="0"
                     step="0.1"
-                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.dimensions ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.0"
@@ -765,7 +765,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     onChange={handleInputChange}
                     min="0"
                     step="0.1"
-                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.dimensions ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.0"
@@ -780,7 +780,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     onChange={handleInputChange}
                     min="0"
                     step="0.1"
-                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.dimensions ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.0"
@@ -795,7 +795,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     onChange={handleInputChange}
                     min="0"
                     step="0.1"
-                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.dimensions ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.0"
@@ -822,7 +822,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-8 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 text-white rounded-xl hover:from-amber-700 hover:to-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center space-x-2"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:from-blue-700 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center space-x-2"
               >
                 {isLoading ? (
                   <>

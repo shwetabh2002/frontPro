@@ -66,16 +66,16 @@ const Pagination: React.FC<PaginationProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className={`bg-gray-800 border border-amber-500/30 rounded-lg p-4 ${className}`}>
+    <div className={`bg-white border border-slate-300 rounded-lg p-4 ${className}`}>
       {/* Items per page selector */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <label className="text-sm font-medium text-amber-300">Items per page:</label>
+          <label className="text-sm font-medium text-slate-700">Items per page:</label>
           <select
             value={itemsPerPage}
             onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
             disabled={isLoading}
-            className="px-3 py-1 bg-gray-700 border border-amber-500/50 rounded text-amber-100 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50"
+            className="px-3 py-1 bg-slate-100 border border-slate-300 rounded text-slate-700 text-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 disabled:opacity-50"
           >
             {APP_CONSTANTS.DEFAULTS.PAGINATION.ITEMS_PER_PAGE_OPTIONS.map(option => (
               <option key={option} value={option}>{option}</option>
@@ -83,7 +83,7 @@ const Pagination: React.FC<PaginationProps> = ({
           </select>
         </div>
         
-        <div className="text-sm text-amber-300">
+        <div className="text-sm text-slate-700">
           Showing {startItem}-{endItem} of {totalItems.toLocaleString()} items
         </div>
       </div>
@@ -96,8 +96,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={!hasPrevPage || isLoading}
           className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
             hasPrevPage && !isLoading
-              ? 'bg-amber-600 text-black hover:bg-amber-700 hover:scale-105'
-              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-105'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,15 +111,15 @@ const Pagination: React.FC<PaginationProps> = ({
           {pageNumbers.map((page, index) => (
             <React.Fragment key={index}>
               {page === '...' ? (
-                <span className="px-3 py-2 text-amber-400">...</span>
+                <span className="px-3 py-2 text-slate-500">...</span>
               ) : (
                 <button
                   onClick={() => onPageChange(page as number)}
                   disabled={isLoading}
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     page === currentPage
-                      ? 'bg-amber-500 text-black font-bold'
-                      : 'bg-gray-700 text-amber-300 hover:bg-amber-600 hover:text-black hover:scale-105'
+                      ? 'bg-emerald-500 text-white font-bold'
+                      : 'bg-slate-100 text-slate-700 hover:bg-emerald-600 hover:text-white hover:scale-105'
                   } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {page}
@@ -135,8 +135,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={!hasNextPage || isLoading}
           className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
             hasNextPage && !isLoading
-              ? 'bg-amber-600 text-black hover:bg-amber-700 hover:scale-105'
-              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-105'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
           }`}
         >
           Next
@@ -149,8 +149,8 @@ const Pagination: React.FC<PaginationProps> = ({
       {/* Loading indicator */}
       {isLoading && (
         <div className="mt-3 text-center">
-          <div className="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 rounded-lg text-sm">
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <div className="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-sm">
+            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>

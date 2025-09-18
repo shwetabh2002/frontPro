@@ -17,9 +17,9 @@ const EmployeeLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
       {/* Top Navigation */}
-      <nav className="bg-gradient-to-r from-gray-800 to-black shadow-lg border-b border-amber-500/30">
+      <nav className="bg-gradient-to-r from-slate-200 to-slate-300 shadow-lg border-b border-slate-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-6">
@@ -30,8 +30,8 @@ const EmployeeLayout: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-300">
-                Welcome, <span className="font-medium text-amber-400">{user?.name}</span>
+              <div className="text-sm text-gray-700">
+                Welcome, <span className="font-medium text-blue-400">{user?.name}</span>
               </div>
               <Button
                 variant="outline"
@@ -46,7 +46,7 @@ const EmployeeLayout: React.FC = () => {
       </nav>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900/50 to-black/50">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50/50 to-white/50">
         <Outlet />
       </main>
     </div>

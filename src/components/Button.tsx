@@ -19,10 +19,10 @@ const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] shadow-lg hover:shadow-xl';
   
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-amber-600 to-yellow-500 text-black hover:from-amber-700 hover:to-yellow-600 focus:ring-amber-500/30 border border-amber-400',
-    secondary: 'bg-gradient-to-r from-gray-800 to-black text-amber-400 hover:from-gray-700 hover:to-gray-900 focus:ring-amber-500/30 border border-amber-500/50',
-    danger: 'bg-gradient-to-r from-red-900 to-red-800 text-red-300 hover:from-red-800 hover:to-red-700 focus:ring-red-500/30 border border-red-600',
-    outline: 'border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400 focus:ring-amber-500/30 bg-gray-800',
+    primary: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 focus:ring-emerald-500/30 border border-emerald-400',
+    secondary: 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-800 hover:from-slate-200 hover:to-slate-300 focus:ring-slate-500/30 border border-slate-500/50',
+    danger: 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 focus:ring-red-500/30 border border-red-400',
+    outline: 'border-2 border-slate-500/50 text-slate-700 hover:bg-slate-100 hover:border-slate-400 focus:ring-slate-500/30 bg-white',
   };
   
   const sizeClasses = {

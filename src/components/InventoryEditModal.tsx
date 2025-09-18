@@ -437,7 +437,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
               <p className="text-gray-400">
                 Update product information and settings
                 {hasChanges() && (
-                  <span className="ml-2 text-amber-400 text-sm font-medium">
+                  <span className="ml-2 text-blue-400 text-sm font-medium">
                     • Unsaved changes
                   </span>
                 )}
@@ -460,12 +460,12 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
           {/* Basic Information */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-amber-400">Basic Information</h3>
+              <h3 className="text-xl font-semibold text-blue-400">Basic Information</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -476,7 +476,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="name"
                   value={formData.name || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.name ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter product name"
@@ -518,7 +518,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="category"
                   value={formData.category || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.category ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter category"
@@ -538,7 +538,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="subcategory"
                   value={formData.subcategory || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.subcategory ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter subcategory"
@@ -558,7 +558,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="brand"
                   value={formData.brand || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.brand ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter brand"
@@ -578,7 +578,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="model"
                   value={formData.model || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.model ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter model"
@@ -600,7 +600,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   onChange={handleInputChange}
                   min="1900"
                   max="2030"
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.year ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="Enter year"
@@ -620,7 +620,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="color"
                   value={formData.color || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.color ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="e.g., Silver, Black"
@@ -640,7 +640,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   name="interiorColor"
                   value={formData.interiorColor || ''}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                  className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                     errors.interiorColor ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                   }`}
                   placeholder="e.g., Black, Beige"
@@ -661,7 +661,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                 value={formData.description || ''}
                 onChange={handleInputChange}
                 rows={3}
-                className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                className={`w-full px-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                   errors.description ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                 }`}
                 placeholder="Enter product description"
@@ -698,7 +698,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     onChange={handleInputChange}
                     step="0.01"
                     min="0"
-                    className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.costPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.00"
@@ -723,7 +723,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     onChange={handleInputChange}
                     step="0.01"
                     min="0"
-                    className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-amber-500 focus:outline-none transition-all duration-200 ${
+                    className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.sellingPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
                     placeholder="0.00"
@@ -923,7 +923,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Stock Status * 
                   {formData.type === 'car' && (
-                    <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                    <span className="text-xs text-blue-400 ml-2">(Auto-set based on VIN status)</span>
                   )}
                 </label>
                 <select
@@ -961,7 +961,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Status * 
                   {formData.type === 'car' && (
-                    <span className="text-xs text-amber-400 ml-2">(Auto-set based on VIN status)</span>
+                    <span className="text-xs text-blue-400 ml-2">(Auto-set based on VIN status)</span>
                   )}
                 </label>
                 <select
@@ -1136,8 +1136,8 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-60 p-4">
           <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
