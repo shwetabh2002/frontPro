@@ -9,6 +9,7 @@ import { type Customer } from '../services/customerService';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
 import { getCompanyName, getCompanyCurrency } from '../utils/companyUtils';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
+import { useToast } from '../contexts/ToastContext';
 import CountryDropdown from './CountryDropdown';
 import CurrencyDropdown from './CurrencyDropdown';
 import Pagination from './Pagination';
@@ -97,6 +98,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
 
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add' }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -108,29 +110,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showRequirements, setShowRequirements] = useState(false);
-  // Toast state
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const [toastProgress, setToastProgress] = useState(100);
 
-  // Auto-dismiss toast after 5 seconds
-  useEffect(() => {
-    if (showToast) {
-      setToastProgress(100);
-      const timer = setInterval(() => {
-        setToastProgress(prev => {
-          if (prev <= 0) {
-            setShowToast(false);
-            return 100;
-          }
-          return prev - APP_CONSTANTS.TOAST.PROGRESS_STEP; // Decrease by step every interval
-        });
-      }, 100);
-
-      return () => clearInterval(timer);
-    }
-  }, [showToast]);
 
   // Pre-populate form when prePopulatedData is provided
   useEffect(() => {
@@ -157,6 +137,17 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     }
   }, [isOpen, mode]);
 
+  // Reset additional expenses when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setAdditionalExpenses({
+        expenceType: 'none',
+        description: '',
+        amount: 0
+      });
+    }
+  }, [isOpen]);
+
   // Requirements form data
   const [requirements, setRequirements] = useState({
     category: '',
@@ -179,6 +170,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [selectedChassisNumbers, setSelectedChassisNumbers] = useState<Record<string, string[]>>({});
   const [discount, setDiscount] = useState<number>(0);
   const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
+  
+  // Additional expenses state
+  const [additionalExpenses, setAdditionalExpenses] = useState({
+    expenceType: 'none' as 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other' | 'none',
+    description: '',
+    amount: 0
+  });
 
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>(APP_CONSTANTS.DEFAULTS.COUNTRY_CODE);
 
@@ -448,15 +446,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         setCurrentPage(pagination.currentPage);
       } else {
         console.error('API error:', response.message);
-        setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-        setToastType('error');
-        setShowToast(true);
+        showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
       }
     } catch (error) {
       console.error('Error fetching all inventory items:', error);
-      setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-      setToastType('error');
-      setShowToast(true);
+      showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
     } finally {
       setIsInventoryLoading(false);
       setIsRefreshing(false);
@@ -494,15 +488,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         setFilterSummary(response.data.summary);
       } else {
         console.error('API error:', response.message);
-        setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-        setToastType('error');
-        setShowToast(true);
+        showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
       }
     } catch (error) {
       console.error('Error fetching inventory:', error);
-      setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-      setToastType('error');
-      setShowToast(true);
+      showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
     } finally {
       setIsInventoryLoading(false);
     }
@@ -521,15 +511,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         setAllInventoryItems(response.data.items);
       } else {
         console.error('API error:', response.message);
-        setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-        setToastType('error');
-        setShowToast(true);
+        showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
       }
     } catch (error) {
       console.error('Error fetching all inventory items:', error);
-      setToastMessage(ERROR_MESSAGES.INVENTORY.FETCH_FAILED);
-      setToastType('error');
-      setShowToast(true);
+      showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
     } finally {
       setIsAllItemsLoading(false);
     }
@@ -554,6 +540,16 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
     if (!formData.address?.trim()) {
       newErrors.address = 'Address is required';
+    }
+
+    // Validate additional expenses
+    if (additionalExpenses.expenceType !== 'none') {
+      if (!additionalExpenses.description?.trim()) {
+        newErrors.additionalExpensesDescription = 'Description is required for additional expenses';
+      }
+      if (additionalExpenses.amount <= 0) {
+        newErrors.additionalExpensesAmount = 'Amount must be greater than 0 for additional expenses';
+      }
     }
 
     setErrors(newErrors);
@@ -588,9 +584,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         setCreatedCustomerId(response.data._id);
         
         // Success: Show green toast and open requirements section
-        setToastMessage(SUCCESS_MESSAGES.CUSTOMER.CREATED);
-        setToastType('success');
-        setShowToast(true);
+        showToast(SUCCESS_MESSAGES.CUSTOMER.CREATED, 'success');
         setShowRequirements(true);
         
         // Clear errors
@@ -604,16 +598,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           });
           setShowRequirements(false);
         } else {
-          setToastMessage(response.message || 'Failed to create customer');
-          setToastType('error');
-          setShowToast(true);
+          showToast(response.message || 'Failed to create customer', 'error');
         }
       }
     } catch (error) {
       console.error('Error creating customer:', error);
-              setToastMessage(ERROR_MESSAGES.CUSTOMER.CREATE_FAILED);
-      setToastType('error');
-      setShowToast(true);
+      showToast(ERROR_MESSAGES.CUSTOMER.CREATE_FAILED, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -642,9 +632,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       const newQuantity = currentQuantity + 1;
       
       if (newQuantity > item.quantity) {
-        setToastMessage(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`);
-        setToastType('error');
-        setShowToast(true);
+        showToast(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`, 'error');
         return;
       }
       
@@ -678,9 +666,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       
       // Check if new quantity would exceed available quantity
       if (newQty > item.quantity) {
-        setToastMessage(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`);
-        setToastType('error');
-        setShowToast(true);
+        showToast(`Cannot add more than ${item.quantity} units of ${item.name}. Only ${item.quantity} units available in stock.`, 'error');
         return prev; // Return previous state without changes
       }
       
@@ -745,7 +731,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const getFinalTotal = () => {
     const subtotal = getSubtotal();
     const discountAmount = getDiscountAmount();
-    return Math.max(0, subtotal - discountAmount); // Total cannot be negative
+    const additionalExpenseAmount = additionalExpenses.expenceType !== 'none' ? additionalExpenses.amount : 0;
+    return Math.max(0, subtotal - discountAmount + additionalExpenseAmount); // Total cannot be negative
   };
 
   // Convert selected items to quotation items format
@@ -805,16 +792,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     const customerId = mode === 'quotation' ? prePopulatedData?._id : createdCustomerId;
     
     if (!customerId) {
-      setToastMessage('Customer ID not found. Please create customer first.');
-      setToastType('error');
-      setShowToast(true);
+      showToast('Customer ID not found. Please create customer first.', 'error');
       return;
     }
 
     if (selectedItems.size === 0) {
-      setToastMessage('Please select at least one item for quotation.');
-      setToastType('error');
-      setShowToast(true);
+      showToast('Please select at least one item for quotation.', 'error');
       return;
     }
 
@@ -827,9 +810,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     });
 
     if (itemsWithMissingChassis.length > 0) {
-      setToastMessage('Please select chassis numbers for all items that have VIN numbers available.');
-      setToastType('error');
-      setShowToast(true);
+      showToast('Please select chassis numbers for all items that have VIN numbers available.', 'error');
       return;
     }
 
@@ -839,6 +820,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       const quotationData: CreateQuotationData = {
         custId: customerId,
         items: convertToQuotationItems(),
+        additionalExpenses: additionalExpenses.expenceType !== 'none' ? {
+          expenceType: additionalExpenses.expenceType,
+          description: additionalExpenses.description,
+          amount: additionalExpenses.amount
+        } : undefined,
         discount: discount || 0,
         discountType: discountType,
         VAT: 5, // Default VAT rate
@@ -853,22 +839,44 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
       if (response.success) {
         const quotationNumber = response.data?.quotationNumber || response.data?.quotationId || 'N/A';
-        setToastMessage(`Quotation created successfully! Quotation #: ${quotationNumber}`);
-        setToastType('success');
-        setShowToast(true);
+        showToast(`Quotation created successfully! Quotation #: ${quotationNumber}`, 'success');
         
         // Reset form and close modal
         confirmClose();
       } else {
-        setToastMessage(response.message || 'Failed to create quotation');
-        setToastType('error');
-        setShowToast(true);
+        showToast(response.message || 'Failed to create quotation', 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating quotation:', error);
-      setToastMessage('Failed to create quotation. Please try again.');
-      setToastType('error');
-      setShowToast(true);
+      
+      // Parse validation errors from API response
+      let errorMessage = 'Failed to create quotation. Please try again.';
+      
+      if (error.response?.status === 400 && error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        if (typeof errors === 'string') {
+          // Handle string format: "additionalExpenses.description" is not allowed to be empty
+          const fieldMatch = errors.match(/"([^"]+)"/);
+          if (fieldMatch) {
+            const field = fieldMatch[1];
+            const fieldName = field.split('.').pop() || field;
+            errorMessage = `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required.`;
+          } else {
+            errorMessage = errors;
+          }
+        } else if (Array.isArray(errors)) {
+          // Handle array format
+          errorMessage = errors.join(', ');
+        } else if (typeof errors === 'object') {
+          // Handle object format
+          const errorMessages = Object.values(errors).flat();
+          errorMessage = errorMessages.join(', ');
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      showToast(errorMessage, 'error');
     } finally {
       setIsCreatingQuotation(false);
     }
@@ -889,6 +897,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     setSelectedChassisNumbers({});
     setDiscount(0);
     setDiscountType('fixed');
+    setAdditionalExpenses({
+      expenceType: 'none',
+      description: '',
+      amount: 0
+    });
     setSelectedCurrency(null);
     setFilterSummary({ category: [], brand: [], model: [], year: [], color: [] });
     setCurrentPage(APP_CONSTANTS.DEFAULTS.PAGINATION.DEFAULT_PAGE);
@@ -1616,18 +1629,181 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       )}
                     </div>
 
-                    {/* Final Total */}
-                    <div className="flex items-center justify-between pt-3 border-t border-amber-500/30">
-                      <div className="text-xl font-bold text-amber-400">Total</div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-green-400">
-                          {formatPrice(getFinalTotal(), selectedCurrency?.code || 'USD')}
+                    {/* Additional Expenses */}
+                    <div className="mb-4 p-4 bg-gradient-to-r from-gray-700/80 to-gray-800/80 rounded-xl border border-blue-400/60">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="p-1.5 bg-blue-500/50 rounded-lg">
+                            <svg className="w-4 h-4 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                          </div>
+                          <label className="text-sm font-black text-white">Additional Expenses</label>
                         </div>
-                        {discount > 0 && (
-                          <div className="text-sm text-green-400">
-                            You save {formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}
+                        <div className="flex items-center space-x-2">
+                          <div className="relative">
+                            <select
+                              value={additionalExpenses.expenceType}
+                              onChange={(e) => setAdditionalExpenses(prev => ({
+                                ...prev,
+                                expenceType: e.target.value as any,
+                                description: e.target.value === 'none' ? '' : prev.description,
+                                amount: e.target.value === 'none' ? 0 : prev.amount
+                              }))}
+                              className="appearance-none px-4 py-2 pr-8 text-sm bg-gray-600 border-2 border-blue-300 rounded-lg text-white focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition-colors cursor-pointer font-semibold"
+                            >
+                              <option value="none" className="bg-gray-600 text-white font-semibold">Select Expense Type</option>
+                              <option value="shipping" className="bg-gray-600 text-white font-semibold">🚚 Shipping</option>
+                              <option value="accessories" className="bg-gray-600 text-white font-semibold">🔧 Accessories</option>
+                              <option value="Rta Fees" className="bg-gray-600 text-white font-semibold">📋 RTA Fees</option>
+                              <option value="COO Fees" className="bg-gray-600 text-white font-semibold">📄 COO Fees</option>
+                              <option value="Customs" className="bg-gray-600 text-white font-semibold">🏛️ Customs</option>
+                              <option value="Insurance" className="bg-gray-600 text-white font-semibold">🛡️ Insurance</option>
+                              <option value="Other" className="bg-gray-600 text-white font-semibold">📝 Other</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                              <svg className="w-4 h-4 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {additionalExpenses.expenceType !== 'none' && (
+                        <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-xs font-black text-white uppercase tracking-wide">Description</label>
+                              <input
+                                type="text"
+                                placeholder="Enter expense description..."
+                                value={additionalExpenses.description}
+                                onChange={(e) => setAdditionalExpenses(prev => ({
+                                  ...prev,
+                                  description: e.target.value
+                                }))}
+                                className={`w-full px-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-300 transition-colors font-semibold ${
+                                  errors.additionalExpensesDescription 
+                                    ? 'border-red-400 focus:border-red-400' 
+                                    : 'border-gray-400 focus:border-blue-300'
+                                }`}
+                              />
+                              {errors.additionalExpensesDescription && (
+                                <p className="text-xs text-red-400 font-medium">{errors.additionalExpensesDescription}</p>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-black text-white uppercase tracking-wide">Amount</label>
+                              <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                  <span className="text-blue-100 font-black">
+                                    {getCurrencySymbol(selectedCurrency?.code || 'USD')}
+                                  </span>
+                                </div>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  value={additionalExpenses.amount || ''}
+                                  onChange={(e) => setAdditionalExpenses(prev => ({
+                                    ...prev,
+                                    amount: Math.max(0, parseFloat(e.target.value) || 0)
+                                  }))}
+                                  className={`w-full pl-8 pr-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-300 transition-colors font-semibold ${
+                                    errors.additionalExpensesAmount 
+                                      ? 'border-red-400 focus:border-red-400' 
+                                      : 'border-gray-400 focus:border-blue-300'
+                                  }`}
+                                />
+                              </div>
+                              {errors.additionalExpensesAmount && (
+                                <p className="text-xs text-red-400 font-medium">{errors.additionalExpensesAmount}</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {additionalExpenses.amount > 0 && (
+                            <div className="flex items-center justify-between p-3 bg-blue-500/30 border-2 border-blue-300/60 rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-blue-100 rounded-full"></div>
+                                <span className="text-sm font-black text-blue-100">Additional Expense Added</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-black text-blue-100">
+                                  +{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}
+                                </div>
+                                <div className="text-xs text-blue-200 font-bold">
+                                  {additionalExpenses.expenceType}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Final Total */}
+                    <div className="pt-4 border-t border-amber-500/30">
+                      {/* Total Breakdown */}
+                      <div className="space-y-2 mb-4 p-4 bg-gradient-to-r from-gray-700/80 to-gray-800/80 rounded-xl border border-gray-400/60">
+                        <div className="flex justify-between items-center py-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            <span className="text-sm font-black text-white">Subtotal</span>
+                          </div>
+                          <span className="text-sm font-black text-white">{formatPrice(getSubtotal(), selectedCurrency?.code || 'USD')}</span>
+                        </div>
+                        
+                        {additionalExpenses.expenceType !== 'none' && additionalExpenses.amount > 0 && (
+                          <div className="flex justify-between items-center py-1">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-1.5 h-1.5 bg-blue-200 rounded-full"></div>
+                              <span className="text-sm font-black text-blue-100">Additional Expenses</span>
+                              <span className="text-xs text-blue-200 font-bold">({additionalExpenses.expenceType})</span>
+                            </div>
+                            <span className="text-sm font-black text-blue-100">+{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}</span>
                           </div>
                         )}
+                        
+                        {discount > 0 && (
+                          <div className="flex justify-between items-center py-1">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-1.5 h-1.5 bg-red-200 rounded-full"></div>
+                              <span className="text-sm font-black text-red-100">Discount</span>
+                              <span className="text-xs text-red-200 font-bold">({discountType === 'percentage' ? `${discount}%` : 'Fixed'})</span>
+                            </div>
+                            <span className="text-sm font-black text-red-100">-{formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Final Total */}
+                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-800/60 to-gray-900/60 rounded-xl border border-amber-500/60 shadow-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="p-3 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
+                            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-black text-white">Final Total</div>
+                            {discount > 0 && (
+                              <div className="text-sm text-green-300 font-bold">
+                                You save {formatPrice(getDiscountAmount(), selectedCurrency?.code || 'USD')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-4xl font-black text-amber-300">
+                            {formatPrice(getFinalTotal(), selectedCurrency?.code || 'USD')}
+                          </div>
+                          <div className="text-sm text-gray-300 font-bold">
+                            {getTotalSelectedItems()} item{getTotalSelectedItems() !== 1 ? 's' : ''} selected
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1898,49 +2074,6 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         </div>
       </SimpleModal>
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
-          toastType === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
-        }`}>
-          {/* Progress Bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-b-lg overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-100 ${
-                toastType === 'success' ? 'bg-green-400' : 'bg-red-400'
-              }`}
-              style={{ width: `${toastProgress}%` }}
-            />
-          </div>
-          
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              {toastType === 'success' ? (
-                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              )}
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{toastMessage}</p>
-            </div>
-            <div className="ml-auto pl-3">
-              <button
-                onClick={() => setShowToast(false)}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
-              >
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Close Confirmation Modal */}
       {showCloseConfirmation && (
