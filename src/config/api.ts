@@ -15,6 +15,7 @@ export const API_CONFIG = {
       GET_CUSTOMERS: '/users/get-customer',
       GET_CUSTOMER_DETAILS: '/users/get-customer',
       PROFILE: '/users/profile',
+      SUPPLIER: '/users/supplier',
     },
     
     // Inventory

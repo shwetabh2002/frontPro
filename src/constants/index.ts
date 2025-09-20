@@ -65,6 +65,13 @@ export const ERROR_MESSAGES = {
     PHONE_ALREADY_EXISTS: 'Customer with this phone already exists',
     CREATE_FAILED: 'Failed to create customer. Please try again.',
   },
+  SUPPLIER: {
+    FETCH_FAILED: 'Failed to fetch suppliers data',
+    NO_TOKEN: 'No access token found',
+    CREATE_FAILED: 'Failed to create supplier. Please try again.',
+    UPDATE_FAILED: 'Failed to update supplier. Please try again.',
+    DELETE_FAILED: 'Failed to delete supplier. Please try again.',
+  },
   INVENTORY: {
     FETCH_FAILED: 'Failed to fetch inventory data',
     NO_TOKEN: 'No access token found',
@@ -98,6 +105,12 @@ export const SUCCESS_MESSAGES = {
   CUSTOMER: {
     CREATED: 'Customer saved successfully!',
     FETCHED: 'Customers loaded successfully!',
+  },
+  SUPPLIER: {
+    CREATED: 'Supplier created successfully!',
+    FETCHED: 'Suppliers loaded successfully!',
+    UPDATED: 'Supplier updated successfully!',
+    DELETED: 'Supplier deleted successfully!',
   },
   QUOTATION: {
     CREATED: 'Quotation created and sent successfully!',

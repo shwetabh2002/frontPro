@@ -17,6 +17,7 @@ import OrdersPage from '../pages/common/OrdersPage';
 import EmployeeDashboard from '../pages/common/EmployeeDashboard';
 import Loader from '../components/Loader';
 import InventoryPage from '../pages/common/InventoryPage';
+import SuppliersPage from '../pages/common/SuppliersPage';
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.auth);
@@ -76,6 +77,7 @@ const AppRoutes: React.FC = () => {
           <Route path="all-sales" element={<AllSalesPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="quotations" element={<QuotationsPage />} />
+          <Route path="suppliers" element={<SuppliersPage />} />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="orders" element={<OrdersPage />} />
         </Route>
@@ -94,6 +96,7 @@ const AppRoutes: React.FC = () => {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<EmployeeDashboard />} />
           <Route path="customers" element={<CustomersPage />} />
+          <Route path="suppliers" element={<SuppliersPage />} />
         </Route>
 
         {/* Catch all route */}
