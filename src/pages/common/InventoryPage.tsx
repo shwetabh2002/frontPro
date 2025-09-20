@@ -497,89 +497,117 @@ const InventoryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Inventory Grid */}
+          {/* Inventory List */}
           {inventoryData.data.items.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-              {inventoryData.data.items.map((item) => (
-                <div key={item._id} className="bg-gradient-to-br from-blue-50 to-white rounded-lg p-4 border border-blue-200 hover:border-blue-300 transition-colors shadow-sm">
-                  {/* Item Header */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-gray-800 truncate">{item.name}</h4>
-                    <div className="text-xs text-gray-600">{item.brand} {item.model} {item.year}</div>
-                  </div>
-
-                  {/* Key Details */}
-                  <div className="space-y-2 mt-3 text-xs">
-                      <div className="flex justify-between">
-                      <span className="text-gray-600">Type:</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {item.type?.toUpperCase() || 'N/A'}
-                      </span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-600">Color:</span>
-                      <span className="text-gray-800">{item.color}</span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-600">Qty:</span>
-                      <span className="text-gray-800 font-medium">{item.quantity}</span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-600">Price:</span>
-                      <span className="text-blue-600 font-bold">
-                        ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
-                      </span>
-                      </div>
-                        </div>
-
-                  {/* Status Badges */}
-                  <div className="flex justify-between items-center mt-3">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      item.condition === 'new' ? 'bg-emerald-500/20 text-emerald-700' :
-                      item.condition === 'used' ? 'bg-amber-100 text-amber-700' :
-                          'bg-gray-500/20 text-gray-400'
-                        }`}>
-                          {item.condition}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      item.status === 'active' ? 'bg-emerald-500/20 text-emerald-700' :
-                      item.status === 'inactive' ? 'bg-red-500/20 text-red-700' :
-                      'bg-slate-500/20 text-slate-700'
-                        }`}>
-                          {item.status}
-                        </span>
-                    </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2 mt-3">
-                    <button
-                      onClick={() => handleViewItem(item)}
-                      disabled={isLoadingItem}
-                      className="flex-1 px-3 py-2 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {isLoadingItem ? 'Loading...' : 'View Details'}
-                    </button>
-                    <button
-                      onClick={() => handleEditItem(item)}
-                      disabled={isLoadingItem}
-                      className="px-3 py-2 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                      title={isLoadingItem ? "Loading..." : "Edit Item"}
-                    >
-                      {isLoadingItem ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
+            <div className="bg-white rounded-lg border border-blue-200 overflow-hidden">
+              {/* List Header */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
+                <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-blue-800">
+                  <div className="col-span-3">Item Details</div>
+                  <div className="col-span-2">Type & Category</div>
+                  <div className="col-span-1">Color</div>
+                  <div className="col-span-1">Qty</div>
+                  <div className="col-span-1">Price</div>
+                  <div className="col-span-2">Status</div>
+                  <div className="col-span-2">Actions</div>
                 </div>
-              ))}
+              </div>
+
+              {/* List Items */}
+              <div className="divide-y divide-blue-100">
+                {inventoryData.data.items.map((item, index) => (
+                  <div key={item._id} className={`px-6 py-4 hover:bg-blue-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'}`}>
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Item Details */}
+                      <div className="col-span-3">
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-semibold text-gray-800 truncate">{item.name}</h4>
+                          <div className="text-xs text-gray-600">{item.brand} {item.model} {item.year}</div>
+                          <div className="text-xs text-gray-500">SKU: {item.sku || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* Type & Category */}
+                      <div className="col-span-2">
+                        <div className="space-y-1">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                            item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            {item.type?.toUpperCase() || 'N/A'}
+                          </span>
+                          <div className="text-xs text-gray-600">{item.category || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* Color */}
+                      <div className="col-span-1">
+                        <span className="text-sm text-gray-800 font-medium">{item.color || 'N/A'}</span>
+                      </div>
+
+                      {/* Quantity */}
+                      <div className="col-span-1">
+                        <span className="text-sm text-gray-800 font-medium">{item.quantity}</span>
+                      </div>
+
+                      {/* Price */}
+                      <div className="col-span-1">
+                        <span className="text-sm text-blue-600 font-bold">
+                          ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
+                        </span>
+                      </div>
+
+                      {/* Status */}
+                      <div className="col-span-2">
+                        <div className="flex flex-col space-y-1">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium w-fit ${
+                            item.condition === 'new' ? 'bg-emerald-500/20 text-emerald-700' :
+                            item.condition === 'used' ? 'bg-amber-100 text-amber-700' :
+                            'bg-gray-500/20 text-gray-400'
+                          }`}>
+                            {item.condition}
+                          </span>
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium w-fit ${
+                            item.status === 'active' ? 'bg-emerald-500/20 text-emerald-700' :
+                            item.status === 'inactive' ? 'bg-red-500/20 text-red-700' :
+                            'bg-slate-500/20 text-slate-700'
+                          }`}>
+                            {item.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="col-span-2">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleViewItem(item)}
+                            disabled={isLoadingItem}
+                            className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {isLoadingItem ? 'Loading...' : 'View'}
+                          </button>
+                          <button
+                            onClick={() => handleEditItem(item)}
+                            disabled={isLoadingItem}
+                            className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                            title={isLoadingItem ? "Loading..." : "Edit Item"}
+                          >
+                            {isLoadingItem ? (
+                              <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="text-center py-12">
