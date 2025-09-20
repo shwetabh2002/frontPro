@@ -19,6 +19,7 @@ interface CustomerModalProps {
   onClose: () => void;
   prePopulatedData?: Customer | null;
   mode?: 'add' | 'quotation';
+  allowCustomerCreation?: boolean; // New prop to allow customer creation in quotation mode
 }
 
 // Chassis Selection Component
@@ -97,7 +98,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
 
 
 
-const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add' }) => {
+const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add', allowCustomerCreation = false }) => {
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -112,6 +113,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [showRequirements, setShowRequirements] = useState(false);
   const [isItemsSectionExpanded, setIsItemsSectionExpanded] = useState(true);
 
+  // Determine if customer fields should be disabled
+  const isCustomerFieldsDisabled = showRequirements || (mode === 'quotation' && !allowCustomerCreation);
 
   // Pre-populate form when prePopulatedData is provided
   useEffect(() => {
@@ -129,14 +132,14 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     }
   }, [prePopulatedData, isOpen]);
 
-  // Auto-open requirements section when in quotation mode
+  // Auto-open requirements section when in quotation mode (but not when allowing customer creation)
   useEffect(() => {
-    if (isOpen && mode === 'quotation') {
+    if (isOpen && mode === 'quotation' && !allowCustomerCreation) {
       setShowRequirements(true);
     } else if (!isOpen) {
       setShowRequirements(false);
     }
-  }, [isOpen, mode]);
+  }, [isOpen, mode, allowCustomerCreation]);
 
   // Reset additional expenses when modal opens
   useEffect(() => {
@@ -560,8 +563,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const handleAddRequirement = async () => {
     if (!validateForm()) return;
 
-    // If in quotation mode, skip customer creation and go directly to requirements
-    if (mode === 'quotation') {
+    // If in quotation mode and not allowing customer creation, skip customer creation and go directly to requirements
+    if (mode === 'quotation' && !allowCustomerCreation) {
       setShowRequirements(true);
       return;
     }
@@ -780,6 +783,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           chasisNumber: chassisNumber
         })),
         interiorColor: item.interiorColor,
+        supplierId: item.supplierId || undefined,
         };
       });
     
@@ -789,8 +793,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
   // Create quotation
   const handleCreateQuotation = async () => {
-    // Get customer ID - either from created customer or pre-populated data
-    const customerId = mode === 'quotation' ? prePopulatedData?._id : createdCustomerId;
+    // Get customer ID - either from created customer, pre-populated data, or newly created customer
+    let customerId: string | undefined;
+    
+    if (mode === 'quotation') {
+      if (allowCustomerCreation) {
+        // When allowing customer creation, use the created customer ID
+        customerId = createdCustomerId;
+      } else {
+        // When not allowing customer creation, use pre-populated data
+        customerId = prePopulatedData?._id;
+      }
+    } else {
+      // In add mode, use created customer ID
+      customerId = createdCustomerId;
+    }
     
     if (!customerId) {
       showToast('Customer ID not found. Please create customer first.', 'error');
@@ -1052,10 +1069,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter customer name"
-                  disabled={showRequirements || mode === 'quotation'}
+                  disabled={isCustomerFieldsDisabled}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
                     errors.name ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
-                  } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
+                  } ${isCustomerFieldsDisabled ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.name && (
                   <p className="mt-2 text-sm text-red-400 flex items-center">
@@ -1077,10 +1094,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
-                  disabled={showRequirements || mode === 'quotation'}
+                  disabled={isCustomerFieldsDisabled}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
                     errors.email ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
-                  } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
+                  } ${isCustomerFieldsDisabled ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.email && (
                   <p className="mt-2 text-sm text-red-400 flex items-center">
@@ -1102,19 +1119,19 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     value={selectedCountryCode}
                     onChange={setSelectedCountryCode}
                     countries={countries}
-                    className={`min-w-[180px] ${showRequirements || mode === 'quotation' ? 'opacity-75 pointer-events-none' : ''}`}
+                    className={`min-w-[180px] ${isCustomerFieldsDisabled ? 'opacity-75 pointer-events-none' : ''}`}
                     isLoading={countries.length === 0}
-                    disabled={mode === 'quotation'}
+                    disabled={mode === 'quotation' && !allowCustomerCreation}
                   />
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="Enter phone number"
-                    disabled={showRequirements || mode === 'quotation'}
+                    disabled={isCustomerFieldsDisabled}
                     className={`block flex-1 px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
                       errors.phone ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
-                    } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
+                    } ${isCustomerFieldsDisabled ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                   />
                 </div>
                 {errors.phone && (
@@ -1137,10 +1154,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="Enter customer address"
                   rows={3}
-                  disabled={showRequirements || mode === 'quotation'}
+                  disabled={isCustomerFieldsDisabled}
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 resize-none bg-white text-gray-800 ${
                     errors.address ? 'border-red-400 bg-red-900' : 'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
-                  } ${showRequirements || mode === 'quotation' ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
+                  } ${isCustomerFieldsDisabled ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
                 />
                 {errors.address && (
                   <p className="mt-2 text-sm text-red-400 flex items-center">
@@ -1183,7 +1200,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Add Requirement
+                    {mode === 'quotation' && allowCustomerCreation ? 'Create Customer & Continue' : 'Add Requirement'}
                   </div>
                 )}
               </button>

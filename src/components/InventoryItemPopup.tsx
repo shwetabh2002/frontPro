@@ -80,9 +80,17 @@ const InventoryItemPopup: React.FC<InventoryItemPopupProps> = ({ item, isOpen, o
                     <span className="text-gray-800">{item.color}</span>
                   </div>
                   {item.interiorColor && (
-                    <div className="flex justify-between items-center py-2">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-700/30">
                       <span className="text-gray-600">Interior</span>
                       <span className="text-gray-800">{item.interiorColor}</span>
+                    </div>
+                  )}
+                  {item.supplierId && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-600">Supplier</span>
+                      <span className="text-gray-800 font-medium">
+                        {item.supplierId.name}
+                      </span>
                     </div>
                   )}
                 </div>

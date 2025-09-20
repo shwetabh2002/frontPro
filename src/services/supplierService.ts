@@ -57,7 +57,11 @@ export const getSuppliers = async (): Promise<SupplierResponse> => {
     // Handle different response structures
     if (response.data && response.data.suppliers && response.data.pagination) {
       // Response is already in the correct format
-      return response.data;
+      return {
+        success: true,
+        message: SUCCESS_MESSAGES.SUPPLIER.FETCHED,
+        data: response.data
+      };
     } else if (response.data && Array.isArray(response.data)) {
       // Response is just an array of suppliers, wrap it
       return {

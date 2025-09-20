@@ -157,7 +157,7 @@ export const createQuotation = async (quotationData: CreateQuotationData): Promi
   }
 };
 
-export const getQuotations = async (): Promise<any> => {
+export const getQuotations = async (page: number = 1, limit: number = 10): Promise<any> => {
   try {
     if (!hasAuthToken()) {
       throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
@@ -170,7 +170,13 @@ export const getQuotations = async (): Promise<any> => {
 
     httpClient.setAuthToken(token);
 
-    const response = await httpClient.get(API_CONFIG.ENDPOINTS.QUOTATIONS.GET_ALL);
+    // Add pagination parameters to the API call
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
+    const response = await httpClient.get(`${API_CONFIG.ENDPOINTS.QUOTATIONS.GET_ALL}?${params}`);
     return response;
   } catch (error) {
     console.error('❌ Error fetching quotations:', error);

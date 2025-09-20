@@ -39,6 +39,13 @@ export interface InventoryUser {
   id: string;
 }
 
+export interface InventorySupplier {
+  _id: string;
+  name: string;
+  email: string;
+  custId: string;
+}
+
 export interface CreateInventoryItemData {
   name: string;
   type: 'car' | 'part';
@@ -66,6 +73,7 @@ export interface CreateInventoryItemData {
     height: number;
     weight: number;
   };
+  supplierId?: string;
 }
 
 export interface DetailedInventoryItem extends InventoryItem {
@@ -108,6 +116,7 @@ export interface InventoryItem {
   tags?: string[];
   createdBy?: InventoryUser;
   updatedBy?: InventoryUser;
+  supplierId?: InventorySupplier;
 }
 
 export interface FilterSummary {

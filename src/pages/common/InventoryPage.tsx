@@ -34,6 +34,8 @@ const InventoryPage: React.FC = () => {
   const [isUpdatingProduct, setIsUpdatingProduct] = useState(false);
   const [editingItem, setEditingItem] = useState<DetailedInventoryItem | null>(null);
 
+
+
   const loadInventoryData = async (customFilters?: AdvancedInventoryFilters) => {
     setIsLoading(true);
     setError(null);
@@ -157,6 +159,7 @@ const InventoryPage: React.FC = () => {
     setIsModalOpen(false);
     setSelectedItem(null);
   };
+
 
   // Handle edit item - fetch latest data first
   const handleEditItem = async (item: InventoryItem) => {
@@ -750,6 +753,7 @@ const InventoryPage: React.FC = () => {
         isLoading={isUpdatingProduct}
         item={editingItem}
       />
+
     </div>
   );
 };

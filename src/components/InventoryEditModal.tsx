@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { type InventoryItem, type DetailedInventoryItem, type CreateInventoryItemData } from '../services/inventoryService';
+import { getSuppliers, type Supplier } from '../services/supplierService';
 
 interface InventoryEditModalProps {
   isOpen: boolean;
@@ -25,6 +26,59 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
     vinNumbers: string[];
   } | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(false);
+
+  // Load suppliers when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadSuppliers();
+    }
+  }, [isOpen]);
+
+  const loadSuppliers = async () => {
+    setIsLoadingSuppliers(true);
+    try {
+      // Check if suppliers are cached in localStorage
+      const cachedSuppliers = localStorage.getItem('suppliers');
+      const cacheTimestamp = localStorage.getItem('suppliers_timestamp');
+      const now = Date.now();
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+      if (cachedSuppliers && cacheTimestamp && (now - parseInt(cacheTimestamp)) < CACHE_DURATION) {
+        // Use cached data
+        const suppliers = JSON.parse(cachedSuppliers);
+        setSuppliers(suppliers);
+        setIsLoadingSuppliers(false);
+        return;
+      }
+
+      // Fetch from API
+      const response = await getSuppliers();
+      const suppliers = response.data.suppliers || [];
+      
+      // Cache the suppliers
+      localStorage.setItem('suppliers', JSON.stringify(suppliers));
+      localStorage.setItem('suppliers_timestamp', now.toString());
+      
+      setSuppliers(suppliers);
+    } catch (error) {
+      console.error('Error loading suppliers:', error);
+      // Try to use cached data as fallback
+      const cachedSuppliers = localStorage.getItem('suppliers');
+      if (cachedSuppliers) {
+        try {
+          const suppliers = JSON.parse(cachedSuppliers);
+          setSuppliers(suppliers);
+        } catch (parseError) {
+          console.error('Error parsing cached suppliers:', parseError);
+        }
+      }
+    } finally {
+      setIsLoadingSuppliers(false);
+    }
+  };
+
 
   // Initialize form data when item changes
   useEffect(() => {
@@ -54,7 +108,8 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
           width: 0,
           height: 0,
           weight: 0
-        }
+        },
+        supplierId: (item as any).supplierId?._id || undefined
       };
       
       setFormData(initialFormData);
@@ -744,6 +799,57 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     ) : (
                       <span className="text-red-400">Selling price must be greater than cost price</span>
                     )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Supplier Selection */}
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-purple-400">Supplier (Optional)</h3>
+            </div>
+
+            <div className="space-y-4">
+              {/* Supplier Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Select Supplier</label>
+                <div className="relative">
+                  <select
+                    value={formData.supplierId || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, supplierId: e.target.value || undefined }))}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  >
+                    <option value="">No Supplier Selected</option>
+                    {isLoadingSuppliers ? (
+                      <option disabled>Loading suppliers...</option>
+                    ) : suppliers.length > 0 ? (
+                      suppliers.map((supplier) => (
+                        <option key={supplier._id} value={supplier._id}>
+                          {supplier.name} ({supplier.email})
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No suppliers found</option>
+                    )}
+                  </select>
+                </div>
+                {formData.supplierId && (
+                  <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-purple-400 text-sm">
+                        Selected: {suppliers.find(s => s._id === formData.supplierId)?.name}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
