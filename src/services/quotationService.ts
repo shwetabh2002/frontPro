@@ -113,6 +113,60 @@ export interface QuotationResponse {
   };
 }
 
+export interface OrdersResponse {
+  success: boolean;
+  message: string;
+  data: QuotationResponse['data'][];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  summary: {
+    appliedFilters: {
+      search: string | null;
+      status: string | null;
+      customerId: string | null;
+      createdBy: string | null;
+      currency: string | null;
+      dateFrom: string | null;
+      dateTo: string | null;
+      validTillFrom: string | null;
+      validTillTo: string | null;
+    };
+    availableFilters: {
+      statuses: string[];
+      currencies: string[];
+      customers: string[];
+      creators: string[];
+      dateRanges: {
+        created: {
+          min: string;
+          max: string;
+        };
+        validTill: {
+          min: string;
+          max: string;
+        };
+      };
+      counts: {
+        totalQuotations: number;
+      };
+      sortOptions: Array<{
+        value: string;
+        label: string;
+      }>;
+      pageSizes: number[];
+    };
+    sortBy: string;
+    totalResults: number;
+    showingResults: string;
+  };
+}
+
 // Service functions
 export const createQuotation = async (quotationData: CreateQuotationData): Promise<QuotationResponse> => {
   try {
@@ -391,6 +445,90 @@ export const rejectQuotation = async (quotationId: string): Promise<QuotationRes
     
     throw new ApiError(
       error instanceof Error ? error.message : 'Failed to reject quotation',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+/**
+ * Get accepted orders (sales orders)
+ * @param page - Page number for pagination
+ * @param limit - Number of items per page
+ * @returns Promise<OrdersResponse>
+ */
+export const getAcceptedOrders = async (page: number = 1, limit: number = 10): Promise<OrdersResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    httpClient.setAuthToken(token);
+
+    const response = await httpClient.get<OrdersResponse>('/quotations/accepted-orders', {
+      page: page.toString(),
+      limit: limit.toString()
+    });
+    
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to fetch accepted orders',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error fetching accepted orders:', error);
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to fetch accepted orders',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+export const updateAcceptedOrder = async (orderId: string, updateData: any): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    httpClient.setAuthToken(token);
+    const response = await httpClient.put<QuotationResponse>(`/quotations/accepted-orders/${orderId}`, updateData);
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to update accepted order',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+    return response;
+  } catch (error) {
+    console.error('Error updating accepted order:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to update accepted order',
       500,
       'Internal Server Error',
       error

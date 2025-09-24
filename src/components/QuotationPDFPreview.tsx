@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
+import QuotationPDFTemplate from './QuotationPDFTemplate';
 
 interface QuotationPDFPreviewProps {
   quotationData: any;
   onClose: () => void;
   onDownload: () => void;
+  templateRef?: React.RefObject<HTMLDivElement | null>;
+  isGenerating?: boolean;
 }
 
 const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({ 
   quotationData, 
   onClose, 
-  onDownload 
+  onDownload,
+  templateRef,
+  isGenerating = false
 }) => {
   // Helper function to format currency
-  const formatCurrency = (amount: number, currency: string = 'AED') => {
+  const formatCurrency = (amount: number, currency: string = quotationData.currency || 'AED') => {
     return new Intl.NumberFormat('en-AE', {
       style: 'currency',
       currency: currency,
@@ -153,8 +158,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       <th className="px-4 py-3 text-center font-semibold text-sm text-gray-800 border-b border-gray-300">Ext. Color</th>
                       <th className="px-4 py-3 text-center font-semibold text-sm text-gray-800 border-b border-gray-300">Int. Color</th>
                       <th className="px-4 py-3 text-center font-semibold text-sm text-gray-800 border-b border-gray-300">Qty</th>
-                      <th className="px-4 py-3 text-right font-semibold text-sm text-gray-800 border-b border-gray-300">Unit Price (AED)</th>
-                      <th className="px-4 py-3 text-right font-semibold text-sm text-gray-800 border-b border-gray-300">Total Amount (AED)</th>
+                      <th className="px-4 py-3 text-right font-semibold text-sm text-gray-800 border-b border-gray-300">Unit Price ({quotationData.currency})</th>
+                      <th className="px-4 py-3 text-right font-semibold text-sm text-gray-800 border-b border-gray-300">Total Amount ({quotationData.currency})</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,7 +193,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Subtotal (AED)</td>
+                      <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Subtotal ({quotationData.currency})</td>
                       <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">{formatCurrency(quotationData.subtotal, quotationData.currency)}</td>
                     </tr>
                     
@@ -217,7 +222,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     )}
                     
                     <tr>
-                      <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Total Amount (AED)</td>
+                      <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Total Amount ({quotationData.currency})</td>
                       <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
                         {formatCurrency(
                           quotationData.subtotal + 
@@ -254,7 +259,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     </div>
                     <div className="text-right">
                       <div className="font-semibold text-lg">
-                        {formatCurrency(quotationData.additionalExpenses.amount, quotationData.additionalExpenses.currency || quotationData.currency)}
+                        {formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
                       </div>
                     </div>
                   </div>
@@ -295,8 +300,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     
                     {quotationData.additionalExpenses && quotationData.additionalExpenses.amount > 0 && (
                       <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">Additional Expenses:</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 text-right">+{formatCurrency(quotationData.additionalExpenses.amount, quotationData.additionalExpenses.currency || quotationData.currency)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">Additional Expenses ({quotationData.currency}):</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-right">+{formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}</td>
                       </tr>
                     )}
                     
@@ -410,7 +415,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                           <span className="text-gray-700">{quotationData.company.bankDetails.accountNumber}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="font-semibold text-gray-800">IBAN (AED):</span>
+                          <span className="font-semibold text-gray-800">IBAN ({quotationData.currency}):</span>
                           <span className="text-gray-700 text-xs">{quotationData.company.bankDetails.iban}</span>
                         </div>
                         <div className="flex justify-between">
@@ -450,15 +455,33 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
           </button>
           <button
             onClick={onDownload}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            disabled={isGenerating}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Download PDF
+            {isGenerating ? (
+              <svg className="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            )}
+            {isGenerating ? 'Generating...' : 'Download PDF'}
           </button>
         </div>
       </div>
+
+      {/* Hidden template for PDF generation */}
+      {templateRef && (
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+          <QuotationPDFTemplate 
+            ref={templateRef}
+            quotationData={quotationData} 
+          />
+        </div>
+      )}
     </div>
   );
 };

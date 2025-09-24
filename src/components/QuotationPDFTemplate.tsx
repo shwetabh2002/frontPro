@@ -237,8 +237,8 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'left' }}>Ext. Color</th>
               <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'left' }}>Int. Color</th>
               <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'center' }}>Qty</th>
-              <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>Unit Price (AED)</th>
-              <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>Total Amount (AED)</th>
+              <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>Unit Price ({quotationData.currency})</th>
+              <th style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>Total Amount ({quotationData.currency})</th>
             </tr>
           </thead>
           <tbody>
@@ -352,7 +352,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             
             <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
               <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                Total Amount (AED)
+                Total Amount ({quotationData.currency})
               </td>
               <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
                 {formatCurrency(
@@ -477,7 +477,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <strong>Account No:</strong> {quotationData.company?.bankDetails?.accountNumber || '101234567890'}
             </div>
             <div style={{ marginBottom: '3px' }}>
-              <strong>IBAN (AED):</strong> {quotationData.company?.bankDetails?.iban || 'AE070331000000123456789'}
+              <strong>IBAN ({quotationData.currency}):</strong> {quotationData.company?.bankDetails?.iban || 'AE070331000000123456789'}
             </div>
             <div>
               <strong>SWIFT CODE:</strong> {quotationData.company?.bankDetails?.swiftCode || 'EBILAEAD'}
