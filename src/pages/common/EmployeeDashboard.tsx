@@ -201,27 +201,26 @@ const EmployeeDashboard: React.FC = () => {
       {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {employeeStats.map((stat, index) => (
-          <div key={stat.name} className="group relative bg-gradient-to-br from-gray-900 to-black overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] border border-amber-500/30">
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-300`}></div>
+          <div key={stat.name} className="group relative bg-white overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200">
             <div className="relative p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="text-4xl">{stat.icon}</div>
-                <div className={`flex-shrink-0 px-3 py-1.5 rounded-xl ${
+                <div className={`flex-shrink-0 px-3 py-1.5 rounded-lg ${
                   stat.changeType === 'positive' 
-                    ? 'bg-gradient-to-br from-amber-100 to-yellow-100 text-amber-800 border border-amber-300' 
-                    : 'bg-gradient-to-br from-red-900 to-red-800 text-red-300 border border-red-600'
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-700'
                 }`}>
                   <span className="text-sm font-bold">{stat.change}</span>
                 </div>
               </div>
               <div className="space-y-2">
-                <dt className="text-sm font-bold text-amber-400 truncate">
+                <dt className="text-sm font-bold text-gray-600 truncate">
                   {stat.name}
                 </dt>
-                <dd className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                <dd className="text-3xl font-bold text-gray-900">
                   {stat.value}
                 </dd>
-                <p className="text-xs text-gray-400 font-medium">
+                <p className="text-xs text-gray-500 font-medium">
                   {stat.description}
                 </p>
               </div>
