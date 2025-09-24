@@ -1,6 +1,5 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, API_RESPONSE_STATUS } from '../constants';
-import { httpClient, getAuthToken, hasAuthToken, validateApiResponse, ApiError } from '../utils/apiUtils';
+import { httpClient, getAuthToken, hasAuthToken, ApiError } from '../utils/apiUtils';
 
 // Types
 export interface QuotationItem {
@@ -280,6 +279,118 @@ export const deleteQuotation = async (quotationId: string): Promise<any> => {
     
     throw new ApiError(
       error instanceof Error ? error.message : 'Failed to delete quotation',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+/**
+ * Accept a quotation
+ * @param quotationId - The ID of the quotation to accept
+ * @returns Promise<QuotationResponse>
+ */
+export const acceptQuotation = async (quotationId: string): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    httpClient.setAuthToken(token);
+
+    const response = await httpClient.patch<QuotationResponse>(`/quotations/${quotationId}/accept`);
+    
+    if (!response.success) {
+      // Handle specific case when quotation is already accepted
+      if (response.message === 'Quotation is already accepted') {
+        throw new ApiError(
+          'This quotation has already been accepted by the customer',
+          400,
+          'Already Accepted',
+          response
+        );
+      }
+      
+      throw new ApiError(
+        response.message || 'Failed to accept quotation',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error accepting quotation:', error);
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to accept quotation',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+/**
+ * Reject a quotation
+ * @param quotationId - The ID of the quotation to reject
+ * @returns Promise<QuotationResponse>
+ */
+export const rejectQuotation = async (quotationId: string): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+
+    httpClient.setAuthToken(token);
+
+    const response = await httpClient.patch<QuotationResponse>(`/quotations/${quotationId}/reject`);
+    
+    if (!response.success) {
+      // Handle specific case when quotation is already rejected
+      if (response.message === 'Quotation is already rejected') {
+        throw new ApiError(
+          'This quotation has already been rejected by the customer',
+          400,
+          'Already Rejected',
+          response
+        );
+      }
+      
+      throw new ApiError(
+        response.message || 'Failed to reject quotation',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error rejecting quotation:', error);
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to reject quotation',
       500,
       'Internal Server Error',
       error

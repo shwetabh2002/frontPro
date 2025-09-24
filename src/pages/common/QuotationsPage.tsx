@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
 import CustomerModal from '../../components/CustomerModal';
-import { getQuotations } from '../../services/quotationService';
+import QuotationPDF from '../../components/QuotationPDF';
+import { getQuotations, getQuotationById, acceptQuotation, rejectQuotation } from '../../services/quotationService';
 import { formatPrice, getCurrencySymbol } from '../../utils/currencyUtils';
-import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants';
+import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 import { useToast } from '../../contexts/ToastContext';
 
 // Quotation interfaces specific to this page
@@ -176,7 +177,6 @@ const QuotationsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredQuotations, setFilteredQuotations] = useState<Quotation[]>([]);
   const [pagination, setPagination] = useState<QuotationsPagination>({
     page: 1,
     limit: 10, // Default, will be updated from API response
@@ -198,7 +198,29 @@ const QuotationsPage: React.FC = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [isCreateQuotationModalOpen, setIsCreateQuotationModalOpen] = useState(false);
+  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
+  const [selectedQuotationData, setSelectedQuotationData] = useState<any>(null);
+  const [isLoadingPDF, setIsLoadingPDF] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const { showToast } = useToast();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      // Check if the click is outside any dropdown
+      if (!target.closest('.dropdown-container')) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fetch quotations from API
   const fetchQuotations = async (page: number = 1, limit: number = 10) => {
@@ -209,7 +231,6 @@ const QuotationsPage: React.FC = () => {
       
       if (response.success) {
         setQuotations(response.data);
-        setFilteredQuotations(response.data);
         setPagination(response.pagination);
         setSummary(response.summary);
         
@@ -256,8 +277,8 @@ const QuotationsPage: React.FC = () => {
     fetchQuotations();
   }, []);
 
-  // Filter quotations based on search term and filters
-  useEffect(() => {
+  // Filter quotations based on search term and filters using useMemo
+  const filteredQuotations = useMemo(() => {
     let filtered = quotations;
 
     // Apply search filter
@@ -316,7 +337,7 @@ const QuotationsPage: React.FC = () => {
       );
     }
 
-    setFilteredQuotations(filtered);
+    return filtered;
   }, [searchTerm, filters, quotations]);
 
   // Handle search input change
@@ -386,6 +407,57 @@ const QuotationsPage: React.FC = () => {
     setIsCreateQuotationModalOpen(false);
     // Refresh quotations list after modal closes
     fetchQuotations(pagination.page, pagination.limit);
+  };
+
+  // Handle view quotation (PDF generation)
+  const handleViewQuotation = async (quotationId: string) => {
+    setIsLoadingPDF(true);
+    try {
+      const response = await getQuotationById(quotationId);
+      if (response.success) {
+        setSelectedQuotationData(response.data);
+        setIsPDFModalOpen(true);
+      } else {
+        showToast(response.message || 'Failed to fetch quotation details', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching quotation details:', error);
+      showToast('Failed to fetch quotation details', 'error');
+    } finally {
+      setIsLoadingPDF(false);
+    }
+  };
+
+  const handlePDFModalClose = () => {
+    setIsPDFModalOpen(false);
+    setSelectedQuotationData(null);
+  };
+
+  const handleDropdownToggle = (quotationId: string) => {
+    setOpenDropdownId(openDropdownId === quotationId ? null : quotationId);
+  };
+
+  const handleStatusUpdate = async (quotationId: string, status: string) => {
+    try {
+      setOpenDropdownId(null);
+      setUpdatingStatusId(quotationId);
+      
+      if (status === QUOTATION_STATUS.ACCEPTED) {
+        await acceptQuotation(quotationId);
+        showToast(SUCCESS_MESSAGES.QUOTATION.ACCEPTED, 'success');
+      } else if (status === QUOTATION_STATUS.REJECTED) {
+        await rejectQuotation(quotationId);
+        showToast(SUCCESS_MESSAGES.QUOTATION.REJECTED, 'success');
+      }
+      
+      // Refresh the quotations list to reflect the updated status
+      await fetchQuotations(pagination.page, pagination.limit);
+    } catch (error) {
+      console.error('Error updating quotation status:', error);
+      showToast(ERROR_MESSAGES.GENERAL.UNKNOWN_ERROR, 'error');
+    } finally {
+      setUpdatingStatusId(null);
+    }
   };
 
   // Get status badge color
@@ -499,10 +571,9 @@ const QuotationsPage: React.FC = () => {
       render: (value: any, quotation: Quotation) => (
         <div className="flex items-center space-x-2">
           <Button
-            onClick={() => {
-              // TODO: Implement view quotation details
-            }}
-            className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
+            onClick={() => handleViewQuotation(quotation._id)}
+            disabled={isLoadingPDF}
+            className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -510,17 +581,60 @@ const QuotationsPage: React.FC = () => {
             </svg>
             View
           </Button>
-          <Button
-            onClick={() => {
-              // TODO: Implement edit quotation
-            }}
-            className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit
-          </Button>
+          
+          {/* 3-dots dropdown menu */}
+          <div className="relative dropdown-container">
+            <Button
+              onClick={() => handleDropdownToggle(quotation._id)}
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </Button>
+            
+            {/* Dropdown menu */}
+            {openDropdownId === quotation._id && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                <div className="py-1">
+                  <button
+                    onClick={() => handleStatusUpdate(quotation._id, QUOTATION_STATUS.REJECTED)}
+                    disabled={updatingStatusId === quotation._id}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {updatingStatusId === quotation._id ? (
+                      <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                    Rejected by Customer
+                  </button>
+                  <button
+                    onClick={() => handleStatusUpdate(quotation._id, QUOTATION_STATUS.ACCEPTED)}
+                    disabled={updatingStatusId === quotation._id}
+                    className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {updatingStatusId === quotation._id ? (
+                      <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    Customer Accepted
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )
     }
@@ -803,47 +917,18 @@ const QuotationsPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Summary</h3>
               <p className="text-sm text-gray-600">{summary.showingResults}</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">{summary.totalResults}</div>
                 <div className="text-sm text-gray-500">Total Quotations</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {filteredQuotations.filter(q => q.status === 'accepted').length}
-                </div>
-                <div className="text-sm text-gray-500">Accepted</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-yellow-600">
                   {filteredQuotations.filter(q => q.status === 'draft').length}
                 </div>
                 <div className="text-sm text-gray-500">Draft</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
-                  {filteredQuotations.filter(q => q.status === 'rejected').length}
-                </div>
-                <div className="text-sm text-gray-500">Rejected</div>
-              </div>
             </div>
-            
-            {/* Available Statuses */}
-            {summary.availableFilters.statuses.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Available Statuses</h4>
-                <div className="flex flex-wrap gap-2">
-                  {summary.availableFilters.statuses.map((status) => (
-                    <span
-                      key={status}
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(status)}`}
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </span>
-                  ))}
-                </div>
             </div>
-            )}
           </div>
         )}
       </div>
@@ -855,6 +940,14 @@ const QuotationsPage: React.FC = () => {
         mode="quotation"
         allowCustomerCreation={true}
       />
+
+      {/* PDF Generation Modal */}
+      {isPDFModalOpen && selectedQuotationData && (
+        <QuotationPDF
+          quotationData={selectedQuotationData}
+          onClose={handlePDFModalClose}
+        />
+      )}
     </div>
   );
 };

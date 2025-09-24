@@ -117,7 +117,18 @@ export const SUCCESS_MESSAGES = {
     FETCHED: 'Quotations loaded successfully!',
     UPDATED: 'Quotation updated successfully!',
     DELETED: 'Quotation deleted successfully!',
+    ACCEPTED: 'Quotation accepted successfully!',
+    REJECTED: 'Quotation rejected successfully!',
   },
+} as const;
+
+// Quotation Status Constants
+export const QUOTATION_STATUS = {
+  DRAFT: 'draft',
+  SENT: 'sent',
+  ACCEPTED: 'accepted',
+  REJECTED: 'rejected',
+  EXPIRED: 'expired',
 } as const;
 
 // HTTP Status Codes
