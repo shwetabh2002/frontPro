@@ -96,18 +96,18 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
       </div>
 
       {/* Proforma Invoice Title - Compact */}
-      <div style={{ 
-        textAlign: 'center', 
-        fontSize: '18px', 
-        fontWeight: 'bold', 
-        color: '#1e40af',
-        marginTop: '80px',
-        marginBottom: '15px',
-        borderBottom: '2px solid #3b82f6',
-        paddingBottom: '10px'
-      }}>
-        PROFORMA INVOICE
-      </div>
+        <div style={{ 
+          textAlign: 'center', 
+          fontSize: '18px', 
+          fontWeight: 'bold', 
+          color: '#1e40af',
+          marginTop: '80px',
+          marginBottom: '15px',
+          borderBottom: '2px solid #3b82f6',
+          paddingBottom: '10px'
+        }}>
+          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER INVOICE'}
+        </div>
 
       {/* Two Column Cards - Compact */}
       <div style={{ 

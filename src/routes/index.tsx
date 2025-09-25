@@ -14,6 +14,7 @@ import CustomersPage from '../pages/common/CustomersPage';
 import QuotationsPage from '../pages/common/QuotationsPage';
 import InvoicesPage from '../pages/common/InvoicesPage';
 import OrdersPage from '../pages/common/OrdersPage';
+import ReviewOrdersPage from '../pages/common/ReviewOrdersPage';
 import EmployeeDashboard from '../pages/common/EmployeeDashboard';
 import Loader from '../components/Loader';
 import InventoryPage from '../pages/common/InventoryPage';
@@ -80,6 +81,7 @@ const AppRoutes: React.FC = () => {
           <Route path="suppliers" element={<SuppliersPage />} />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="review-orders" element={<ReviewOrdersPage />} />
         </Route>
 
         {/* Employee routes */}

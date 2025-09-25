@@ -535,3 +535,265 @@ export const updateAcceptedOrder = async (orderId: string, updateData: any): Pro
     );
   }
 };
+
+/**
+ * Send order for review
+ * @param orderId - The ID of the order to send for review
+ * @returns Promise<QuotationResponse>
+ */
+export const sendOrderForReview = async (orderId: string): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    httpClient.setAuthToken(token);
+    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/send-review`);
+    
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to send order for review',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error sending order for review:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to send order for review',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+// Review Orders Response Interface
+export interface ReviewOrdersResponse {
+  success: boolean;
+  message: string;
+  data: QuotationResponse['data'][];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  summary: {
+    appliedFilters: {
+      search: string | null;
+      status: string[];
+      customerId: string | null;
+      createdBy: string | null;
+      currency: string | null;
+      dateFrom: string | null;
+      dateTo: string | null;
+      validTillFrom: string | null;
+      validTillTo: string | null;
+    };
+    availableFilters: {
+      statuses: string[];
+      currencies: string[];
+      customers: string[];
+      creators: string[];
+      dateRanges: {
+        created: {
+          min: string;
+          max: string;
+        };
+        validTill: {
+          min: string;
+          max: string;
+        };
+      };
+      counts: {
+        totalQuotations: number;
+      };
+      sortOptions: Array<{
+        value: string;
+        label: string;
+      }>;
+      pageSizes: number[];
+    };
+    sortBy: string;
+    totalResults: number;
+    showingResults: string;
+  };
+}
+
+// Review Orders Filters Interface
+export interface ReviewOrdersFilters {
+  search?: string;
+  status?: string;
+  customerId?: string;
+  createdBy?: string;
+  currency?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  validTillFrom?: string;
+  validTillTo?: string;
+  sortBy?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Get review orders
+ * @param page - Page number
+ * @param limit - Items per page
+ * @param filters - Optional filters
+ * @returns Promise<ReviewOrdersResponse>
+ */
+export const getReviewOrders = async (
+  page: number = 1,
+  limit: number = 10,
+  filters: ReviewOrdersFilters = {}
+): Promise<ReviewOrdersResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    httpClient.setAuthToken(token);
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    
+    // Add filters to query params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+    
+    const response = await httpClient.get<ReviewOrdersResponse>(`/quotations/review-orders?${queryParams.toString()}`);
+    
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to fetch review orders',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error fetching review orders:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to fetch review orders',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+/**
+ * Approve order
+ * @param orderId - The ID of the order to approve
+ * @returns Promise<QuotationResponse>
+ */
+export const approveOrder = async (orderId: string): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    httpClient.setAuthToken(token);
+    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/approve`);
+    
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to approve order',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error approving order:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to approve order',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+/**
+ * Reject order
+ * @param orderId - The ID of the order to reject
+ * @returns Promise<QuotationResponse>
+ */
+export const rejectOrder = async (orderId: string): Promise<QuotationResponse> => {
+  try {
+    if (!hasAuthToken()) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    const token = getAuthToken();
+    if (!token) {
+      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
+    }
+    
+    httpClient.setAuthToken(token);
+    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/reject`);
+    
+    if (!response.success) {
+      throw new ApiError(
+        response.message || 'Failed to reject order',
+        400,
+        'Bad Request',
+        response
+      );
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error rejecting order:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to reject order',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};

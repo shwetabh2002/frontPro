@@ -8,9 +8,10 @@ import QuotationPDFTemplate from './QuotationPDFTemplate';
 interface QuotationPDFProps {
   quotationData: any;
   onClose: () => void;
+  isFromOrdersPage?: boolean;
 }
 
-const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose }) => {
+const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose, isFromOrdersPage = false }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
   const templateRef = useRef<HTMLDivElement>(null);
@@ -76,6 +77,7 @@ const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose }) =
       onDownload={handleDownload}
       templateRef={templateRef}
       isGenerating={isGenerating}
+      isFromOrdersPage={isFromOrdersPage}
     />
   );
 };

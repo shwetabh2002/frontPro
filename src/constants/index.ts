@@ -119,6 +119,9 @@ export const SUCCESS_MESSAGES = {
     DELETED: 'Quotation deleted successfully!',
     ACCEPTED: 'Quotation accepted successfully!',
     REJECTED: 'Quotation rejected successfully!',
+    SENT_FOR_REVIEW: 'Order sent for review successfully!',
+    APPROVED: 'Order approved successfully!',
+    ORDER_REJECTED: 'Order rejected successfully!',
   },
 } as const;
 
@@ -129,6 +132,7 @@ export const QUOTATION_STATUS = {
   ACCEPTED: 'accepted',
   REJECTED: 'rejected',
   EXPIRED: 'expired',
+  REVIEW: 'review',
 } as const;
 
 // HTTP Status Codes

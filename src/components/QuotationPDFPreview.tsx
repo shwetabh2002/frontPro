@@ -8,6 +8,7 @@ interface QuotationPDFPreviewProps {
   onDownload: () => void;
   templateRef?: React.RefObject<HTMLDivElement | null>;
   isGenerating?: boolean;
+  isFromOrdersPage?: boolean;
 }
 
 const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({ 
@@ -15,7 +16,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
   onClose, 
   onDownload,
   templateRef,
-  isGenerating = false
+  isGenerating = false,
+  isFromOrdersPage = false
 }) => {
   // Helper function to format currency
   const formatCurrency = (amount: number, currency: string = quotationData.currency || 'AED') => {
@@ -25,6 +27,11 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
       minimumFractionDigits: 2
     }).format(amount);
   };
+
+  // Determine if download should be enabled
+  const isDownloadEnabled = isFromOrdersPage 
+    ? quotationData.status === 'approved' 
+    : true; // Always enabled for quotations page
 
   // Helper function to format date
   const formatDate = (dateString: string) => {
@@ -91,7 +98,9 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
             {/* Proforma Invoice Title - Centered above cards */}
             <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">PROFORMA INVOICE</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER INVOICE'}
+        </h1>
             </div>
 
             {/* Two Column Cards */}
@@ -455,8 +464,12 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
           </button>
           <button
             onClick={onDownload}
-            disabled={isGenerating}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isGenerating || !isDownloadEnabled}
+            className={`px-6 py-2 rounded-lg transition-colors flex items-center ${
+              isDownloadEnabled && !isGenerating
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isGenerating ? (
               <svg className="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -468,7 +481,12 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             )}
-            {isGenerating ? 'Generating...' : 'Download PDF'}
+            {isGenerating 
+              ? 'Generating...' 
+              : !isDownloadEnabled 
+                ? 'Download PDF (Approved orders only)'
+                : 'Download PDF'
+            }
           </button>
         </div>
       </div>

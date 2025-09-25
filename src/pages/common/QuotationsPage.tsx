@@ -552,7 +552,18 @@ const QuotationsPage: React.FC = () => {
       header: 'Status',
       render: (value: any, quotation: Quotation) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(quotation.status)}`}>
-          {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
+          {quotation.status.toLowerCase() === 'accepted' 
+            ? 'Customer Accepted' 
+            : quotation.status.toLowerCase() === 'review'
+            ? 'Under Review'
+            : quotation.status.toLowerCase() === 'approved'
+            ? 'Approved by Admin'
+            : quotation.status.toLowerCase() === 'confirmed'
+            ? 'Confirmed'
+            : quotation.status.toLowerCase() === 'rejected'
+            ? 'Rejected'
+            : quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)
+          }
         </span>
       )
     },

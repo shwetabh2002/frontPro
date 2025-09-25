@@ -370,18 +370,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
             <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
               <Button
                 type="button"
-                onClick={() => {
-                  console.log('Current form data:', formData);
-                  console.log('Original data:', originalData);
-                  const testChanges = getChangedFields();
-                  console.log('Test changes:', testChanges);
-                }}
-                className="px-4 py-2 border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-50"
-              >
-                Debug
-              </Button>
-              <Button
-                type="button"
                 onClick={onClose}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
               >

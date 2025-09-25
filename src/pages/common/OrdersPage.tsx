@@ -5,9 +5,10 @@ import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
 import EditOrderModal from '../../components/EditOrderModal';
 import QuotationPDF from '../../components/QuotationPDF';
-import { getAcceptedOrders, getQuotationById } from '../../services/quotationService';
+import { getAcceptedOrders, getQuotationById, sendOrderForReview } from '../../services/quotationService';
 import { formatPrice } from '../../utils/currencyUtils';
 import { useToast } from '../../contexts/ToastContext';
+import { SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 
 // Order interfaces
 interface OrderCustomer {
@@ -136,6 +137,9 @@ interface OrdersSummary {
     };
     counts: {
       totalQuotations: number;
+      statusCounts: {
+        [key: string]: number;
+      };
     };
     sortOptions: Array<{
       value: string;
@@ -178,6 +182,7 @@ const OrdersPage: React.FC = () => {
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [selectedOrderForPDF, setSelectedOrderForPDF] = useState<any>(null);
   const [isLoadingPDF, setIsLoadingPDF] = useState(false);
+  const [sendingForReviewId, setSendingForReviewId] = useState<string | null>(null);
   const { showToast } = useToast();
 
   // Fetch orders from API
@@ -190,7 +195,27 @@ const OrdersPage: React.FC = () => {
       if (response.success) {
         setOrders(response.data);
         setPagination(response.pagination);
-        setSummary(response.summary);
+        
+        // Calculate status counts from the orders data
+        const statusCounts: { [key: string]: number } = {};
+        response.data.forEach((order: Order) => {
+          const status = order.status.toLowerCase();
+          statusCounts[status] = (statusCounts[status] || 0) + 1;
+        });
+        
+        // Update summary with calculated status counts
+        const updatedSummary: OrdersSummary = {
+          ...response.summary,
+          availableFilters: {
+            ...response.summary.availableFilters,
+            counts: {
+              totalQuotations: response.summary.totalResults,
+              statusCounts
+            }
+          }
+        };
+        
+        setSummary(updatedSummary);
         setError(null);
       } else {
         const errorMsg = response.message || 'Failed to fetch orders';
@@ -329,11 +354,25 @@ const OrdersPage: React.FC = () => {
   };
 
   // Handle send for review
-  const handleSendForReview = (order: Order) => {
+  const handleSendForReview = async (order: Order) => {
     setOpenDropdownId(null);
-    // TODO: Implement send for review functionality
-    console.log('Send for review:', order._id);
-    showToast('Send for review functionality will be implemented', 'info');
+    setSendingForReviewId(order._id);
+    
+    try {
+      await sendOrderForReview(order._id);
+      showToast(SUCCESS_MESSAGES.QUOTATION.SENT_FOR_REVIEW, 'success');
+      
+      // Refresh the orders list to get updated status
+      await fetchOrders(pagination.page, pagination.limit);
+    } catch (error: any) {
+      console.error('Error sending order for review:', error);
+      showToast(
+        error?.message || 'Failed to send order for review',
+        'error'
+      );
+    } finally {
+      setSendingForReviewId(null);
+    }
   };
 
   // Handle view as PDF
@@ -397,6 +436,12 @@ const OrdersPage: React.FC = () => {
     switch (status.toLowerCase()) {
       case 'accepted':
         return 'bg-green-100 text-green-800';
+      case 'review':
+        return 'bg-blue-100 text-blue-800';
+      case 'approved':
+        return 'bg-purple-100 text-purple-800';
+      case 'confirmed':
+        return 'bg-indigo-100 text-indigo-800';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800';
       case 'rejected':
@@ -460,7 +505,16 @@ const OrdersPage: React.FC = () => {
       header: 'Status',
       render: (value: string, order: Order) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(order.status)}`}>
-          {order.status.toLowerCase() === 'accepted' ? 'Customer Accepted' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          {order.status.toLowerCase() === 'accepted' 
+            ? 'Customer Accepted' 
+            : order.status.toLowerCase() === 'review'
+            ? 'Under Review'
+            : order.status.toLowerCase() === 'approved'
+            ? 'Approved by Admin'
+            : order.status.toLowerCase() === 'confirmed'
+            ? 'Confirmed'
+            : order.status.charAt(0).toUpperCase() + order.status.slice(1)
+          }
         </span>
       )
     },
@@ -476,66 +530,133 @@ const OrdersPage: React.FC = () => {
     {
       key: 'actions',
       header: 'Actions',
-      render: (value: any, order: Order) => (
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={() => handleEditOrder(order)}
-            className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit
-          </Button>
-          
-          {/* 3-dots dropdown menu */}
-          <div className="relative dropdown-container">
-            <Button
-              onClick={() => handleDropdownToggle(order._id)}
-              className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
-            </Button>
-            
-            {/* Dropdown menu */}
-            {openDropdownId === order._id && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button
-                    onClick={() => handleSendForReview(order)}
-                    className="block w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 transition-colors"
-                  >
-                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Send for Review
-                  </button>
-                  <button
-                    onClick={() => handleViewAsPDF(order)}
-                    disabled={isLoadingPDF}
-                    className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoadingPDF ? (
-                      <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                    {isLoadingPDF ? 'Loading...' : 'View as PDF'}
-                  </button>
-                </div>
+      render: (value: any, order: Order) => {
+        const status = order.status.toLowerCase();
+        
+        // Actions for accepted status (Edit + Send for Review + PDF)
+        if (status === 'accepted') {
+          return (
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => handleEditOrder(order)}
+                className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </Button>
+              
+              {/* 3-dots dropdown menu for Send for Review and PDF actions */}
+              <div className="relative dropdown-container">
+                <Button
+                  onClick={() => handleDropdownToggle(order._id)}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </Button>
+                
+                {/* Dropdown menu */}
+                {openDropdownId === order._id && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleSendForReview(order)}
+                        disabled={sendingForReviewId === order._id}
+                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
+                          sendingForReviewId === order._id
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-blue-700 hover:bg-blue-50'
+                        }`}
+                      >
+                        {sendingForReviewId === order._id ? (
+                          <>
+                            <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Send for Review
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleViewAsPDF(order)}
+                        disabled={isLoadingPDF}
+                        className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoadingPDF ? (
+                          <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                        {isLoadingPDF ? 'Loading...' : 'View as PDF'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          );
+        }
+        
+        // Actions for all other statuses (PDF only)
+        return (
+          <div className="flex items-center space-x-2">
+            {/* 3-dots dropdown menu for PDF actions */}
+            <div className="relative dropdown-container">
+              <Button
+                onClick={() => handleDropdownToggle(order._id)}
+                className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </Button>
+              
+              {/* Dropdown menu */}
+              {openDropdownId === order._id && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleViewAsPDF(order)}
+                      disabled={isLoadingPDF}
+                      className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoadingPDF ? (
+                        <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                      {isLoadingPDF ? 'Loading...' : 'View as PDF'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )
+        );
+      }
     }
   ];
 
@@ -649,7 +770,14 @@ const OrdersPage: React.FC = () => {
                     <option value="">All Statuses</option>
                     {summary.availableFilters.statuses.map((status) => (
                       <option key={status} value={status}>
-                        {status.toLowerCase() === 'accepted' ? 'Customer Accepted' : status.charAt(0).toUpperCase() + status.slice(1)}
+                        {status.toLowerCase() === 'accepted' 
+                          ? 'Customer Accepted' 
+                          : status.toLowerCase() === 'review'
+                          ? 'Under Review'
+                          : status.toLowerCase() === 'approved'
+                          ? 'Approved by Admin'
+                          : status.charAt(0).toUpperCase() + status.slice(1)
+                        }
                       </option>
                     ))}
                   </select>
@@ -730,9 +858,9 @@ const OrdersPage: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+      </div>
 
-        {/* Orders Table */}
+      {/* Orders Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <Table
             data={filteredOrders}
@@ -780,17 +908,57 @@ const OrdersPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Summary</h3>
               <p className="text-sm text-gray-600">{summary.showingResults}</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Total Orders */}
+            <div className="mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{summary.totalResults}</div>
+                <div className="text-3xl font-bold text-blue-600">{summary.totalResults}</div>
                 <div className="text-sm text-gray-500">Total Orders</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {filteredOrders.filter(o => o.status === 'accepted').length}
-                </div>
-                <div className="text-sm text-gray-500">Customer Accepted</div>
-              </div>
+            </div>
+
+            {/* Status Counts */}
+            <div className={`grid gap-4 ${
+              summary.availableFilters.statuses.length === 1 ? 'grid-cols-1' :
+              summary.availableFilters.statuses.length === 2 ? 'grid-cols-2' :
+              summary.availableFilters.statuses.length === 3 ? 'grid-cols-3' :
+              summary.availableFilters.statuses.length === 4 ? 'grid-cols-2 md:grid-cols-4' :
+              summary.availableFilters.statuses.length === 5 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5' :
+              'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
+            }`}>
+              {summary.availableFilters.statuses.map((status) => {
+                const count = summary.availableFilters.counts?.statusCounts?.[status] || 0;
+                const statusDisplayName = status.toLowerCase() === 'accepted' 
+                  ? 'Customer Accepted' 
+                  : status.toLowerCase() === 'review'
+                  ? 'Under Review'
+                  : status.toLowerCase() === 'approved'
+                  ? 'Approved by Admin'
+                  : status.toLowerCase() === 'confirmed'
+                  ? 'Confirmed'
+                  : status.toLowerCase() === 'rejected'
+                  ? 'Rejected'
+                  : status.charAt(0).toUpperCase() + status.slice(1);
+
+                const statusColor = status.toLowerCase() === 'accepted' 
+                  ? 'text-green-600' 
+                  : status.toLowerCase() === 'review'
+                  ? 'text-blue-600'
+                  : status.toLowerCase() === 'approved'
+                  ? 'text-purple-600'
+                  : status.toLowerCase() === 'confirmed'
+                  ? 'text-indigo-600'
+                  : status.toLowerCase() === 'rejected'
+                  ? 'text-red-600'
+                  : 'text-gray-600';
+
+                return (
+                  <div key={status} className="text-center">
+                    <div className={`text-2xl font-bold ${statusColor}`}>{count}</div>
+                    <div className="text-sm text-gray-500">{statusDisplayName}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -811,6 +979,7 @@ const OrdersPage: React.FC = () => {
         <QuotationPDF
           quotationData={selectedOrderForPDF}
           onClose={handlePDFModalClose}
+          isFromOrdersPage={true}
         />
       )}
     </div>
