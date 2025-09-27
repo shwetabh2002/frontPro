@@ -336,12 +336,21 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Expense Type</label>
-                    <Input
-                      type="text"
+                    <select
                       value={formData.additionalExpenses.expenceType}
                       onChange={(e) => handleInputChange('additionalExpenses.expenceType', e.target.value)}
-                      placeholder="e.g., shipping, handling"
-                    />
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select expense type</option>
+                      <option value="shipping">Shipping</option>
+                      <option value="accessories">Accessories</option>
+                      <option value="Rta Fees">RTA Fees</option>
+                      <option value="COO Fees">COO Fees</option>
+                      <option value="Customs">Customs</option>
+                      <option value="Insurance">Insurance</option>
+                      <option value="Other">Other</option>
+                      <option value="none">None</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
