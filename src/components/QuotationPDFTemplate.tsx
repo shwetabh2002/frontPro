@@ -22,6 +22,27 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
     });
   };
 
+  // Helper function to get status text
+  const getStatusInfo = (status: string) => {
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case 'draft':
+        return { text: 'Draft' };
+      case 'accepted':
+        return { text: 'Accepted' };
+      case 'review':
+        return { text: 'Under Review' };
+      case 'approved':
+        return { text: 'Approved by Admin' };
+      case 'confirmed':
+        return { text: 'Confirmed' };
+      case 'rejected':
+        return { text: 'Rejected' };
+      default:
+        return { text: status };
+    }
+  };
+
   const customer = quotationData.customer;
 
   return (
@@ -34,8 +55,10 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
       lineHeight: '1.4',
       color: '#000000',
       backgroundColor: '#ffffff',
-      margin: '0 auto'
+      margin: '0 auto',
+      position: 'relative'
     }}>
+      
       {/* Header Section - Compact */}
       <div style={{ 
         display: 'flex', 
@@ -192,6 +215,10 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>Sales Reference:</span>
               <span>{quotationData.createdBy?.name || 'System Administrator'}</span>
+            </div>
+            <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontWeight: 'bold' }}>Status:</span>
+              <span>{getStatusInfo(quotationData.status).text}</span>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
@@ -432,10 +459,10 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             lineHeight: '1.3'
           }}>
             <div style={{ marginBottom: '4px' }}>
-              <strong>EXPORT PRICE:</strong> {quotationData.company?.termCondition?.export?.price || 'All prices are FOB Dubai unless otherwise specified.'}
+              <strong>SALES POLICY:</strong> {quotationData.company?.termCondition?.export?.price || 'All prices are FOB Dubai unless otherwise specified.'}
             </div>
             <div style={{ marginBottom: '4px' }}>
-              <strong>DELIVERY:</strong> {quotationData.company?.termCondition?.export?.delivery || 'Delivery within 7-10 working days from order confirmation.'}
+              <strong>EXPORT & COMPLIANCE:</strong> {quotationData.company?.termCondition?.export?.delivery || 'Delivery within 7-10 working days from order confirmation.'}
             </div>
             <div style={{ marginBottom: '4px' }}>
               <strong>PAYMENT & MODE:</strong> {quotationData.company?.termCondition?.export?.payment || '100% advance payment required before shipment.'}

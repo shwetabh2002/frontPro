@@ -1,5 +1,6 @@
 import { API_CONFIG } from '../config/api';
-import { httpClient, getAuthToken, hasAuthToken, ApiError } from '../utils/apiUtils';
+import apiClient from './apiClient';
+import { ApiError } from '../utils/apiUtils';
 
 // Types
 export interface QuotationItem {
@@ -170,30 +171,16 @@ export interface OrdersResponse {
 // Service functions
 export const createQuotation = async (quotationData: CreateQuotationData): Promise<QuotationResponse> => {
   try {
-    // Check if user is authenticated
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
-    }
-
-    // Get auth token and set it in the request
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    // Set the auth token for this request
-    httpClient.setAuthToken(token);
-
     console.log('📋 Creating quotation with data:', quotationData);
 
-    const response = await httpClient.post<QuotationResponse>(
+    const response = await apiClient.post<QuotationResponse>(
       API_CONFIG.ENDPOINTS.QUOTATIONS.CREATE,
       quotationData
     );
 
     console.log('✅ Quotation created successfully:', response);
 
-    return response;
+    return response.data;
   } catch (error) {
     console.error('❌ Error creating quotation:', error);
     
@@ -212,25 +199,14 @@ export const createQuotation = async (quotationData: CreateQuotationData): Promi
 
 export const getQuotations = async (page: number = 1, limit: number = 10): Promise<any> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
     // Add pagination parameters to the API call
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString()
     });
 
-    const response = await httpClient.get(`${API_CONFIG.ENDPOINTS.QUOTATIONS.GET_ALL}?${params}`);
-    return response;
+    const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.QUOTATIONS.GET_ALL}?${params}`);
+    return response.data;
   } catch (error) {
     console.error('❌ Error fetching quotations:', error);
     
@@ -249,19 +225,8 @@ export const getQuotations = async (page: number = 1, limit: number = 10): Promi
 
 export const getQuotationById = async (quotationId: string): Promise<any> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.get(`${API_CONFIG.ENDPOINTS.QUOTATIONS.GET_BY_ID}/${quotationId}`);
-    return response;
+    const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.QUOTATIONS.GET_BY_ID}/${quotationId}`);
+    return response.data;
   } catch (error) {
     console.error('❌ Error fetching quotation:', error);
     
@@ -269,30 +234,19 @@ export const getQuotationById = async (quotationId: string): Promise<any> => {
       throw error;
     }
     
-      throw new ApiError(
-        error instanceof Error ? error.message : 'Failed to fetch quotation',
-        500,
-        'Internal Server Error',
-        error
-      );
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to fetch quotation',
+      500,
+      'Internal Server Error',
+      error
+    );
   }
 };
 
 export const updateQuotation = async (quotationId: string, quotationData: Partial<CreateQuotationData>): Promise<any> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.put(`${API_CONFIG.ENDPOINTS.QUOTATIONS.UPDATE}/${quotationId}`, quotationData);
-    return response;
+    const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.QUOTATIONS.UPDATE}/${quotationId}`, quotationData);
+    return response.data;
   } catch (error) {
     console.error('❌ Error updating quotation:', error);
     
@@ -311,19 +265,8 @@ export const updateQuotation = async (quotationId: string, quotationData: Partia
 
 export const deleteQuotation = async (quotationId: string): Promise<any> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication required', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.delete(`${API_CONFIG.ENDPOINTS.QUOTATIONS.DELETE}/${quotationId}`);
-    return response;
+    const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.QUOTATIONS.DELETE}/${quotationId}`);
+    return response.data;
   } catch (error) {
     console.error('❌ Error deleting quotation:', error);
     
@@ -347,39 +290,28 @@ export const deleteQuotation = async (quotationId: string): Promise<any> => {
  */
 export const acceptQuotation = async (quotationId: string): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.patch<QuotationResponse>(`/quotations/${quotationId}/accept`);
+    const response = await apiClient.patch<QuotationResponse>(`/quotations/${quotationId}/accept`);
     
-    if (!response.success) {
+    if (!response.data.success) {
       // Handle specific case when quotation is already accepted
-      if (response.message === 'Quotation is already accepted') {
+      if (response.data.message === 'Quotation is already accepted') {
         throw new ApiError(
           'This quotation has already been accepted by the customer',
           400,
           'Already Accepted',
-          response
+          response.data
         );
       }
       
       throw new ApiError(
-        response.message || 'Failed to accept quotation',
+        response.data.message || 'Failed to accept quotation',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
 
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error accepting quotation:', error);
     
@@ -403,39 +335,28 @@ export const acceptQuotation = async (quotationId: string): Promise<QuotationRes
  */
 export const rejectQuotation = async (quotationId: string): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.patch<QuotationResponse>(`/quotations/${quotationId}/reject`);
+    const response = await apiClient.patch<QuotationResponse>(`/quotations/${quotationId}/reject`);
     
-    if (!response.success) {
+    if (!response.data.success) {
       // Handle specific case when quotation is already rejected
-      if (response.message === 'Quotation is already rejected') {
+      if (response.data.message === 'Quotation is already rejected') {
         throw new ApiError(
           'This quotation has already been rejected by the customer',
           400,
           'Already Rejected',
-          response
+          response.data
         );
       }
       
       throw new ApiError(
-        response.message || 'Failed to reject quotation',
+        response.data.message || 'Failed to reject quotation',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
 
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error rejecting quotation:', error);
     
@@ -460,32 +381,8 @@ export const rejectQuotation = async (quotationId: string): Promise<QuotationRes
  */
 export const getAcceptedOrders = async (page: number = 1, limit: number = 10): Promise<OrdersResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-
-    httpClient.setAuthToken(token);
-
-    const response = await httpClient.get<OrdersResponse>('/quotations/accepted-orders', {
-      page: page.toString(),
-      limit: limit.toString()
-    });
-    
-    if (!response.success) {
-      throw new ApiError(
-        response.message || 'Failed to fetch accepted orders',
-        400,
-        'Bad Request',
-        response
-      );
-    }
-
-    return response;
+    const response = await apiClient.get<OrdersResponse>(`/quotations/accepted-orders?page=${page}&limit=${limit}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching accepted orders:', error);
     
@@ -504,24 +401,16 @@ export const getAcceptedOrders = async (page: number = 1, limit: number = 10): P
 
 export const updateAcceptedOrder = async (orderId: string, updateData: any): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    httpClient.setAuthToken(token);
-    const response = await httpClient.put<QuotationResponse>(`/quotations/accepted-orders/${orderId}`, updateData);
-    if (!response.success) {
+    const response = await apiClient.put<QuotationResponse>(`/quotations/accepted-orders/${orderId}`, updateData);
+    if (!response.data.success) {
       throw new ApiError(
-        response.message || 'Failed to update accepted order',
+        response.data.message || 'Failed to update accepted order',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error updating accepted order:', error);
     if (error instanceof ApiError) {
@@ -543,28 +432,18 @@ export const updateAcceptedOrder = async (orderId: string, updateData: any): Pro
  */
 export const sendOrderForReview = async (orderId: string): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
+    const response = await apiClient.patch<QuotationResponse>(`/quotations/${orderId}/send-review`);
     
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    
-    httpClient.setAuthToken(token);
-    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/send-review`);
-    
-    if (!response.success) {
+    if (!response.data.success) {
       throw new ApiError(
-        response.message || 'Failed to send order for review',
+        response.data.message || 'Failed to send order for review',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
     
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error sending order for review:', error);
     if (error instanceof ApiError) {
@@ -663,17 +542,6 @@ export const getReviewOrders = async (
   filters: ReviewOrdersFilters = {}
 ): Promise<ReviewOrdersResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    
-    httpClient.setAuthToken(token);
-    
     // Build query parameters
     const queryParams = new URLSearchParams();
     queryParams.append('page', page.toString());
@@ -682,22 +550,26 @@ export const getReviewOrders = async (
     // Add filters to query params
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, value.toString());
+        if (Array.isArray(value)) {
+          value.forEach(v => queryParams.append(key, v.toString()));
+        } else {
+          queryParams.append(key, value.toString());
+        }
       }
     });
     
-    const response = await httpClient.get<ReviewOrdersResponse>(`/quotations/review-orders?${queryParams.toString()}`);
+    const response = await apiClient.get<ReviewOrdersResponse>(`/quotations/review-orders?${queryParams.toString()}`);
     
-    if (!response.success) {
+    if (!response.data.success) {
       throw new ApiError(
-        response.message || 'Failed to fetch review orders',
+        response.data.message || 'Failed to fetch review orders',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
     
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching review orders:', error);
     if (error instanceof ApiError) {
@@ -719,28 +591,18 @@ export const getReviewOrders = async (
  */
 export const approveOrder = async (orderId: string): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
+    const response = await apiClient.patch<QuotationResponse>(`/quotations/${orderId}/approve`);
     
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    
-    httpClient.setAuthToken(token);
-    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/approve`);
-    
-    if (!response.success) {
+    if (!response.data.success) {
       throw new ApiError(
-        response.message || 'Failed to approve order',
+        response.data.message || 'Failed to approve order',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
     
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error approving order:', error);
     if (error instanceof ApiError) {
@@ -762,28 +624,18 @@ export const approveOrder = async (orderId: string): Promise<QuotationResponse> 
  */
 export const rejectOrder = async (orderId: string): Promise<QuotationResponse> => {
   try {
-    if (!hasAuthToken()) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
+    const response = await apiClient.patch<QuotationResponse>(`/quotations/${orderId}/reject`);
     
-    const token = getAuthToken();
-    if (!token) {
-      throw new ApiError('Authentication token not found', 401, 'Unauthorized', undefined);
-    }
-    
-    httpClient.setAuthToken(token);
-    const response = await httpClient.patch<QuotationResponse>(`/quotations/${orderId}/reject`);
-    
-    if (!response.success) {
+    if (!response.data.success) {
       throw new ApiError(
-        response.message || 'Failed to reject order',
+        response.data.message || 'Failed to reject order',
         400,
         'Bad Request',
-        response
+        response.data
       );
     }
     
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error rejecting order:', error);
     if (error instanceof ApiError) {
@@ -791,6 +643,67 @@ export const rejectOrder = async (orderId: string): Promise<QuotationResponse> =
     }
     throw new ApiError(
       error instanceof Error ? error.message : 'Failed to reject order',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+// Get approved orders for invoice requests
+export const getApprovedOrders = async (
+  page: number = 1,
+  limit: number = 10,
+  filters: ReviewOrdersFilters = {}
+): Promise<ReviewOrdersResponse> => {
+  try {
+    // Build query parameters
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      )
+    });
+    
+    const response = await apiClient.get<ReviewOrdersResponse>(`/quotations/approved-orders?${params}`);
+    
+    if (!response.data.success) {
+      throw new ApiError(
+        response.data.message || 'Failed to fetch approved orders',
+        400,
+        'Bad Request',
+        response.data
+      );
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching approved orders:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to fetch approved orders',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
+// Update discount for accepted quotation
+export const updateQuotationDiscount = async (quotationId: string, discountData: { discount: number; discountType: string }): Promise<any> => {
+  try {
+    const response = await apiClient.put(`/quotations/accepted-orders/${quotationId}`, discountData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating quotation discount:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to update quotation discount',
       500,
       'Internal Server Error',
       error

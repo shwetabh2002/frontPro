@@ -8,13 +8,14 @@ import AdminLayout from '../layouts/AdminLayout';
 import EmployeeLayout from '../layouts/EmployeeLayout';
 import AdminDashboard from '../pages/common/AdminDashboard';
 import EmployeesPage from '../pages/common/EmployeesPage';
-import SalesPage from '../pages/common/SalesPage';
-import AllSalesPage from '../pages/common/AllSalesPage';
+// import SalesPage from '../pages/common/SalesPage';
+// import AllSalesPage from '../pages/common/AllSalesPage';
 import CustomersPage from '../pages/common/CustomersPage';
 import QuotationsPage from '../pages/common/QuotationsPage';
 import InvoicesPage from '../pages/common/InvoicesPage';
 import OrdersPage from '../pages/common/OrdersPage';
 import ReviewOrdersPage from '../pages/common/ReviewOrdersPage';
+import InvoiceRequestsPage from '../pages/common/InvoiceRequestsPage';
 import EmployeeDashboard from '../pages/common/EmployeeDashboard';
 import Loader from '../components/Loader';
 import InventoryPage from '../pages/common/InventoryPage';
@@ -74,14 +75,15 @@ const AppRoutes: React.FC = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="sales" element={<SalesPage />} />
-          <Route path="all-sales" element={<AllSalesPage />} />
+          {/* <Route path="sales" element={<SalesPage />} /> */}
+          {/* <Route path="all-sales" element={<AllSalesPage />} /> */}
           <Route path="customers" element={<CustomersPage />} />
           <Route path="quotations" element={<QuotationsPage />} />
           <Route path="suppliers" element={<SuppliersPage />} />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="review-orders" element={<ReviewOrdersPage />} />
+          <Route path="invoice-requests" element={<InvoiceRequestsPage />} />
         </Route>
 
         {/* Employee routes */}

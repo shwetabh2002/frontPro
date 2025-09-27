@@ -500,117 +500,203 @@ const InventoryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Inventory List */}
+          {/* Excel-like Inventory Table */}
           {inventoryData.data.items.length > 0 ? (
-            <div className="bg-white rounded-lg border border-blue-200 overflow-hidden">
-              {/* List Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
-                <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-blue-800">
-                  <div className="col-span-3">Item Details</div>
-                  <div className="col-span-2">Type & Category</div>
-                  <div className="col-span-1">Color</div>
-                  <div className="col-span-1">Qty</div>
-                  <div className="col-span-1">Price</div>
-                  <div className="col-span-2">Status</div>
-                  <div className="col-span-2">Actions</div>
+            <div className="overflow-x-auto">
+              <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-sm min-w-max">
+              {/* Table Header */}
+              <div className="bg-gray-50 border-b border-gray-300 sticky top-0 z-10">
+                <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '60px 1fr 80px 100px 100px 100px 70px 120px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">#</div>
+                  <div className="p-2 border-r-2 border-gray-400">Name</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Type</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Category</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Brand</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Model</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Year</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">SKU</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Color</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Qty</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Sell Price</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Currency</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Status</div>
+                  {/* <div className="p-2 border-r-2 border-gray-400 text-center">Min Stock</div> */}
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Created</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Updated</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Supplier</div>
+                  {/* <div className="p-2 border-r-2 border-gray-400 text-center">Tags</div> */}
+                  <div className="p-2 border-r-2 border-gray-400 text-center">VIN</div>
+                  <div className="p-2 text-center">Actions</div>
                 </div>
               </div>
 
-              {/* List Items */}
-              <div className="divide-y divide-blue-100">
+              {/* Table Body */}
+              <div className="divide-y divide-gray-200">
                 {inventoryData.data.items.map((item, index) => (
-                  <div key={item._id} className={`px-6 py-4 hover:bg-blue-50/50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'}`}>
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                      {/* Item Details */}
-                      <div className="col-span-3">
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-semibold text-gray-800 truncate">{item.name}</h4>
-                          <div className="text-xs text-gray-600">{item.brand} {item.model} {item.year}</div>
-                          <div className="text-xs text-gray-500">SKU: {item.sku || 'N/A'}</div>
+                  <div key={item._id} className={`grid gap-0 hover:bg-gray-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '60px 1fr 80px 100px 100px 100px 70px 120px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
+                    {/* Row Number */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center text-xs text-gray-600 flex items-center justify-center">
+                      {index + 1}
+                    </div>
+
+                    {/* Name */}
+                    <div className="p-2 border-r-2 border-gray-400 flex items-center">
+                      <div className="text-xs font-medium text-gray-900 break-words leading-tight">
+                        {item.name}
+                      </div>
+                    </div>
+
+                    {/* Type */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
+                        item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      }`}>
+                        {item.type?.toUpperCase() || 'N/A'}
+                      </span>
+                    </div>
+
+                    {/* Category */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.category || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Brand */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.brand || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Model */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.model || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Year */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-800">
+                        {item.year || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* SKU */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-600 break-words leading-tight">
+                        {item.sku || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Color */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.color || 'N/A'}
+                      </div>
                         </div>
-                      </div>
 
-                      {/* Type & Category */}
-                      <div className="col-span-2">
-                        <div className="space-y-1">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                          }`}>
-                            {item.type?.toUpperCase() || 'N/A'}
-                          </span>
-                          <div className="text-xs text-gray-600">{item.category || 'N/A'}</div>
-                        </div>
+                    {/* Quantity */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-800 font-medium">
+                        {item.quantity || 0}
                       </div>
+                    </div>
 
-                      {/* Color */}
-                      <div className="col-span-1">
-                        <span className="text-sm text-gray-800 font-medium">{item.color || 'N/A'}</span>
+                    {/* Selling Price */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-blue-600 font-medium">
+                        ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
                       </div>
+                    </div>
 
-                      {/* Quantity */}
-                      <div className="col-span-1">
-                        <span className="text-sm text-gray-800 font-medium">{item.quantity}</span>
+                    {/* Currency */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-600">
+                        {item.currencyType || 'USD'}
                       </div>
+                    </div>
 
-                      {/* Price */}
-                      <div className="col-span-1">
-                        <span className="text-sm text-blue-600 font-bold">
-                          ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
+                    {/* Status */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
+                        item.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                        item.status === 'inactive' ? 'bg-red-100 text-red-700' :
+                        item.status === 'out_of_stock' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {item.status || 'N/A'}
                         </span>
-                      </div>
+                    </div>
 
-                      {/* Status */}
-                      <div className="col-span-2">
-                        <div className="flex flex-col space-y-1">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium w-fit ${
-                            item.condition === 'new' ? 'bg-emerald-500/20 text-emerald-700' :
-                            item.condition === 'used' ? 'bg-amber-100 text-amber-700' :
-                            'bg-gray-500/20 text-gray-400'
-                          }`}>
-                            {item.condition}
-                          </span>
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium w-fit ${
-                            item.status === 'active' ? 'bg-emerald-500/20 text-emerald-700' :
-                            item.status === 'inactive' ? 'bg-red-500/20 text-red-700' :
-                            'bg-slate-500/20 text-slate-700'
-                          }`}>
-                            {item.status}
-                          </span>
-                        </div>
+                    {/* Min Stock Level */}
+                    {/* <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-800">
+                        {item.minStockLevel || 'N/A'}
                       </div>
+                    </div> */}
 
-                      {/* Actions */}
-                      <div className="col-span-2">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleViewItem(item)}
-                            disabled={isLoadingItem}
-                            className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            {isLoadingItem ? 'Loading...' : 'View'}
-                          </button>
-                          <button
-                            onClick={() => handleEditItem(item)}
-                            disabled={isLoadingItem}
-                            className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                            title={isLoadingItem ? "Loading..." : "Edit Item"}
-                          >
-                            {isLoadingItem ? (
-                              <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                            ) : (
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            )}
-                          </button>
+                    {/* Created Date */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-600">
+                        {(item as any).createdAt ? new Date((item as any).createdAt).toLocaleDateString() : 'N/A'}
+                      </div>
+                            </div>
+
+                    {/* Updated Date */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-600">
+                        {(item as any).updatedAt ? new Date((item as any).updatedAt).toLocaleDateString() : 'N/A'}
+                            </div>
                         </div>
+
+                    {/* Supplier */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.supplierId?.name || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    {/* <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-600">
+                        {item.tags?.length || 0}
+                      </div>
+                    </div> */}
+
+                    {/* VIN Count */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
+                      <div className="text-xs text-gray-600">
+                        {item.vinNumber?.length || 0}
+                      </div>
+                        </div>
+
+                    {/* Actions */}
+                    <div className="p-2 text-center flex items-center justify-center">
+                      <div className="flex space-x-1 justify-center">
+                        <button
+                          onClick={() => handleViewItem(item)}
+                          disabled={isLoadingItem}
+                          className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="View Details"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEditItem(item)}
+                          disabled={isLoadingItem}
+                          className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="Edit Item"
+                        >
+                          Edit
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
+                  </div>
+                </div>
             </div>
           ) : (
             <div className="text-center py-12">

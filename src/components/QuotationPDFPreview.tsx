@@ -42,6 +42,27 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
     });
   };
 
+  // Helper function to get status color and text
+  const getStatusInfo = (status: string) => {
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case 'draft':
+        return { color: 'bg-gray-500', text: 'Draft', textColor: 'text-gray-700' };
+      case 'accepted':
+        return { color: 'bg-blue-500', text: 'Accepted', textColor: 'text-blue-700' };
+      case 'review':
+        return { color: 'bg-yellow-500', text: 'Under Review', textColor: 'text-yellow-700' };
+      case 'approved':
+        return { color: 'bg-green-500', text: 'Approved by Admin', textColor: 'text-green-700' };
+      case 'confirmed':
+        return { color: 'bg-purple-500', text: 'Confirmed', textColor: 'text-purple-700' };
+      case 'rejected':
+        return { color: 'bg-red-500', text: 'Rejected', textColor: 'text-red-700' };
+      default:
+        return { color: 'bg-gray-500', text: status, textColor: 'text-gray-700' };
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -60,7 +81,15 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
         {/* PDF Preview Content */}
         <div className="flex-1 overflow-auto p-6 bg-gray-50">
-          <div className="bg-white shadow-lg max-w-4xl mx-auto rounded-lg" style={{ minHeight: '800px', padding: '28px' }}>
+          <div className="bg-white shadow-lg max-w-4xl mx-auto rounded-lg relative" style={{ minHeight: '800px', padding: '28px' }}>
+            {/* Status Indicator */}
+            <div className="absolute top-4 right-4 z-10">
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${getStatusInfo(quotationData.status).color} text-white shadow-md`}>
+                <div className={`w-2 h-2 rounded-full mr-2 ${getStatusInfo(quotationData.status).color.replace('bg-', 'bg-').replace('-500', '-300')}`}></div>
+                {getStatusInfo(quotationData.status).text}
+              </div>
+            </div>
+            
             {/* Header Section */}
             <header className="flex items-center justify-between gap-4 mb-5">
               <div className="flex gap-4 items-center">
@@ -376,11 +405,11 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     {quotationData.company?.termCondition?.export ? (
                       <div className="space-y-3 text-sm text-gray-700">
                         <div>
-                          <div className="font-semibold text-gray-800 mb-1">EXPORT PRICE:</div>
+                          <div className="font-semibold text-gray-800 mb-1">SALES POLICY:</div>
                           <div className="text-gray-600">{quotationData.company.termCondition.export.price}</div>
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-800 mb-1">DELIVERY:</div>
+                          <div className="font-semibold text-gray-800 mb-1">EXPORT & COMPLIANCE:</div>
                           <div className="text-gray-600">{quotationData.company.termCondition.export.delivery}</div>
                         </div>
                         <div>
