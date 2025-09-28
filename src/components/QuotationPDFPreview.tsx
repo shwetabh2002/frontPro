@@ -24,7 +24,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
     return new Intl.NumberFormat('en-AE', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -476,8 +477,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
               <div className="text-right">
                 <div className="mb-2 font-bold">Customer Acceptance</div>
-                <div>Proforma Invoice — {quotationData.quotationNumber}</div>
-                <div className="mt-1">Show Room No: 377, Dubai Auto Zone</div>
+                <div>{quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {quotationData.quotationNumber}</div>
+                <div className="mt-1">{quotationData.company?.address?.street || 'Show Room No: 377, Dubai Auto Zone'}</div>
               </div>
             </div>
           </div>

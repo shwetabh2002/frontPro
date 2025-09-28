@@ -3,7 +3,7 @@ import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
-import { getApprovedOrders, ReviewOrdersFilters, getQuotationById } from '../../services/quotationService';
+import { getApprovedOrders, ReviewOrdersFilters, getQuotationById, createCustomerInvoice, CreateCustomerInvoiceRequest } from '../../services/quotationService';
 import { formatPrice } from '../../utils/currencyUtils';
 import { useToast } from '../../contexts/ToastContext';
 import QuotationPDF from '../../components/QuotationPDF';
@@ -181,6 +181,23 @@ const InvoiceRequestsPage: React.FC = () => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null);
   const [decliningRequestId, setDecliningRequestId] = useState<string | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedOrderForReview, setSelectedOrderForReview] = useState<Order | null>(null);
+  const [isLoadingReview, setIsLoadingReview] = useState(false);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [invoiceFormData, setInvoiceFormData] = useState({
+    notes: '',
+    moreExpense: {
+      description: '',
+      amount: 0
+    },
+    customerPayment: {
+      paymentAmount: 0,
+      paymentMethod: 'bank_transfer',
+      paymentNotes: '',
+      paymentDate: new Date().toISOString().split('T')[0] + 'T' + new Date().toTimeString().split(' ')[0] + '.000Z'
+    }
+  });
 
   const { showToast } = useToast();
 
@@ -302,25 +319,138 @@ const InvoiceRequestsPage: React.FC = () => {
     setOpenDropdownId(openDropdownId === orderId ? null : orderId);
   };
 
-  // Handle approve request
+  // Handle approve request - now opens review modal
   const handleApproveRequest = async (order: Order) => {
-    setApprovingRequestId(order._id);
     setOpenDropdownId(null); // Close dropdown
+    setSelectedOrderForReview(order);
+    setIsReviewModalOpen(true);
     
+    // Reset form data when opening modal
+    setInvoiceFormData({
+      notes: '',
+      moreExpense: {
+        description: '',
+        amount: 0
+      },
+      customerPayment: {
+        paymentAmount: 0,
+        paymentMethod: 'bank_transfer',
+        paymentNotes: '',
+        paymentDate: new Date().toISOString()
+      }
+    });
+  };
+
+  // Handle review modal - fetch full order data and show review
+  const handleReviewOrder = async () => {
+    if (!selectedOrderForReview) return;
+    
+    setIsLoadingReview(true);
     try {
-      // TODO: Implement approve request API call
-      // const response = await approveInvoiceRequest(order._id);
-      
-      // For now, show success message
-      showToast('Invoice request approved successfully!', 'success');
-      
-      // Refresh the orders list
-      await fetchOrders(pagination.page, pagination.limit);
+      const fullOrderData = await getQuotationById(selectedOrderForReview._id);
+      setSelectedOrderForReview(fullOrderData);
     } catch (error) {
-      console.error('Error approving invoice request:', error);
-      showToast('Failed to approve invoice request', 'error');
+      console.error('Error fetching order details:', error);
+      showToast('Failed to load order details', 'error');
     } finally {
-      setApprovingRequestId(null);
+      setIsLoadingReview(false);
+    }
+  };
+
+  // Handle invoice form input changes
+  const handleInvoiceFormChange = (field: string, value: any) => {
+    setInvoiceFormData(prev => {
+      const keys = field.split('.');
+      
+      if (keys.length === 1) {
+        // Top level field
+        return { ...prev, [keys[0]]: value };
+      } else if (keys.length === 2) {
+        // Nested field (e.g., moreExpense.amount)
+        const firstKey = keys[0] as keyof typeof prev;
+        const secondKey = keys[1];
+        return {
+          ...prev,
+          [firstKey]: {
+            ...(prev[firstKey] as any),
+            [secondKey]: value
+          }
+        };
+      } else if (keys.length === 3) {
+        // Deeply nested field (e.g., customerPayment.paymentAmount)
+        const firstKey = keys[0] as keyof typeof prev;
+        const secondKey = keys[1];
+        const thirdKey = keys[2];
+        return {
+          ...prev,
+          [firstKey]: {
+            ...(prev[firstKey] as any),
+            [secondKey]: {
+              ...((prev[firstKey] as any)[secondKey] as any),
+              [thirdKey]: value
+            }
+          }
+        };
+      }
+      
+      return prev;
+    });
+  };
+
+  // Handle generate invoice
+  const handleGenerateInvoice = async () => {
+    if (!selectedOrderForReview) return;
+    
+    // Client-side validation
+    if (!invoiceFormData.customerPayment.paymentNotes.trim()) {
+      showToast('Payment notes are required', 'error');
+      return;
+    }
+    
+    setIsGeneratingInvoice(true);
+    try {
+      const invoiceData: CreateCustomerInvoiceRequest = {
+        quotationId: selectedOrderForReview._id,
+        notes: invoiceFormData.notes,
+        moreExpense: invoiceFormData.moreExpense,
+        customerPayment: {
+          ...invoiceFormData.customerPayment,
+          paymentNotes: invoiceFormData.customerPayment.paymentNotes.trim()
+        }
+      };
+      
+      await createCustomerInvoice(invoiceData);
+      showToast('Invoice generated successfully!', 'success');
+      
+      // Close modal and refresh data
+      setIsReviewModalOpen(false);
+      setSelectedOrderForReview(null);
+      await fetchOrders(pagination.page, pagination.limit);
+    } catch (error: any) {
+      console.error('Error generating invoice:', error);
+      
+      // Handle validation errors
+      if (error?.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        if (typeof errors === 'string') {
+          // Single error message
+          showToast(errors, 'error');
+        } else if (typeof errors === 'object') {
+          // Multiple validation errors
+          const errorMessages = Object.values(errors).flat();
+          showToast(errorMessages.join(', '), 'error');
+        } else {
+          showToast('Validation error occurred', 'error');
+        }
+      } else if (error?.response?.data?.message) {
+        showToast(error.response.data.message, 'error');
+      } else if (error?.message) {
+        showToast(error.message, 'error');
+      } else {
+        showToast('Failed to generate invoice', 'error');
+      }
+    } finally {
+      setIsGeneratingInvoice(false);
     }
   };
 
@@ -750,6 +880,324 @@ const InvoiceRequestsPage: React.FC = () => {
             isFromOrdersPage={true}
           />
         )}
+
+        {/* Review Once Modal */}
+        {isReviewModalOpen && selectedOrderForReview && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] flex flex-col">
+              {/* Sticky Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900">Review Once</h2>
+                  <button
+                    onClick={() => {
+                      setIsReviewModalOpen(false);
+                      setSelectedOrderForReview(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+
+                {isLoadingReview ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-gray-600">Loading order details...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Order Information */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Order Information</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Order Number</label>
+                          <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                            {selectedOrderForReview.quotationNumber}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                          <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                            {selectedOrderForReview.status === 'approved' ? 'Approved by Admin' : selectedOrderForReview.status}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
+                          <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                            {new Date(selectedOrderForReview.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Valid Till</label>
+                          <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                            {new Date(selectedOrderForReview.validTill).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Customer Information */}
+                      <div className="mb-4">
+                        <h4 className="text-md font-medium text-gray-900 mb-2">Customer Information</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.customer?.name || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.customer?.email || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Customer ID</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.customer?.custId || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.customer?.phone || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Items */}
+                      <div className="mb-4">
+                        <h4 className="text-md font-medium text-gray-900 mb-2">Items</h4>
+                        <div className="space-y-2">
+                          {selectedOrderForReview.items?.map((item: any, index: number) => (
+                            <div key={index} className="bg-white border border-gray-300 rounded-lg p-3">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Name:</span> {item.name}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Brand:</span> {item.brand}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Model:</span> {item.model} ({item.year})
+                                </div>
+                                <div>
+                                  <span className="font-medium">Qty:</span> {item.quantity} × {item.sellingPrice} {selectedOrderForReview.currency}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Financial Summary */}
+                      <div>
+                        <h4 className="text-md font-medium text-gray-900 mb-2">Financial Summary</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Subtotal</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.subtotal} {selectedOrderForReview.currency}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">VAT ({selectedOrderForReview.VAT}%)</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900">
+                              {selectedOrderForReview.vatAmount} {selectedOrderForReview.currency}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                            <div className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 font-semibold">
+                              {selectedOrderForReview.totalAmount} {selectedOrderForReview.currency}
+                            </div>
+                          </div>
+                        </div>
+                        {selectedOrderForReview.additionalExpenses?.amount && selectedOrderForReview.additionalExpenses.amount > 0 && (
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Order Additional Expenses</label>
+                            <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-gray-900">
+                              {selectedOrderForReview.additionalExpenses.amount} {selectedOrderForReview.currency} - Additional expenses
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Invoice Generation Form */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Generate Invoice</h3>
+                      
+                      {/* Invoice Notes */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Notes</label>
+                        <textarea
+                          value={invoiceFormData.notes}
+                          onChange={(e) => handleInvoiceFormChange('notes', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Enter invoice notes..."
+                        />
+                      </div>
+
+                      {/* Invoice Level Additional Expenses */}
+                      <div className="mb-4">
+                        <h4 className="text-md font-medium text-gray-900 mb-3">Invoice Level Additional Expenses</h4>
+                        <p className="text-sm text-gray-600 mb-3">Add any additional expenses specific to this invoice (separate from order expenses shown above)</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <Input
+                              type="text"
+                              value={invoiceFormData.moreExpense.description}
+                              onChange={(e) => handleInvoiceFormChange('moreExpense.description', e.target.value)}
+                              placeholder="e.g., Insurance and registration fees"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                            <Input
+                              type="number"
+                              value={invoiceFormData.moreExpense.amount}
+                              onChange={(e) => handleInvoiceFormChange('moreExpense.amount', parseFloat(e.target.value) || 0)}
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Customer Payment */}
+                      <div className="mb-4">
+                        <h4 className="text-md font-medium text-gray-900 mb-3">Customer Payment</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Payment Amount</label>
+                            <Input
+                              type="number"
+                              value={invoiceFormData.customerPayment.paymentAmount}
+                              onChange={(e) => handleInvoiceFormChange('customerPayment.paymentAmount', parseFloat(e.target.value) || 0)}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                            <select
+                              value={invoiceFormData.customerPayment.paymentMethod}
+                              onChange={(e) => handleInvoiceFormChange('customerPayment.paymentMethod', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="bank_transfer">Bank Transfer</option>
+                              <option value="cash">Cash</option>
+                              <option value="credit_card">Credit Card</option>
+                              <option value="check">Check</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Payment Notes <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              value={invoiceFormData.customerPayment.paymentNotes}
+                              onChange={(e) => handleInvoiceFormChange('customerPayment.paymentNotes', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              rows={2}
+                              placeholder="Enter payment notes..."
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Payment Date</label>
+                            <Input
+                              type="datetime-local"
+                              value={invoiceFormData.customerPayment.paymentDate.split('T')[0] + 'T' + invoiceFormData.customerPayment.paymentDate.split('T')[1].split('.')[0]}
+                              onChange={(e) => handleInvoiceFormChange('customerPayment.paymentDate', e.target.value + '.000Z')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Amount Breakdown */}
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <h4 className="text-md font-medium text-gray-900 mb-3">Amount Breakdown</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span>{selectedOrderForReview.subtotal} {selectedOrderForReview.currency}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>VAT ({selectedOrderForReview.VAT}%):</span>
+                            <span>{selectedOrderForReview.vatAmount} {selectedOrderForReview.currency}</span>
+                          </div>
+                          {selectedOrderForReview.additionalExpenses?.amount && selectedOrderForReview.additionalExpenses.amount > 0 && (
+                            <div className="flex justify-between">
+                              <span>Order Additional Expenses:</span>
+                              <span>{selectedOrderForReview.additionalExpenses.amount} {selectedOrderForReview.currency}</span>
+                            </div>
+                          )}
+                          {invoiceFormData.moreExpense.amount > 0 && (
+                            <div className="flex justify-between">
+                              <span>Invoice Additional Expenses:</span>
+                              <span>{invoiceFormData.moreExpense.amount} {selectedOrderForReview.currency}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between font-bold border-t pt-2">
+                            <span>Total Amount:</span>
+                            <span>{(selectedOrderForReview.totalAmount + invoiceFormData.moreExpense.amount).toFixed(2)} {selectedOrderForReview.currency}</span>
+                          </div>
+                          <div className="flex justify-between text-green-600">
+                            <span>Payment Received:</span>
+                            <span>{invoiceFormData.customerPayment.paymentAmount} {selectedOrderForReview.currency}</span>
+                          </div>
+                          <div className="flex justify-between text-red-600 font-bold">
+                            <span>Outstanding Balance:</span>
+                            <span>{((selectedOrderForReview.totalAmount + invoiceFormData.moreExpense.amount) - invoiceFormData.customerPayment.paymentAmount).toFixed(2)} {selectedOrderForReview.currency}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+              </div>
+              
+              {/* Sticky Footer with Action Buttons */}
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6 z-10">
+                <div className="flex justify-end space-x-4">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsReviewModalOpen(false);
+                      setSelectedOrderForReview(null);
+                    }}
+                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleGenerateInvoice}
+                    disabled={isGeneratingInvoice}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {isGeneratingInvoice ? 'Generating...' : 'Generate Invoice'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

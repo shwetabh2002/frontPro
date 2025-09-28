@@ -710,3 +710,56 @@ export const updateQuotationDiscount = async (quotationId: string, discountData:
     );
   }
 };
+
+// Customer Invoice interfaces
+export interface MoreExpense {
+  description: string;
+  amount: number;
+}
+
+export interface CustomerPayment {
+  paymentAmount: number;
+  paymentMethod: string;
+  paymentNotes: string;
+  paymentDate: string;
+}
+
+export interface CreateCustomerInvoiceRequest {
+  quotationId: string;
+  notes: string;
+  moreExpense: MoreExpense;
+  customerPayment: CustomerPayment;
+}
+
+export interface CreateCustomerInvoiceResponse {
+  success: boolean;
+  message: string;
+  data: any;
+}
+
+/**
+ * Create customer invoice
+ * @param invoiceData - Invoice data including quotationId, notes, moreExpense, and customerPayment
+ * @returns Promise with invoice creation response
+ */
+export const createCustomerInvoice = async (invoiceData: CreateCustomerInvoiceRequest): Promise<CreateCustomerInvoiceResponse> => {
+  try {
+    console.log('Creating customer invoice:', invoiceData);
+    
+    const response = await apiClient.post(API_CONFIG.ENDPOINTS.CUSTOMER_INVOICES.CREATE, invoiceData);
+    
+    console.log('Customer invoice created successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating customer invoice:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to create customer invoice',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};

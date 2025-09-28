@@ -47,6 +47,13 @@ export const API_CONFIG = {
       UPDATE: '/quotations',
       DELETE: '/quotations',
     },
+    
+    // Customer Invoices
+    CUSTOMER_INVOICES: {
+      CREATE: '/customer-invoices',
+      GET_ALL: '/customer-invoices',
+      GET_BY_ID: '/customer-invoices',
+    },
   },
   
   // HTTP Headers

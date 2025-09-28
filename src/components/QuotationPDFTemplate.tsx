@@ -534,9 +534,9 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             Customer Acceptance
           </div>
           <div style={{ fontWeight: 'bold' }}>
-            Proforma Invoice — {quotationData.quotationNumber}
+            {quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {quotationData.quotationNumber}
           </div>
-          <div>Show Room No: 377, Dubai Auto Zone</div>
+          <div>{quotationData.company?.address?.street || 'Show Room No: 377, Dubai Auto Zone'}</div>
         </div>
       </div>
     </div>
