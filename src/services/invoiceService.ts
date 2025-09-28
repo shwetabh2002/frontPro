@@ -199,6 +199,288 @@ export interface GetInvoicesParams {
   sortBy?: string;
 }
 
+// Sales Analytics Interfaces
+export interface SalesAnalyticsSummary {
+  totalInvoices: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalMoreExpense: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  paidAmount: number;
+  pendingAmount: number;
+  paidProfitAmount: number;
+  paidProfitWithoutVAT: number;
+  paidProfitWithVAT: number;
+  pendingProfitAmount: number;
+  pendingProfitWithoutVAT: number;
+  pendingProfitWithVAT: number;
+  averageInvoiceValue: number;
+  averageProfitPerInvoice: number;
+  averageProfitPerInvoiceWithoutVAT: number;
+  averageProfitPerInvoiceWithVAT: number;
+  minInvoiceValue: number;
+  maxInvoiceValue: number;
+  minProfitPerInvoice: number;
+  minProfitPerInvoiceWithoutVAT: number;
+  minProfitPerInvoiceWithVAT: number;
+  maxProfitPerInvoice: number;
+  maxProfitPerInvoiceWithoutVAT: number;
+  maxProfitPerInvoiceWithVAT: number;
+}
+
+export interface TimeSeriesData {
+  _id: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  date: string;
+  totalInvoices: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalMoreExpense: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  paidAmount: number;
+  pendingAmount: number;
+  paidProfitAmount: number;
+  paidProfitWithoutVAT: number;
+  paidProfitWithVAT: number;
+  pendingProfitAmount: number;
+  pendingProfitWithoutVAT: number;
+  pendingProfitWithVAT: number;
+  averageInvoiceValue: number;
+  averageProfitPerInvoice: number;
+  averageProfitPerInvoiceWithoutVAT: number;
+  averageProfitPerInvoiceWithVAT: number;
+}
+
+export interface TopCustomer {
+  _id: string;
+  customerName: string;
+  totalAmount: number;
+  invoiceCount: number;
+}
+
+export interface SalesByStatus {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface SalesByCurrency {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface MonthlyTrend {
+  _id: {
+    year: number;
+    month: number;
+  };
+  count: number;
+  totalAmount: number;
+}
+
+export interface AdditionalAnalytics {
+  topCustomers: TopCustomer[];
+  salesByStatus: SalesByStatus[];
+  salesByCurrency: SalesByCurrency[];
+  monthlyTrend: MonthlyTrend[];
+}
+
+export interface AnalyticsFilters {
+  dateFrom: string | null;
+  dateTo: string | null;
+  dateRange: {
+    from: string | null;
+    to: string | null;
+    applied: boolean;
+  };
+  status: {
+    value: string | null;
+    applied: boolean;
+    options: string[];
+  };
+  customerId: {
+    value: string | null;
+    applied: boolean;
+    options: string[];
+    availableCustomers: AvailableCustomer[];
+  };
+  createdBy: {
+    value: string | null;
+    applied: boolean;
+    options: string[];
+    availableEmployees: any[];
+  };
+  currency: {
+    value: string | null;
+    applied: boolean;
+    options: string[];
+    availableCurrencies: AvailableCurrency[];
+  };
+  groupBy: {
+    value: string;
+    applied: boolean;
+    options: string[];
+  };
+  limit: {
+    value: number;
+    applied: boolean;
+    type: string;
+  };
+  appliedFilters: AppliedFilters;
+  query: QueryInfo;
+}
+
+export interface CurrencySummary {
+  currency: string;
+  totalInvoices: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalMoreExpense: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  paidAmount: number;
+  pendingAmount: number;
+  paidProfitAmount: number;
+  paidProfitWithoutVAT: number;
+  paidProfitWithVAT: number;
+  pendingProfitAmount: number;
+  pendingProfitWithoutVAT: number;
+  pendingProfitWithVAT: number;
+  averageInvoiceValue: number;
+  averageProfitPerInvoice: number;
+  averageProfitPerInvoiceWithoutVAT: number;
+  averageProfitPerInvoiceWithVAT: number;
+  minInvoiceValue: number;
+  maxInvoiceValue: number;
+  minProfitPerInvoice: number;
+  minProfitPerInvoiceWithoutVAT: number;
+  minProfitPerInvoiceWithVAT: number;
+  maxProfitPerInvoice: number;
+  maxProfitPerInvoiceWithoutVAT: number;
+  maxProfitPerInvoiceWithVAT: number;
+}
+
+export interface CurrencyTimeSeriesData {
+  _id: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  date: string;
+  currency: string;
+  totalInvoices: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalMoreExpense: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  paidAmount: number;
+  pendingAmount: number;
+  paidProfitAmount: number;
+  paidProfitWithoutVAT: number;
+  paidProfitWithVAT: number;
+  pendingProfitAmount: number;
+  pendingProfitWithoutVAT: number;
+  pendingProfitWithVAT: number;
+  averageInvoiceValue: number;
+  averageProfitPerInvoice: number;
+  averageProfitPerInvoiceWithoutVAT: number;
+  averageProfitPerInvoiceWithVAT: number;
+}
+
+export interface AvailableCustomer {
+  customerId: string;
+  customerName: string;
+  totalAmount: number;
+  invoiceCount: number;
+}
+
+export interface AvailableCurrency {
+  currency: string;
+  totalInvoices: number;
+  totalAmount: number;
+  totalProfit: number;
+}
+
+export interface CurrencyBreakdown {
+  currency: string;
+  invoices: number;
+  amount: number;
+  profit: number;
+}
+
+export interface AppliedFilters {
+  count: number;
+  list: any[];
+  currencyBreakdown: CurrencyBreakdown[];
+}
+
+export interface QueryInfo {
+  totalInvoices: number;
+  hasData: boolean;
+  timeSeriesPoints: number;
+  currencyTimeSeriesPoints: number;
+  currenciesFound: number;
+  currencyList: string[];
+}
+
+export interface SalesAnalyticsData {
+  summary: SalesAnalyticsSummary;
+  currencySummaries: CurrencySummary[];
+  timeSeries: TimeSeriesData[];
+  currencyTimeSeries: CurrencyTimeSeriesData[];
+  additionalAnalytics: AdditionalAnalytics;
+  filters: AnalyticsFilters;
+}
+
+export interface SalesAnalyticsResponse {
+  success: boolean;
+  message: string;
+  data: SalesAnalyticsData;
+}
+
 // Invoice Service Functions
 export const getInvoices = async (
   page: number = 1,
@@ -233,6 +515,337 @@ export const getInvoiceById = async (invoiceId: string): Promise<Invoice> => {
     return response.data.data;
   } catch (error) {
     console.error('Error fetching invoice by ID:', error);
+    throw error;
+  }
+};
+
+// Sales Analytics Filter Parameters
+export interface SalesAnalyticsFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  customerId?: string;
+  createdBy?: string;
+  currency?: string;
+  groupBy?: string;
+  limit?: string | number;
+}
+
+// Sales Analytics Service Function
+export const getSalesAnalytics = async (filters?: SalesAnalyticsFilters): Promise<SalesAnalyticsData> => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value));
+        }
+      });
+    }
+    
+    const url = params.toString() 
+      ? `${API_CONFIG.ENDPOINTS.CUSTOMER_INVOICES.SALES_ANALYTICS}?${params.toString()}`
+      : API_CONFIG.ENDPOINTS.CUSTOMER_INVOICES.SALES_ANALYTICS;
+      
+    const response = await apiClient.get(url);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching sales analytics:', error);
+    throw error;
+  }
+};
+
+// Quotation Analytics Interfaces
+export interface QuotationAnalyticsSummary {
+  totalQuotations: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  averageQuotationValue: number;
+  averageProfitPerQuotation: number;
+  averageProfitPerQuotationWithoutVAT: number;
+  averageProfitPerQuotationWithVAT: number;
+  minQuotationValue: number;
+  maxQuotationValue: number;
+  minProfitPerQuotation: number;
+  minProfitPerQuotationWithoutVAT: number;
+  minProfitPerQuotationWithVAT: number;
+  maxProfitPerQuotation: number;
+  maxProfitPerQuotationWithoutVAT: number;
+  maxProfitPerQuotationWithVAT: number;
+}
+
+export interface QuotationStatusSummary {
+  status: string;
+  totalQuotations: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  averageQuotationValue: number;
+  averageProfitPerQuotation: number;
+  averageProfitPerQuotationWithoutVAT: number;
+  averageProfitPerQuotationWithVAT: number;
+  minQuotationValue: number;
+  maxQuotationValue: number;
+  minProfitPerQuotation: number;
+  minProfitPerQuotationWithoutVAT: number;
+  minProfitPerQuotationWithVAT: number;
+  maxProfitPerQuotation: number;
+  maxProfitPerQuotationWithoutVAT: number;
+  maxProfitPerQuotationWithVAT: number;
+}
+
+export interface QuotationTimeSeriesData {
+  _id: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  date: string;
+  totalQuotations: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  averageQuotationValue: number;
+  averageProfitPerQuotation: number;
+  averageProfitPerQuotationWithoutVAT: number;
+  averageProfitPerQuotationWithVAT: number;
+}
+
+export interface QuotationStatusTimeSeriesData {
+  _id: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  date: string;
+  status: string;
+  totalQuotations: number;
+  totalAmount: number;
+  totalVatAmount: number;
+  totalSubtotal: number;
+  totalDiscount: number;
+  totalAdditionalExpense: number;
+  totalCostAmount: number;
+  totalSellingAmount: number;
+  totalNetRevenue: number;
+  totalProfitAmount: number;
+  totalProfitWithoutVAT: number;
+  totalProfitWithVAT: number;
+  averageQuotationValue: number;
+  averageProfitPerQuotation: number;
+  averageProfitPerQuotationWithoutVAT: number;
+  averageProfitPerQuotationWithVAT: number;
+}
+
+export interface QuotationTopCustomer {
+  _id: string;
+  customerName: string;
+  totalAmount: number;
+  quotationCount: number;
+}
+
+export interface QuotationByStatus {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface QuotationByCurrency {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface QuotationMonthlyTrend {
+  _id: {
+    year: number;
+    month: number;
+  };
+  count: number;
+  totalAmount: number;
+}
+
+export interface QuotationCustomerStatusBreakdown {
+  _id: string;
+  customerName: string;
+  statusBreakdown: Array<{
+    status: string;
+    count: number;
+    totalAmount: number;
+  }>;
+  totalQuotations: number;
+  totalAmount: number;
+}
+
+export interface QuotationStatusCount {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
+export interface QuotationCustomerSummary {
+  _id: string;
+  customerName: string;
+  totalQuotations: number;
+  totalAmount: number;
+  confirmedQuotations: number;
+  confirmedAmount: number;
+  draftQuotations: number;
+  sentQuotations: number;
+  acceptedQuotations: number;
+  rejectedQuotations: number;
+}
+
+export interface QuotationCustomerAnalytics {
+  customerStatusBreakdown: QuotationCustomerStatusBreakdown[];
+  statusCounts: QuotationStatusCount[];
+  customerSummary: QuotationCustomerSummary[];
+}
+
+export interface QuotationAdditionalAnalytics {
+  topCustomers: QuotationTopCustomer[];
+  quotationsByStatus: QuotationByStatus[];
+  quotationsByCurrency: QuotationByCurrency[];
+  monthlyTrend: QuotationMonthlyTrend[];
+}
+
+export interface QuotationFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  customerId?: string;
+  createdBy?: string;
+  currency?: string;
+  groupBy?: string;
+  limit?: string | number;
+}
+
+export interface QuotationAnalyticsData {
+  summary: QuotationAnalyticsSummary;
+  statusSummaries: QuotationStatusSummary[];
+  timeSeries: QuotationTimeSeriesData[];
+  statusTimeSeries: QuotationStatusTimeSeriesData[];
+  additionalAnalytics: QuotationAdditionalAnalytics;
+  customerAnalytics: QuotationCustomerAnalytics;
+  filters: {
+    dateFrom: string | null;
+    dateTo: string | null;
+    dateRange: {
+      from: string | null;
+      to: string | null;
+      applied: boolean;
+    };
+    status: {
+      value: string | null;
+      applied: boolean;
+      options: string[];
+    };
+    customerId: {
+      value: string | null;
+      applied: boolean;
+      options: string[];
+      availableCustomers: Array<{
+        customerId: string;
+        customerName: string;
+        totalAmount: number;
+        quotationCount: number;
+      }>;
+    };
+    createdBy: {
+      value: string | null;
+      applied: boolean;
+      options: string[];
+      availableEmployees: any[];
+    };
+    currency: {
+      value: string | null;
+      applied: boolean;
+      options: string[];
+      availableCurrencies: Array<{
+        currency: string;
+        totalQuotations: number;
+        totalAmount: number;
+        totalProfit: number;
+      }>;
+    };
+    groupBy: {
+      value: string;
+      applied: boolean;
+      options: string[];
+    };
+    limit: {
+      value: number;
+      applied: boolean;
+      type: string;
+    };
+    appliedFilters: {
+      count: number;
+      list: any[];
+      statusBreakdown: Array<{
+        status: string;
+        quotations: number;
+        amount: number;
+        profit: number;
+      }>;
+    };
+    query: {
+      totalQuotations: number;
+      hasData: boolean;
+      timeSeriesPoints: number;
+      statusTimeSeriesPoints: number;
+      statusesFound: number;
+      statusList: string[];
+    };
+  };
+}
+
+// Quotation Analytics Service Function
+export const getQuotationAnalytics = async (filters?: QuotationFilters): Promise<QuotationAnalyticsData> => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value));
+        }
+      });
+    }
+    
+    const url = params.toString() 
+      ? `${API_CONFIG.ENDPOINTS.QUOTATIONS.ANALYTICS}?${params.toString()}`
+      : API_CONFIG.ENDPOINTS.QUOTATIONS.ANALYTICS;
+      
+    const response = await apiClient.get(url);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching quotation analytics:', error);
     throw error;
   }
 };

@@ -46,6 +46,7 @@ export const API_CONFIG = {
       GET_BY_ID: '/quotations',
       UPDATE: '/quotations',
       DELETE: '/quotations',
+      ANALYTICS: '/quotations/analytics',
     },
     
     // Customer Invoices
@@ -53,6 +54,7 @@ export const API_CONFIG = {
       CREATE: '/customer-invoices',
       GET_ALL: '/customer-invoices',
       GET_BY_ID: '/customer-invoices',
+      SALES_ANALYTICS: '/customer-invoices/analytics/sales',
     },
   },
   
