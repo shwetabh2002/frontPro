@@ -558,14 +558,14 @@ const AdminDashboard: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-600 rounded-lg">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
                 <div>
                   <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
                   <p className="text-sm text-gray-500">Analytics overview</p>
-                </div>
               </div>
+          </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
@@ -595,9 +595,9 @@ const AdminDashboard: React.FC = () => {
                   </svg>
                   <span>{isLoading ? 'Loading...' : 'Refresh'}</span>
                 </button>
-              </div>
-            </div>
-            
+        </div>
+      </div>
+
             {/* Tab Navigation */}
             <div className="mt-4 flex space-x-1 bg-gray-100 rounded-lg p-1">
               <button
@@ -611,7 +611,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-center space-x-2">
                   <span>📊</span>
                   <span>Invoice Analytics</span>
-                </div>
+              </div>
               </button>
               <button
                 onClick={() => handleTabChange('quotations')}
@@ -624,7 +624,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-center space-x-2">
                   <span>📋</span>
                   <span>Quotation Analytics</span>
-                </div>
+              </div>
               </button>
             </div>
           </div>
@@ -650,7 +650,7 @@ const AdminDashboard: React.FC = () => {
                     }}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 hover:border-blue-400"
                   />
-                </div>
+              </div>
                 <div className="flex items-center space-x-2">
                   <label className="text-sm font-medium text-gray-700">To:</label>
                   <input
@@ -665,7 +665,7 @@ const AdminDashboard: React.FC = () => {
                     }}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 hover:border-blue-400"
                   />
-                </div>
+            </div>
                 <button
                   onClick={() => {
                     if (activeTab === 'invoices') {
@@ -681,7 +681,7 @@ const AdminDashboard: React.FC = () => {
                   <span>🗑️</span>
                   <span>Clear Dates</span>
                 </button>
-              </div>
+          </div>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -703,7 +703,7 @@ const AdminDashboard: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+      </div>
 
         {/* Filters Section */}
         {showFilters && (
@@ -751,9 +751,9 @@ const AdminDashboard: React.FC = () => {
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+              </svg>
+            </div>
+          </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -911,7 +911,7 @@ const AdminDashboard: React.FC = () => {
                     </span>
                     ))}
                   </div>
-                </div>
+                  </div>
               )}
               
               {/* Currency Breakdown */}
@@ -924,11 +924,11 @@ const AdminDashboard: React.FC = () => {
                       <span key={index} className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                         {currency.currency}: {currency.invoices} invoices ({formatPrice(currency.amount, currency.currency)})
                       </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
+          </div>
+              )}
+        </div>
             
             {/* Filter Status Display */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
@@ -959,7 +959,7 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       );
                     })}
-                  </div>
+      </div>
                 </div>
                 <button
                   onClick={applyFilters}
@@ -981,7 +981,7 @@ const AdminDashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                   <div className="text-lg">{stat.icon}</div>
-                </div>
+            </div>
                 <div className={`px-2 py-1 rounded text-xs font-medium ${
                   stat.changeType === 'positive' 
                     ? 'bg-green-100 text-green-700' 
@@ -1055,14 +1055,14 @@ const AdminDashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {activeTab === 'invoices' ? 'Daily Revenue Trend' : 'Daily Quotation Value Trend'}
-                </h3>
+            </h3>
                 <div className="text-right">
                   <div className="text-lg font-bold text-blue-600">
                     {formatCurrency(activeTab === 'invoices' 
                       ? analyticsData?.summary.totalAmount || 0
                       : quotationData?.summary.totalAmount || 0
                     )}
-                  </div>
+          </div>
                   <div className="text-xs text-gray-500">Total</div>
                 </div>
               </div>
@@ -1172,10 +1172,10 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">{entry.name}</div>
                       <div className="text-xs text-gray-600">{formatCurrency(entry.value)}</div>
-                </div>
-              </div>
-            ))}
           </div>
+        </div>
+            ))}
+      </div>
         </div>
       </div>
         )}
@@ -1195,7 +1195,7 @@ const AdminDashboard: React.FC = () => {
                       ? analyticsData?.additionalAnalytics.salesByStatus.length || 0
                       : quotationData?.additionalAnalytics.quotationsByStatus.length || 0
                     }
-                  </div>
+            </div>
                   <div className="text-xs text-gray-500">Types</div>
                 </div>
               </div>
@@ -1255,7 +1255,7 @@ const AdminDashboard: React.FC = () => {
                       ? analyticsData?.additionalAnalytics.monthlyTrend.length || 0
                       : quotationData?.additionalAnalytics.monthlyTrend.length || 0
                     }
-                  </div>
+          </div>
                   <div className="text-xs text-gray-500">Months</div>
                 </div>
               </div>

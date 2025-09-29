@@ -214,14 +214,60 @@ export const customerService = {
   /**
    * Delete customer
    * @param customerId - Customer ID
-   * @returns Promise<void>
+   * @returns Promise<DeleteCustomerResponse>
    * @throws ApiError
    */
-  async deleteCustomer(customerId: string): Promise<void> {
+  async deleteCustomer(customerId: string): Promise<{
+    success: boolean;
+    message: string;
+    data?: {
+      customerId?: string;
+      customerName?: string;
+      deletedAt?: string;
+      activeQuotations?: Array<{
+        quotationId: string;
+        quotationNumber: string;
+        status: string;
+      }>;
+    };
+    activeQuotations?: Array<{
+      quotationId: string;
+      quotationNumber: string;
+      status: string;
+    }>;
+  }> {
     try {
-      await apiClientService.delete(`${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`);
+      const response = await apiClientService.delete(`${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`);
+      console.log('Raw API response:', response); // Debug log
+      
+      // Ensure we have a valid response structure
+      if (response && response.data) {
+        return response.data;
+      } else {
+        // If response structure is unexpected, create a success response
+        return {
+          success: true,
+          message: 'Customer deleted successfully',
+          data: {
+            customerId: customerId,
+            customerName: 'Unknown',
+            deletedAt: new Date().toISOString()
+          }
+        };
+      }
     } catch (error: any) {
       console.error('Error deleting customer:', error);
+      
+      // Handle 400 status code with business logic error (active quotations)
+      if (error.response?.status === 400 && error.response?.data?.success === false) {
+        return error.response.data;
+      }
+      
+      // If it's a business logic error (has active quotations), return the error response
+      if (error.response?.data?.success === false) {
+        return error.response.data;
+      }
+      
       throw new Error(error.response?.data?.message || 'Failed to delete customer');
     }
   },

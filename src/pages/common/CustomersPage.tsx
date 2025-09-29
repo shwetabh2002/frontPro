@@ -4,9 +4,12 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import CustomerModal from '../../components/CustomerModal';
 import CustomerDetailsModal from '../../components/CustomerDetailsModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import { customerService, type Customer } from '../../services/customerService';
+import { useToast } from '../../contexts/ToastContext';
 
 const CustomersPage: React.FC = () => {
+  const { showToast } = useToast();
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
   const [isCustomerDetailsModalOpen, setIsCustomerDetailsModalOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -16,6 +19,9 @@ const CustomersPage: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<{ id: string; name: string } | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -110,6 +116,61 @@ const CustomersPage: React.FC = () => {
     fetchCustomers(currentPage, searchTerm);
   };
 
+  const handleDeleteCustomer = (customerId: string, customerName: string) => {
+    setCustomerToDelete({ id: customerId, name: customerName });
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!customerToDelete) return;
+
+    try {
+      setIsDeleting(customerToDelete.id);
+      const response = await customerService.deleteCustomer(customerToDelete.id);
+      
+      console.log('Delete customer response:', response); // Debug log
+      
+      if (response && response.success === true) {
+        showToast('Customer deleted successfully', 'success', 5000);
+        // Refresh the customers list
+        fetchCustomers(currentPage, searchTerm);
+        setIsDeleteModalOpen(false);
+        setCustomerToDelete(null);
+      } else if (response && response.success === false) {
+        // Customer has active quotations
+        const activeQuotations = response.data?.activeQuotations || response.activeQuotations || [];
+        const quotationsList = activeQuotations
+          .map(q => `${q.quotationNumber} (${q.status})`)
+          .join(', ');
+        
+        showToast(`${response.message} Active quotations: ${quotationsList}`, 'error', 8000);
+        setIsDeleteModalOpen(false);
+        setCustomerToDelete(null);
+      } else {
+        // Unexpected response structure
+        console.warn('Unexpected response structure:', response);
+        showToast('Customer deleted successfully', 'success', 5000);
+        fetchCustomers(currentPage, searchTerm);
+        setIsDeleteModalOpen(false);
+        setCustomerToDelete(null);
+      }
+    } catch (error: any) {
+      console.error('Error deleting customer:', error);
+      showToast(error.message || 'Failed to delete customer', 'error', 5000);
+      setIsDeleteModalOpen(false);
+      setCustomerToDelete(null);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleDeleteModalClose = () => {
+    if (!isDeleting) {
+      setIsDeleteModalOpen(false);
+      setCustomerToDelete(null);
+    }
+  };
+
   const filteredCustomers = customers;
 
   const columns = [
@@ -179,11 +240,23 @@ const CustomersPage: React.FC = () => {
       header: 'Actions',
       render: (value: any, item: Customer) => (
         <div className="flex items-center space-x-1">
-          <Button variant="outline" size="sm" className="bg-slate-100 border-slate-400 text-slate-700 hover:bg-slate-200 hover:text-slate-900 shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200">
-            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-red-100 border-red-400 text-red-700 hover:bg-red-200 hover:text-red-900 shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handleDeleteCustomer(item._id, item.name)}
+            disabled={isDeleting === item._id}
+          >
+            {isDeleting === item._id ? (
+              <svg className="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            ) : (
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            )}
+            {isDeleting === item._id ? 'Deleting...' : 'Delete'}
           </Button>
           <Button 
             variant="outline" 
@@ -400,6 +473,19 @@ const CustomersPage: React.FC = () => {
         onClose={handleQuotationModalClose}
         prePopulatedData={quotationCustomerData}
         mode="quotation"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Customer"
+        message={`Are you sure you want to delete "${customerToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting === customerToDelete?.id}
+        variant="danger"
       />
     </div>
   );
