@@ -287,22 +287,23 @@ const CustomersPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-blue-600/10 rounded-xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-xl"></div>
           <div className="relative p-4">
             <div className="flex items-center">
-              <div className="p-2.5 bg-gradient-to-br from-gray-900 to-black border border-blue-500 rounded-lg shadow-lg mr-3">
-                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 border border-blue-300 rounded-lg shadow-lg mr-3">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-600 to-blue-500 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-600 to-indigo-600 bg-clip-text text-transparent m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
                   All Customer 
                 </h1>
-                <p className="text-sm text-gray-600 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
+                <p className="text-sm text-gray-700 font-medium m-0 p-0 text-left" style={{ textAlign: 'left', margin: 0, padding: 0 }}>
                   Manage your automotive customer relationships and data.
                 </p>
               </div>
@@ -322,7 +323,7 @@ const CustomersPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gradient-to-br from-gray-900 to-black shadow-lg rounded-xl border border-blue-500/30 p-5">
+      <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-5">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -333,7 +334,7 @@ const CustomersPage: React.FC = () => {
             />
           </div>
           <div className="flex items-end">
-            <Button variant="secondary" className="bg-gray-800 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-black shadow-lg hover:shadow-xl">
+            <Button variant="secondary" className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 shadow-lg hover:shadow-xl">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
@@ -343,20 +344,20 @@ const CustomersPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-gray-900 to-black shadow-lg rounded-xl border border-blue-500/30 overflow-hidden">
+      <div className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-5 py-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg mr-3">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-blue-400">
+              <h3 className="text-lg font-bold text-gray-900">
                 Customer List ({filteredCustomers.length})
               </h3>
             </div>
-            <div className="text-sm font-medium text-blue-400 bg-gray-800 px-3 py-1.5 rounded-full border border-blue-500">
+            <div className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-300">
               {isLoading ? (
                 <div className="flex items-center">
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -487,6 +488,7 @@ const CustomersPage: React.FC = () => {
         isLoading={isDeleting === customerToDelete?.id}
         variant="danger"
       />
+      </div>
     </div>
   );
 };
