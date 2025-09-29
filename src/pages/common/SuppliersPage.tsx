@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import { getSuppliers, Supplier, SupplierResponse } from '../../services/supplierService';
 import { useToast } from '../../contexts/ToastContext';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants';
 import AddSupplierModal from '../../components/AddSupplierModal';
 
 const SuppliersPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { showToast } = useToast();
   const [suppliersData, setSuppliersData] = useState<SupplierResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +22,51 @@ const SuppliersPage: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [viewingSupplier, setViewingSupplier] = useState<Supplier | null>(null);
+
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No suppliers found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm 
+          ? 'Try adjusting your search to find suppliers.'
+          : 'No suppliers have been added yet. Get started by adding your first supplier.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm ? (
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              loadSuppliers();
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Search
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add Supplier
+          </button>
+        )}
+        <button
+          onClick={() => loadSuppliers()}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+    </div>
+  );
 
   // Load suppliers data
   const loadSuppliers = useCallback(async () => {
@@ -60,19 +110,62 @@ const SuppliersPage: React.FC = () => {
         };
         setSuppliersData(fallbackResponse);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error loading suppliers:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryResponse = await getSuppliers();
+              if (retryResponse) {
+                setSuppliersData(retryResponse);
+                return;
+              }
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       const errorMessage = err instanceof Error ? err.message : ERROR_MESSAGES.SUPPLIER.FETCH_FAILED;
       setError(errorMessage);
       showToast(errorMessage, 'error', 5000);
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, []); // Remove showToast dependency to prevent infinite loop
 
   useEffect(() => {
     loadSuppliers();
-  }, [loadSuppliers]);
+  }, []); // Remove loadSuppliers dependency to prevent infinite loop
 
   // Handle search
   const handleSearch = (term: string) => {
@@ -392,39 +485,9 @@ const SuppliersPage: React.FC = () => {
               ))}
             </div>
           </div>
-        ) : suppliersData?.data?.suppliers && suppliersData.data.suppliers.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">No suppliers found</h3>
-              <p className="text-sm text-gray-500 mb-4">Get started by adding your first supplier</p>
-                    <button
-                      onClick={() => setIsAddModalOpen(true)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Add Supplier
-                    </button>
-            </div>
-          </div>
-        ) : suppliersData ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">No suppliers data available</h3>
-              <p className="text-sm text-gray-500 mb-4">The API response doesn't contain supplier data</p>
-              <button
-                onClick={handleRefresh}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Refresh
-              </button>
-            </div>
-          </div>
-        ) : null}
+        ) : (
+          <ZeroState />
+        )}
 
         {/* Pagination */}
         {suppliersData?.data?.pagination && suppliersData.data.pagination.totalPages > 1 && (

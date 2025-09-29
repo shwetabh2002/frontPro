@@ -145,8 +145,8 @@ export interface OrdersResponse {
       creators: string[];
       dateRanges: {
         created: {
-          min: string;
-          max: string;
+          min: string | null;
+          max: string | null;
         };
         validTill: {
           min: string;
@@ -474,7 +474,7 @@ export interface ReviewOrdersResponse {
   summary: {
     appliedFilters: {
       search: string | null;
-      status: string[];
+      status: string | null;
       customerId: string | null;
       createdBy: string | null;
       currency: string | null;
@@ -490,8 +490,8 @@ export interface ReviewOrdersResponse {
       creators: string[];
       dateRanges: {
         created: {
-          min: string;
-          max: string;
+          min: string | null;
+          max: string | null;
         };
         validTill: {
           min: string;
@@ -763,3 +763,4 @@ export const createCustomerInvoice = async (invoiceData: CreateCustomerInvoiceRe
     );
   }
 };
+

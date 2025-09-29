@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -116,8 +119,8 @@ interface OrdersSummary {
     creators: string[];
     dateRanges: {
       created: {
-        min: string;
-        max: string;
+        min: string | null;
+        max: string | null;
       };
       validTill: {
         min: string;
@@ -139,6 +142,8 @@ interface OrdersSummary {
 }
 
 const ReviewOrdersPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -180,6 +185,57 @@ const ReviewOrdersPage: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { showToast } = useToast();
 
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No orders under review found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') 
+          ? 'Try adjusting your search or filters to find orders under review.'
+          : 'No orders are currently under review. Orders will appear here once they are sent for review.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') ? (
+          <Button
+            onClick={() => {
+              setSearchTerm('');
+              setFilters({
+                search: '',
+                status: '',
+                currency: '',
+                customerId: '',
+                createdBy: '',
+                dateFrom: '',
+                dateTo: '',
+                validTillFrom: '',
+                validTillTo: '',
+                sortBy: '-createdAt'
+              });
+              setPagination(prev => ({ ...prev, page: 1 }));
+              fetchOrders(1, pagination.limit);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Filters
+          </Button>
+        ) : null}
+        <Button
+          onClick={() => fetchOrders(pagination.page, pagination.limit)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+    </div>
+  );
+
   // Fetch review orders from API
   const fetchOrders = useCallback(async (page: number = 1, limit: number = 10) => {
     setIsLoading(true);
@@ -218,6 +274,58 @@ const ReviewOrdersPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error fetching review orders:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryResponse = await getReviewOrders(page, limit, filters);
+              if (retryResponse.success) {
+                setOrders(retryResponse.data as any);
+                setPagination({
+                  page: retryResponse.pagination.page,
+                  limit: retryResponse.pagination.limit,
+                  total: retryResponse.pagination.total,
+                  totalPages: retryResponse.pagination.pages,
+                  hasNext: retryResponse.pagination.hasNext,
+                  hasPrev: retryResponse.pagination.hasPrev
+                });
+                setSummary(retryResponse.summary as any);
+                return;
+              }
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       const errorMessage = err?.message || 'Failed to fetch review orders';
       setError(errorMessage);
       showToast(errorMessage, 'error');
@@ -986,12 +1094,16 @@ const ReviewOrdersPage: React.FC = () => {
 
       {/* Orders Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <Table
-          data={filteredOrders}
-          columns={columns}
-          isLoading={isLoading}
-          emptyMessage="No orders under review found"
-        />
+        {filteredOrders.length === 0 ? (
+          <ZeroState />
+        ) : (
+          <Table
+            data={filteredOrders}
+            columns={columns}
+            isLoading={isLoading}
+            emptyMessage="No orders under review found"
+          />
+        )}
         
         {/* Pagination */}
         {pagination.totalPages > 1 && (

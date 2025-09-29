@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import { inventoryService, type AdvancedInventoryFilters, type AdvancedInventoryResponse, type InventoryItem, type DetailedInventoryItem, type CreateInventoryItemData } from '../../services/inventoryService';
 import InventoryItemPopup from '../../components/InventoryItemPopup';
 import AddProductModal from '../../components/AddProductModal';
@@ -6,6 +9,8 @@ import InventoryEditModal from '../../components/InventoryEditModal';
 import { useToast } from '../../contexts/ToastContext';
 
 const InventoryPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { showToast } = useToast();
   const [inventoryData, setInventoryData] = useState<AdvancedInventoryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +39,52 @@ const InventoryPage: React.FC = () => {
   const [isUpdatingProduct, setIsUpdatingProduct] = useState(false);
   const [editingItem, setEditingItem] = useState<DetailedInventoryItem | null>(null);
 
-
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm || Object.values(selectedFilters).some(f => f && f !== '') 
+          ? 'Try adjusting your search or filters to find inventory items.'
+          : 'No inventory items have been added yet. Get started by adding your first product.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm || Object.values(selectedFilters).some(f => f && f !== '') ? (
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setSelectedFilters({});
+              setFilters({ page: 1, limit: 10 });
+              loadInventoryData({ page: 1, limit: 10 });
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Filters
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add Product
+          </button>
+        )}
+        <button
+          onClick={() => loadInventoryData(filters)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+    </div>
+  );
 
   const loadInventoryData = async (customFilters?: AdvancedInventoryFilters) => {
     setIsLoading(true);
@@ -46,8 +96,49 @@ const InventoryPage: React.FC = () => {
       const data = await inventoryService.getInventoryItems(filtersToUse);
       console.log('✅ Inventory data loaded successfully:', data);
       setInventoryData(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error loading inventory:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryData = await inventoryService.getInventoryItems(filters);
+              setInventoryData(retryData);
+              return;
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       const errorMessage = err instanceof Error ? err.message : 'Failed to load inventory';
       setError(errorMessage);
       showToast(errorMessage, 'error', 5000);
@@ -709,10 +800,7 @@ const InventoryPage: React.FC = () => {
                 </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">No inventory items found</div>
-              <p className="text-sm text-gray-500">Try adjusting your search or filter criteria</p>
-            </div>
+            <ZeroState />
           )}
 
           {/* Pagination */}

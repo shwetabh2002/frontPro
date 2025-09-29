@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -173,6 +176,8 @@ interface QuotationsResponse {
 }
 
 const QuotationsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +210,62 @@ const QuotationsPage: React.FC = () => {
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const { showToast } = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No quotations found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') 
+          ? 'Try adjusting your search or filters to find quotations.'
+          : 'No quotations have been created yet. Get started by creating your first quotation.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') ? (
+          <Button
+            onClick={() => {
+              setSearchTerm('');
+              setFilters({
+                status: '',
+                currency: '',
+                customerId: '',
+                createdBy: '',
+                dateFrom: '',
+                dateTo: '',
+                validTillFrom: '',
+                validTillTo: ''
+              });
+              setPagination(prev => ({ ...prev, page: 1 }));
+              fetchQuotations(1, pagination.limit);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Filters
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setIsCreateQuotationModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Create Quotation
+          </Button>
+        )}
+        <Button
+          onClick={() => fetchQuotations(pagination.page, pagination.limit)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+    </div>
+  );
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -243,14 +304,59 @@ const QuotationsPage: React.FC = () => {
         showToast(errorMsg, 'error');
         console.error('API returned error:', response);
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Error fetching quotations:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryResponse = await getQuotations(page, limit);
+              if (retryResponse.success) {
+                setQuotations(retryResponse.data);
+                setPagination(retryResponse.pagination);
+                setSummary(retryResponse.summary);
+                setError(null);
+                return;
+              }
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       let errorMessage = 'Failed to fetch quotations';
       
       if (err instanceof Error) {
         if (err.message.includes('Network Error') || err.message.includes('fetch')) {
           errorMessage = 'Network connection failed. Please check your internet connection.';
-        } else if (err.message.includes('401') || err.message.includes('Unauthorized')) {
-          errorMessage = 'Authentication failed. Please refresh the page and log in again.';
         } else if (err.message.includes('403') || err.message.includes('Forbidden')) {
           errorMessage = 'You do not have permission to view quotations.';
         } else if (err.message.includes('404') || err.message.includes('Not Found')) {
@@ -266,7 +372,6 @@ const QuotationsPage: React.FC = () => {
       
       setError(errorMessage);
       showToast(errorMessage, 'error');
-      console.error('Error fetching quotations:', err);
     } finally {
       setIsLoading(false);
     }
@@ -892,11 +997,15 @@ const QuotationsPage: React.FC = () => {
 
       {/* Quotations Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <Table
-            data={filteredQuotations}
-            columns={columns}
-            emptyMessage="No quotations found"
-          />
+          {filteredQuotations.length === 0 ? (
+            <ZeroState />
+          ) : (
+            <Table
+              data={filteredQuotations}
+              columns={columns}
+              emptyMessage="No quotations found"
+            />
+          )}
         </div>
 
         {/* Pagination */}

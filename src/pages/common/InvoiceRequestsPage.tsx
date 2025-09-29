@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -103,7 +106,7 @@ interface Order {
 interface InvoiceRequestsSummary {
   appliedFilters: {
     search: string | null;
-    status: string[] | null;
+    status: string | null;
     customerId: string | null;
     createdBy: string | null;
     currency: string | null;
@@ -119,8 +122,8 @@ interface InvoiceRequestsSummary {
     creators: string[];
     dateRanges: {
       created: {
-        min: string;
-        max: string;
+        min: string | null;
+        max: string | null;
       };
       validTill: {
         min: string;
@@ -151,6 +154,8 @@ interface InvoiceRequestsPagination {
 }
 
 const InvoiceRequestsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -201,6 +206,56 @@ const InvoiceRequestsPage: React.FC = () => {
 
   const { showToast } = useToast();
 
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No invoice requests found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') 
+          ? 'Try adjusting your search or filters to find invoice requests.'
+          : 'No approved orders are available for invoice generation. Orders will appear here once they are approved.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm || Object.values(filters).some(f => f && f !== '') ? (
+          <Button
+            onClick={() => {
+              setSearchTerm('');
+              setFilters({
+                search: undefined,
+                status: undefined,
+                currency: undefined,
+                customerId: undefined,
+                createdBy: undefined,
+                dateFrom: undefined,
+                dateTo: undefined,
+                validTillFrom: undefined,
+                validTillTo: undefined
+              });
+              setPagination(prev => ({ ...prev, page: 1 }));
+              fetchOrders(1, pagination.limit);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Filters
+          </Button>
+        ) : null}
+        <Button
+          onClick={() => fetchOrders(pagination.page, pagination.limit)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+    </div>
+  );
+
   // Fetch approved orders
   const fetchOrders = useCallback(async (page: number, limit: number) => {
     setIsLoading(true);
@@ -214,26 +269,58 @@ const InvoiceRequestsPage: React.FC = () => {
       
       if (response.success) {
         setOrders(response.data);
+        const currentPage = response.pagination?.page || 1;
+        const totalPages = response.pagination?.pages || 0;
+        
         setPagination({
-          page: response.pagination.page,
-          limit: response.pagination.limit,
-          total: response.pagination.total,
-          totalPages: response.pagination.pages,
-          hasNext: response.pagination.hasNext,
-          hasPrev: response.pagination.hasPrev
+          page: currentPage,
+          limit: response.pagination?.limit || 10,
+          total: response.pagination?.total || 0,
+          totalPages: totalPages,
+          hasNext: currentPage < totalPages,
+          hasPrev: currentPage > 1
         });
         
+        // Use dynamic summary data from API response
         setSummary({
           appliedFilters: {
-            ...response.summary.appliedFilters,
-            status: Array.isArray(response.summary.appliedFilters.status) 
-              ? response.summary.appliedFilters.status 
-              : response.summary.appliedFilters.status
+            search: response.summary?.appliedFilters?.search || searchTerm || null,
+            status: response.summary?.appliedFilters?.status || null,
+            customerId: response.summary?.appliedFilters?.customerId || null,
+            createdBy: response.summary?.appliedFilters?.createdBy || null,
+            currency: response.summary?.appliedFilters?.currency || null,
+            dateFrom: response.summary?.appliedFilters?.dateFrom || null,
+            dateTo: response.summary?.appliedFilters?.dateTo || null,
+            validTillFrom: null, // Not provided in API response
+            validTillTo: null,   // Not provided in API response
           },
-          availableFilters: response.summary.availableFilters,
-          sortBy: response.summary.sortBy,
-          totalResults: response.summary.totalResults,
-          showingResults: response.summary.showingResults
+          availableFilters: {
+            statuses: response.summary?.availableFilters?.statuses || [],
+            currencies: response.summary?.availableFilters?.currencies || [],
+            customers: response.summary?.availableFilters?.customers || [],
+            creators: response.summary?.availableFilters?.creators || [],
+            dateRanges: {
+              created: {
+                min: response.summary?.availableFilters?.dateRanges?.created?.min || null,
+                max: response.summary?.availableFilters?.dateRanges?.created?.max || null
+              },
+              validTill: {
+                min: new Date().toISOString(), // Not provided in API response
+                max: new Date().toISOString()  // Not provided in API response
+              }
+            },
+            counts: {
+              totalQuotations: response.summary?.availableFilters?.counts?.totalQuotations || response.pagination?.total || 0
+            },
+            sortOptions: response.summary?.availableFilters?.sortOptions || [
+              { value: 'createdAt', label: 'Created Date' },
+              { value: 'updatedAt', label: 'Updated Date' }
+            ],
+            pageSizes: [10, 25, 50, 100] // Not provided in API response, using default
+          },
+          sortBy: 'createdAt', // Default sort since not provided in API response
+          totalResults: response.pagination?.total || 0,
+          showingResults: `${response.data?.length || 0}`
         });
       } else {
         setError(response.message || 'Failed to fetch invoice requests');
@@ -241,6 +328,65 @@ const InvoiceRequestsPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error fetching invoice requests:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryResponse = await getApprovedOrders(page, limit, {
+                ...filters,
+                search: searchTerm || undefined
+              });
+              
+              if (retryResponse.success) {
+                setOrders(retryResponse.data);
+                const currentPage = retryResponse.pagination?.page || 1;
+                const totalPages = retryResponse.pagination?.pages || 0;
+                
+                setPagination({
+                  page: currentPage,
+                  limit: retryResponse.pagination?.limit || 10,
+                  total: retryResponse.pagination?.total || 0,
+                  totalPages: totalPages,
+                  hasNext: currentPage < totalPages,
+                  hasPrev: currentPage > 1
+                });
+                setSummary(retryResponse.summary);
+                return;
+              }
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       const errorMessage = err?.message || 'Failed to fetch invoice requests';
       setError(errorMessage);
       showToast(errorMessage, 'error');
@@ -860,12 +1006,16 @@ const InvoiceRequestsPage: React.FC = () => {
 
         {/* Orders Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <Table
-            data={filteredOrders}
-            columns={columns}
-            isLoading={isLoading}
-            emptyMessage="No invoice requests found"
-          />
+          {filteredOrders.length === 0 ? (
+            <ZeroState />
+          ) : (
+            <Table
+              data={filteredOrders}
+              columns={columns}
+              isLoading={isLoading}
+              emptyMessage="No invoice requests found"
+            />
+          )}
         </div>
 
         {/* Pagination */}

@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/hooks';
+import { logout } from '../../features/auth/authSlice';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
 import EditOrderModal from '../../components/EditOrderModal';
 import QuotationPDF from '../../components/QuotationPDF';
-import { getAcceptedOrders, getQuotationById, sendOrderForReview } from '../../services/quotationService';
+import { getAcceptedOrders, getQuotationById, sendOrderForReview, deleteQuotation } from '../../services/quotationService';
 import { formatPrice } from '../../utils/currencyUtils';
 import { useToast } from '../../contexts/ToastContext';
 import { SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 // Order interfaces
 interface OrderCustomer {
@@ -131,8 +135,8 @@ interface OrdersSummary {
     creators: string[];
     dateRanges: {
       created: {
-        min: string;
-        max: string;
+        min: string | null;
+        max: string | null;
       };
     };
     counts: {
@@ -154,6 +158,8 @@ interface OrdersSummary {
 
 
 const OrdersPage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +189,57 @@ const OrdersPage: React.FC = () => {
   const [selectedOrderForPDF, setSelectedOrderForPDF] = useState<any>(null);
   const [isLoadingPDF, setIsLoadingPDF] = useState(false);
   const [sendingForReviewId, setSendingForReviewId] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { showToast } = useToast();
+
+  // Zero state component
+  const ZeroState = () => (
+    <div className="text-center py-12">
+      <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+      <p className="text-gray-500 mb-6">
+        {searchTerm || Object.values(filters).some(f => f) 
+          ? 'Try adjusting your search or filters to find orders.'
+          : 'No orders have been created yet. Orders will appear here once they are created.'
+        }
+      </p>
+      <div className="flex justify-center space-x-3">
+        {searchTerm || Object.values(filters).some(f => f) ? (
+          <Button
+            onClick={() => {
+              setSearchTerm('');
+              setFilters({
+                status: '',
+                currency: '',
+                customerId: '',
+                createdBy: '',
+                dateFrom: '',
+                dateTo: ''
+              });
+              setPagination(prev => ({ ...prev, page: 1 }));
+              fetchOrders(1, pagination.limit);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Clear Filters
+          </Button>
+        ) : null}
+        <Button
+          onClick={() => fetchOrders(pagination.page, pagination.limit)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+    </div>
+  );
 
   // Fetch orders from API
   const fetchOrders = async (page: number = 1, limit: number = 10) => {
@@ -210,12 +266,12 @@ const OrdersPage: React.FC = () => {
             ...response.summary.availableFilters,
             counts: {
               totalQuotations: response.summary.totalResults,
-              statusCounts
+              statusCounts: (response.summary.availableFilters.counts as any)?.statusCounts || {}
             }
           }
         };
         
-        setSummary(updatedSummary);
+        setSummary(updatedSummary as any);
         setError(null);
       } else {
         const errorMsg = response.message || 'Failed to fetch orders';
@@ -223,14 +279,65 @@ const OrdersPage: React.FC = () => {
         showToast(errorMsg, 'error');
         console.error('API returned error:', response);
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Error fetching orders:', err);
+      
+      // Handle authentication errors
+      if (err?.response?.status === 401) {
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('accessToken', refreshData.data.accessToken);
+              localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+              
+              // Retry the original request
+              const retryResponse = await getAcceptedOrders(page, limit);
+              if (retryResponse.success) {
+                setOrders(retryResponse.data);
+                setPagination({
+                  page: retryResponse.pagination.page,
+                  limit: retryResponse.pagination.limit,
+                  total: retryResponse.pagination.total,
+                  pages: retryResponse.pagination.pages,
+                  hasNext: retryResponse.pagination.hasNext,
+                  hasPrev: retryResponse.pagination.hasPrev
+                });
+                setSummary(retryResponse.summary as any);
+                return;
+              }
+            }
+          }
+          
+          // If refresh fails, redirect to login
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          await dispatch(logout() as any);
+          navigate('/login');
+          showToast('Session expired. Please login again.', 'error');
+          return;
+        }
+      }
+      
       let errorMessage = 'Failed to fetch orders';
       
       if (err instanceof Error) {
         if (err.message.includes('Network Error') || err.message.includes('fetch')) {
           errorMessage = 'Network connection failed. Please check your internet connection.';
-        } else if (err.message.includes('401') || err.message.includes('Unauthorized')) {
-          errorMessage = 'Authentication failed. Please refresh the page and log in again.';
         } else if (err.message.includes('403') || err.message.includes('Forbidden')) {
           errorMessage = 'You do not have permission to view orders.';
         } else {
@@ -240,7 +347,6 @@ const OrdersPage: React.FC = () => {
       
       setError(errorMessage);
       showToast(errorMessage, 'error');
-      console.error('Error fetching orders:', err);
     } finally {
       setIsLoading(false);
     }
@@ -398,6 +504,43 @@ const OrdersPage: React.FC = () => {
   const handlePDFModalClose = () => {
     setIsPDFModalOpen(false);
     setSelectedOrderForPDF(null);
+  };
+
+  // Handle delete order
+  const handleDeleteOrder = (order: Order) => {
+    setOrderToDelete(order);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteQuotation(orderToDelete._id);
+      showToast(`Order ${orderToDelete.quotationNumber} deleted successfully`, 'success');
+      
+      // Refresh the orders list
+      await fetchOrders(pagination.page, pagination.limit);
+      
+      // Close modal and reset state
+      setIsDeleteModalOpen(false);
+      setOrderToDelete(null);
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      showToast('Failed to delete order. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Handle delete modal close
+  const handleDeleteModalClose = () => {
+    if (!isDeleting) {
+      setIsDeleteModalOpen(false);
+      setOrderToDelete(null);
+    }
   };
 
   // Handle pagination
@@ -606,6 +749,22 @@ const OrdersPage: React.FC = () => {
                         )}
                         {isLoadingPDF ? 'Loading...' : 'View as PDF'}
                       </button>
+                      
+                      {/* Delete option - only for rejected orders */}
+                      {order.status.toLowerCase() === QUOTATION_STATUS.REJECTED && (
+                        <>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <button
+                            onClick={() => handleDeleteOrder(order)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
+                          >
+                            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Order
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -650,6 +809,22 @@ const OrdersPage: React.FC = () => {
                       )}
                       {isLoadingPDF ? 'Loading...' : 'View as PDF'}
                     </button>
+                    
+                    {/* Delete option - only for rejected orders */}
+                    {order.status.toLowerCase() === QUOTATION_STATUS.REJECTED && (
+                      <>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <button
+                          onClick={() => handleDeleteOrder(order)}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Delete Order
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -874,11 +1049,15 @@ const OrdersPage: React.FC = () => {
 
       {/* Orders Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <Table
-            data={filteredOrders}
-            columns={columns}
-            emptyMessage="No orders found"
-          />
+          {filteredOrders.length === 0 ? (
+            <ZeroState />
+          ) : (
+            <Table
+              data={filteredOrders}
+              columns={columns}
+              emptyMessage="No orders found"
+            />
+          )}
         </div>
 
         {/* Pagination */}
@@ -994,6 +1173,19 @@ const OrdersPage: React.FC = () => {
           isFromOrdersPage={true}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Order"
+        message={`Are you sure you want to permanently delete order ${orderToDelete?.quotationNumber}? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </div>
   );
 };
