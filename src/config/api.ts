@@ -58,6 +58,15 @@ export const API_CONFIG = {
       GET_BY_ID: '/customer-invoices',
       SALES_ANALYTICS: '/customer-invoices/analytics/sales',
     },
+    
+    // Expenses
+    EXPENSES: {
+      CREATE: '/expenses',
+      GET_ALL: '/expenses',
+      GET_BY_ID: '/expenses',
+      UPDATE: '/expenses',
+      DELETE: '/expenses',
+    },
   },
   
   // HTTP Headers

@@ -86,6 +86,13 @@ export const ERROR_MESSAGES = {
     TOKEN_EXPIRED: 'Token has expired',
     UNAUTHORIZED: 'Unauthorized access',
   },
+  EXPENSE: {
+    FETCH_FAILED: 'Failed to fetch expenses data',
+    CREATE_FAILED: 'Failed to create expense. Please try again.',
+    UPDATE_FAILED: 'Failed to update expense. Please try again.',
+    DELETE_FAILED: 'Failed to delete expense. Please try again.',
+    NO_TOKEN: 'No access token found',
+  },
   GENERAL: {
     NETWORK_ERROR: 'Network error',
     REQUEST_TIMEOUT: 'Request timeout',
@@ -122,6 +129,12 @@ export const SUCCESS_MESSAGES = {
     SENT_FOR_REVIEW: 'Order sent for review successfully!',
     APPROVED: 'Order approved successfully!',
     ORDER_REJECTED: 'Order rejected successfully!',
+  },
+  EXPENSE: {
+    CREATED: 'Expense created successfully!',
+    FETCHED: 'Expenses loaded successfully!',
+    UPDATED: 'Expense updated successfully!',
+    DELETED: 'Expense deleted successfully!',
   },
 } as const;
 

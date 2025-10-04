@@ -168,3 +168,25 @@ export function isRTLCurrency(currencyCode: string): boolean {
   const rtlCurrencies = ['SAR', 'AED', 'QAR', 'KWD', 'BHD', 'OMR', 'JOD', 'LBP', 'EGP', 'IQD', 'IRR', 'YER', 'SYP'];
   return rtlCurrencies.includes(currencyCode.toUpperCase());
 }
+
+/**
+ * Format currency amount with symbol
+ * @param amount - The amount to format
+ * @param currencyCode - The currency code (default: 'USD')
+ * @param locale - The locale for number formatting (default: 'en-US')
+ * @returns Formatted currency string
+ */
+export function formatCurrency(amount: number, currencyCode: string = 'USD', locale: string = 'en-US'): string {
+  if (amount === undefined || amount === null || isNaN(amount)) return '';
+  
+  const symbol = getCurrencySymbol(currencyCode);
+  const formattedNumber = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+  
+  // For RTL currencies (Arabic), put symbol after the number
+  const isRTL = isRTLCurrency(currencyCode);
+  
+  return isRTL ? `${formattedNumber} ${symbol}` : `${symbol}${formattedNumber}`;
+}
