@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../app/hooks';
 import { logout } from '../../features/auth/authSlice';
@@ -607,16 +607,14 @@ const InventoryPage: React.FC = () => {
               <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-sm min-w-max">
               {/* Table Header */}
               <div className="bg-gray-50 border-b border-gray-300 sticky top-0 z-10">
-                <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '60px 1fr 80px 100px 100px 100px 70px 120px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
+                <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
                   <div className="p-2 border-r-2 border-gray-400 text-center">#</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Brand</div>
                   <div className="p-2 border-r-2 border-gray-400">Name</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Type</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Category</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Brand</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Model</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Year</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">SKU</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Color</div>
+                  <div className="p-2 border-r-2 border-gray-400 text-center">Color (int./ext.)</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Qty</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Sell Price</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Currency</div>
@@ -634,10 +632,17 @@ const InventoryPage: React.FC = () => {
               {/* Table Body */}
               <div className="divide-y divide-gray-200">
                 {inventoryData.data.items.map((item, index) => (
-                  <div key={item._id} className={`grid gap-0 hover:bg-gray-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '60px 1fr 80px 100px 100px 100px 70px 120px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
+                  <div key={item._id} className={`grid gap-0 hover:bg-gray-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
                     {/* Row Number */}
                     <div className="p-2 border-r-2 border-gray-400 text-center text-xs text-gray-600 flex items-center justify-center">
                       {index + 1}
+                    </div>
+
+                    {/* Brand */}
+                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
+                      <div className="text-xs text-gray-800 break-words leading-tight">
+                        {item.brand || 'N/A'}
+                      </div>
                     </div>
 
                     {/* Name */}
@@ -663,40 +668,22 @@ const InventoryPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Brand */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.brand || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Model */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.model || 'N/A'}
-                      </div>
-                    </div>
-
                     {/* Year */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
                       <div className="text-xs text-gray-800">
                         {item.year || 'N/A'}
                       </div>
-                    </div>
+                        </div>
 
-                    {/* SKU */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-600 break-words leading-tight">
-                        {item.sku || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Color */}
+                    {/* Color (int./ext.) */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
                       <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.color || 'N/A'}
+                        {item.color && item.interiorColor ? 
+                          `${item.color} / ${item.interiorColor}` : 
+                          item.color || item.interiorColor || 'N/A'
+                        }
                       </div>
-                        </div>
+                    </div>
 
                     {/* Quantity */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">

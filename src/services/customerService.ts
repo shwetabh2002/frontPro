@@ -9,6 +9,7 @@ export interface CreateCustomerData {
   phone: string;
   address: string;
   countryCode: string;
+  trn?: string;
 }
 
 export interface Customer {
@@ -21,6 +22,7 @@ export interface Customer {
   type: string;
   status: string;
   address: string;
+  trn?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;

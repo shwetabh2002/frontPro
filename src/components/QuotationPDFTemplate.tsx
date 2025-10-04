@@ -179,6 +179,12 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <span style={{ fontWeight: 'bold' }}>Customer ID:</span>
               <span>{customer.custId || ''}</span>
             </div>
+        {customer.trn && (
+          <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontWeight: 'bold' }}>TRN:</span>
+            <span>{customer.trn}</span>
+          </div>
+        )}
           </div>
         </div>
 

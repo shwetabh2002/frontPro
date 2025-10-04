@@ -159,6 +159,12 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     <span className="font-semibold text-gray-800">Customer ID:</span>
                     <span className="text-gray-700">{quotationData.customer.custId || ''}</span>
                   </div>
+        {quotationData.customer.trn && (
+          <div className="flex justify-between">
+            <span className="font-semibold text-gray-800">TRN:</span>
+            <span className="text-gray-700">{quotationData.customer.trn}</span>
+          </div>
+        )}
                 </div>
               </div>
 

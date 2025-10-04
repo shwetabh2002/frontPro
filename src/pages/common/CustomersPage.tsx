@@ -198,6 +198,15 @@ const CustomersPage: React.FC = () => {
       )
     },
     { 
+      key: 'trn', 
+      header: 'TRN',
+      render: (value: string) => (
+        <div className="text-slate-700 text-sm font-mono">
+          {value || 'N/A'}
+        </div>
+      )
+    },
+    { 
       key: 'phone', 
       header: 'Phone Number',
       render: (value: string) => (

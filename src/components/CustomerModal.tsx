@@ -106,6 +106,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     phone: '',
     address: '',
     notes: '',
+    trn: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -125,6 +126,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         phone: prePopulatedData.phone,
         address: prePopulatedData.address,
         notes: '',
+        trn: prePopulatedData.trn || '',
       });
       
       // Use the countryCode field directly
@@ -579,6 +581,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         phone: formData.phone,
         address: formData.address,
         countryCode: selectedCountryCode,
+        trn: formData.trn || undefined,
       };
 
       const response = await customerService.createCustomer(customerData);
@@ -902,7 +905,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
   const confirmClose = () => {
     // Reset form state
-    setFormData({ name: '', email: '', phone: '', address: '', notes: '' });
+    setFormData({ name: '', email: '', phone: '', address: '', notes: '', trn: '' });
     setErrors({});
     setShowRequirements(false);
     setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
@@ -1142,6 +1145,23 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     {errors.phone}
                   </p>
                 )}
+              </div>
+
+              {/* TRN Input */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  TRN (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.trn || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, trn: e.target.value }))}
+                  placeholder="Enter TRN number"
+                  disabled={isCustomerFieldsDisabled}
+                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-gray-800 ${
+                    'border-blue-500/50 hover:border-blue-400 hover:shadow-md'
+                  } ${isCustomerFieldsDisabled ? 'bg-gray-700 cursor-not-allowed opacity-75' : ''}`}
+                />
               </div>
 
               {/* Address Input */}
