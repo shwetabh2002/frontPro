@@ -107,6 +107,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     address: '',
     notes: '',
     trn: '',
+    exportTo: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -127,6 +128,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         address: prePopulatedData.address,
         notes: '',
         trn: prePopulatedData.trn || '',
+        exportTo: '',
       });
       
       // Use the countryCode field directly
@@ -851,6 +853,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         VAT: 5, // Default VAT rate
         currency: selectedCurrency?.code || 'USD',
         notes: formData.notes || undefined,
+        exportTo: formData.exportTo || undefined,
       };
 
       console.log('📋 Creating quotation with data:', quotationData);
@@ -905,7 +908,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
   const confirmClose = () => {
     // Reset form state
-    setFormData({ name: '', email: '', phone: '', address: '', notes: '', trn: '' });
+    setFormData({ name: '', email: '', phone: '', address: '', notes: '', trn: '', exportTo: '' });
     setErrors({});
     setShowRequirements(false);
     setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
@@ -2081,6 +2084,33 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   )}
                 </div>
               )}
+
+              {/* Export To Input Section - Below Notes */}
+              <div className="mt-6 p-4 bg-gradient-to-br from-green-100 to-white border border-green-500/30 rounded-lg">
+                <label className="block text-sm font-bold text-slate-700 mb-3">
+                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                  </svg>
+                  Export To (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.exportTo}
+                  onChange={(e) => setFormData(prev => ({ ...prev, exportTo: e.target.value }))}
+                  placeholder="Enter export destination country or location..."
+                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-all duration-200 bg-white text-slate-800 ${
+                    errors.exportTo ? 'border-red-400 bg-red-50' : 'border-green-300 hover:border-green-400 hover:shadow-md'
+                  }`}
+                />
+                {errors.exportTo && (
+                  <p className="mt-2 text-sm text-red-400 flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {errors.exportTo}
+                  </p>
+                )}
+              </div>
 
               {requirements.category && filteredItems.length === 0 && !isInventoryLoading && (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">

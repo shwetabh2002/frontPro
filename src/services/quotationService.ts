@@ -51,6 +51,7 @@ export interface CreateQuotationData {
   VAT: number;
   currency: string;
   notes?: string;
+  exportTo?: string;
 }
 
 export interface QuotationResponse {
@@ -763,4 +764,5 @@ export const createCustomerInvoice = async (invoiceData: CreateCustomerInvoiceRe
     );
   }
 };
+
 

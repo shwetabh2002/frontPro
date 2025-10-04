@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react';
-import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
+import React from 'react';
 import QuotationPDFTemplate from './QuotationPDFTemplate';
+import { toWords } from 'number-to-words';
 
 interface QuotationPDFPreviewProps {
   quotationData: any;
@@ -165,6 +165,12 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
             <span className="text-gray-700">{quotationData.customer.trn}</span>
           </div>
         )}
+        {quotationData.exportTo && (
+          <div className="flex justify-between">
+            <span className="font-semibold text-gray-800">Export To:</span>
+            <span className="text-gray-700">{quotationData.exportTo}</span>
+          </div>
+        )}
                 </div>
               </div>
 
@@ -176,16 +182,6 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                   <div><strong>Valid Till:</strong> {formatDate(quotationData.validTill)}</div>
                   <div><strong>Quotation #:</strong> {quotationData.quotationNumber}</div>
                   <div><strong>Sales Reference:</strong> {quotationData.createdBy?.name || 'System Administrator'}</div>
-                  <div className="mt-2">
-                    <strong>Chassis No(s):</strong>
-                    <ul className="ml-4 mt-1 space-y-1">
-                      {quotationData.items.map((item: any, index: number) => 
-                        item.vinNumbers?.map((vin: any, vinIndex: number) => (
-                          <li key={`${index}-${vinIndex}`} className="text-xs">{vin.chasisNumber}</li>
-                        ))
-                      )}
-                    </ul>
-                  </div>
                 </div>
               </div>
             </div>
@@ -357,10 +353,12 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       </tr>
                     )}
                     
-                    <tr className="border-b border-gray-200">
-                      <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({quotationData.VAT || 5}%):</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(quotationData.vatAmount, quotationData.currency)}</td>
-                    </tr>
+                    {quotationData.VAT > 0 && (
+                      <tr className="border-b border-gray-200">
+                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({quotationData.VAT || 5}%):</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(quotationData.vatAmount, quotationData.currency)}</td>
+                      </tr>
+                    )}
                     
                     <tr className="bg-blue-50">
                       <td className="px-4 py-3 text-lg font-bold text-gray-900">Grand Total ({quotationData.currency}):</td>
@@ -429,13 +427,13 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                         </div>
                         <div className="border-t border-gray-300 pt-3 mt-3">
                           <div className="font-semibold text-gray-800 mb-1">Amount in words:</div>
-                          <div className="text-gray-600">{quotationData.totalAmount.toLocaleString()} Only</div>
+                          <div className="font-bold text-gray-900">{toWords(Math.floor(quotationData.totalAmount))} Only</div>
                         </div>
                       </div>
                     ) : (
                       <div className="text-sm text-gray-600">
                         <div className="font-semibold text-gray-800 mb-1">Amount in words:</div>
-                        <div>{quotationData.totalAmount.toLocaleString()} Only</div>
+                        <div className="font-bold text-gray-900">{toWords(Math.floor(quotationData.totalAmount))} Only</div>
                       </div>
                     )}
                   </div>

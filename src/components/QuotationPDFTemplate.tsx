@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { toWords } from 'number-to-words';
 
 interface QuotationPDFTemplateProps {
   quotationData: any;
@@ -185,6 +186,12 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             <span>{customer.trn}</span>
           </div>
         )}
+        {quotationData.exportTo && (
+          <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontWeight: 'bold' }}>Export To:</span>
+            <span>{quotationData.exportTo}</span>
+          </div>
+        )}
           </div>
         </div>
 
@@ -225,23 +232,6 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>Status:</span>
               <span>{getStatusInfo(quotationData.status).text}</span>
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                <span style={{ fontWeight: 'bold' }}>Chassis No(s):</span>
-                <span></span>
-              </div>
-              <div style={{ marginTop: '2px' }}>
-                {quotationData.items.map((item: any, itemIndex: number) => (
-                  item.vinNumbers && item.vinNumbers.length > 0 ? (
-                    item.vinNumbers.map((vin: any, vinIndex: number) => (
-                      <div key={`${itemIndex}-${vinIndex}`} style={{ fontSize: '9px', textAlign: 'right' }}>
-                        {vinIndex + 1}) {vin.chasisNumber}
-                      </div>
-                    ))
-                  ) : null
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -342,6 +332,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
                 <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>-</td>
               </tr>
             )}
+
           </tbody>
           <tfoot>
             <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
@@ -396,14 +387,16 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
                 )}
               </td>
             </tr>
-            <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
-              <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                VAT ({quotationData.company?.VAT || quotationData.VAT || 5}%)
-              </td>
-              <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                {formatCurrency(quotationData.vatAmount, quotationData.currency)}
-              </td>
-            </tr>
+            {(quotationData.VAT > 0 || quotationData.company?.VAT > 0) && (
+              <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
+                <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                  VAT ({quotationData.company?.VAT || quotationData.VAT || 5}%)
+                </td>
+                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                  {formatCurrency(quotationData.vatAmount, quotationData.currency)}
+                </td>
+              </tr>
+            )}
             <tr style={{ backgroundColor: '#e0f2fe', fontWeight: 'bold', fontSize: '11px' }}>
               <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
                 Grand Total ({quotationData.currency})
@@ -476,8 +469,8 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             <div style={{ marginBottom: '4px' }}>
               <strong>VALIDITY:</strong> {quotationData.company?.termCondition?.export?.validity || 'This quotation is valid for 30 days from the date of issue.'}
             </div>
-            <div style={{ marginTop: '6px', fontStyle: 'italic' }}>
-              Amount in words: {formatCurrency(quotationData.totalAmount, quotationData.currency)}
+            <div style={{ marginTop: '6px', fontStyle: 'italic', fontWeight: 'bold', color: '#111827' }}>
+              Amount in words: {toWords(Math.floor(quotationData.totalAmount))} Only
             </div>
           </div>
         </div>
