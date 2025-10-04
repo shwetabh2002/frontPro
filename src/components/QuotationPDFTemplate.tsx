@@ -374,6 +374,18 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               </tr>
             )}
             
+            {/* Booking Amount Row in Totals */}
+            {quotationData.bookingAmount > 0 && (
+              <tr style={{ backgroundColor: '#f0fdf4', fontWeight: 'bold' }}>
+                <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                  Booking Amount
+                </td>
+                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right', color: '#059669' }}>
+                  {formatCurrency(quotationData.bookingAmount, quotationData.currency)}
+                </td>
+              </tr>
+            )}
+            
             <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
               <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
                 Total Amount ({quotationData.currency})

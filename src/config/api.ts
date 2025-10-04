@@ -67,6 +67,12 @@ export const API_CONFIG = {
       UPDATE: '/expenses',
       DELETE: '/expenses',
     },
+    
+    // Receipts
+    RECEIPTS: {
+      GET: '/receipts',
+      GET_BY_ID: '/receipts',
+    },
   },
   
   // HTTP Headers

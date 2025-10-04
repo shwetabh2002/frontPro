@@ -75,6 +75,7 @@ export interface Quotation {
   validTill: string;
   status: string;
   currency: string;
+  bookingAmount?: number;
   createdBy: {
     _id: string;
     name: string;

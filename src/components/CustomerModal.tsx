@@ -20,6 +20,9 @@ interface CustomerModalProps {
   prePopulatedData?: Customer | null;
   mode?: 'add' | 'quotation';
   allowCustomerCreation?: boolean; // New prop to allow customer creation in quotation mode
+  showBookingAmount?: boolean; // New prop to show booking amount field (for Orders page)
+  quotationStatus?: string; // New prop to set quotation status (for Orders page)
+  onQuotationCreated?: () => void; // New prop for success callback (for Orders page)
 }
 
 // Chassis Selection Component
@@ -98,7 +101,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
 
 
 
-const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add', allowCustomerCreation = false }) => {
+const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add', allowCustomerCreation = false, showBookingAmount = false, quotationStatus = 'pending', onQuotationCreated }) => {
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -108,6 +111,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     notes: '',
     trn: '',
     exportTo: '',
+    bookingAmount: 0,
+    paymentMethod: 'cash',
+    description: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -129,6 +135,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         notes: '',
         trn: prePopulatedData.trn || '',
         exportTo: '',
+        bookingAmount: 0,
+        paymentMethod: 'cash',
+        description: '',
       });
       
       // Use the countryCode field directly
@@ -837,6 +846,19 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       return;
     }
 
+    // Validate booking details when creating from Orders page
+    if (showBookingAmount) {
+      if (formData.bookingAmount <= 0) {
+        showToast('Please enter a valid booking amount greater than 0', 'error');
+        return;
+      }
+
+      if (!formData.description.trim()) {
+        showToast('Please enter a description for the booking', 'error');
+        return;
+      }
+    }
+
     setIsCreatingQuotation(true);
 
     try {
@@ -854,6 +876,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         currency: selectedCurrency?.code || 'USD',
         notes: formData.notes || undefined,
         exportTo: formData.exportTo || undefined,
+        bookingAmount: formData.bookingAmount,
+        ...(showBookingAmount && {
+          paymentMethod: formData.paymentMethod,
+          description: formData.description,
+          status: quotationStatus,
+        }),
       };
 
       console.log('📋 Creating quotation with data:', quotationData);
@@ -864,6 +892,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       if (response.success) {
         const quotationNumber = response.data?.quotationNumber || response.data?.quotationId || 'N/A';
         showToast(`Quotation created successfully! Quotation #: ${quotationNumber}`, 'success');
+        
+        // Call the success callback if provided (for Orders page refresh)
+        if (onQuotationCreated) {
+          onQuotationCreated();
+        }
         
         // Reset form and close modal
         confirmClose();
@@ -908,7 +941,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
   const confirmClose = () => {
     // Reset form state
-    setFormData({ name: '', email: '', phone: '', address: '', notes: '', trn: '', exportTo: '' });
+    setFormData({ name: '', email: '', phone: '', address: '', notes: '', trn: '', exportTo: '', bookingAmount: 0, paymentMethod: 'cash', description: '' });
     setErrors({});
     setShowRequirements(false);
     setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
@@ -2053,6 +2086,80 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   )}
                     </>
                   )}
+                </div>
+              )}
+
+              {/* Booking Details - Only shown when called from Orders page */}
+              {selectedCurrency && showBookingAmount && (
+                <div className="mt-6 p-4 bg-gradient-to-br from-purple-100 to-white border border-purple-500/30 rounded-lg">
+                  <h3 className="text-lg font-bold text-slate-700 mb-4 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                    Booking Details
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Booking Amount */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Booking Amount
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-slate-600 font-medium">
+                            {getCurrencySymbol(selectedCurrency?.code || 'USD')}
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          value={formData.bookingAmount}
+                          onChange={(e) => setFormData(prev => ({ ...prev, bookingAmount: parseFloat(e.target.value) || 0 }))}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          className="block w-full pl-10 pr-3 py-2 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Payment Method and Description */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Payment Method */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Payment Method
+                        </label>
+                        <select
+                          value={formData.paymentMethod}
+                          onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                          className="block w-full px-3 py-2 border-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
+                        >
+                          <option value="cash">Cash</option>
+                          <option value="cheque">Cheque</option>
+                          <option value="tt">T/T</option>
+                        </select>
+                      </div>
+                      
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Description
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.description}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Enter payment description..."
+                          className="block w-full px-3 py-2 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="mt-2 text-xs text-slate-600">
+                    Enter the booking amount, payment method, and any additional details for this quotation
+                  </p>
                 </div>
               )}
 

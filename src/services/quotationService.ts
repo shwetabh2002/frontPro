@@ -52,6 +52,10 @@ export interface CreateQuotationData {
   currency: string;
   notes?: string;
   exportTo?: string;
+  bookingAmount: number;
+  paymentMethod?: string;
+  description?: string;
+  status?: string;
 }
 
 export interface QuotationResponse {

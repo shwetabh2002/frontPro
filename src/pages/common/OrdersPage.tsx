@@ -8,11 +8,14 @@ import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
 import EditOrderModal from '../../components/EditOrderModal';
 import QuotationPDF from '../../components/QuotationPDF';
+import CustomerSelectionModal from '../../components/CustomerSelectionModal';
+import CustomerModal from '../../components/CustomerModal';
 import { getAcceptedOrders, getQuotationById, sendOrderForReview, deleteQuotation } from '../../services/quotationService';
 import { formatPrice } from '../../utils/currencyUtils';
 import { useToast } from '../../contexts/ToastContext';
 import { SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { type Customer } from '../../services/customerService';
 
 // Order interfaces
 interface OrderCustomer {
@@ -192,6 +195,12 @@ const OrdersPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Quotation creation states
+  const [isCustomerSelectionModalOpen, setIsCustomerSelectionModalOpen] = useState(false);
+  const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  
   const { showToast } = useToast();
 
   // Zero state component
@@ -454,6 +463,28 @@ const OrdersPage: React.FC = () => {
     fetchOrders(pagination.page, pagination.limit);
   };
 
+  // Handle quotation creation flow
+  const handleCreateQuotation = () => {
+    setIsCustomerSelectionModalOpen(true);
+  };
+
+  const handleCustomerSelected = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsCustomerSelectionModalOpen(false);
+    setIsQuotationModalOpen(true);
+  };
+
+  const handleQuotationModalClose = () => {
+    setIsQuotationModalOpen(false);
+    setSelectedCustomer(null);
+  };
+
+  const handleQuotationCreated = () => {
+    // Refresh the orders list after successful quotation creation
+    fetchOrders(pagination.page, pagination.limit);
+    showToast('Orders page refreshed to show new quotation', 'success');
+  };
+
   // Handle dropdown toggle
   const handleDropdownToggle = (orderId: string) => {
     setOpenDropdownId(openDropdownId === orderId ? null : orderId);
@@ -676,8 +707,8 @@ const OrdersPage: React.FC = () => {
       render: (value: any, order: Order) => {
         const status = order.status.toLowerCase();
         
-        // Actions for accepted status (Edit + Send for Review + PDF)
-        if (status === 'accepted') {
+        // Actions for accepted and booked status (Edit + Send for Review + PDF)
+        if (status === 'accepted' || status === 'booked') {
           return (
             <div className="flex items-center space-x-2">
               <Button
@@ -896,16 +927,27 @@ const OrdersPage: React.FC = () => {
               View and manage all accepted quotations (sales orders)
             </p>
           </div>
-          <Button
-            onClick={() => fetchOrders()}
-            disabled={isLoading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
-          >
-            <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <div className="flex items-center space-x-3">
+            <Button
+              onClick={handleCreateQuotation}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-            <span>{isLoading ? 'Refreshing...' : 'Refresh'}</span>
-          </Button>
+              <span>Create Order</span>
+            </Button>
+            <Button
+              onClick={() => fetchOrders()}
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+            >
+              <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>{isLoading ? 'Refreshing...' : 'Refresh'}</span>
+            </Button>
+          </div>
             </div>
 
         {/* Search and Filters */}
@@ -1186,6 +1228,27 @@ const OrdersPage: React.FC = () => {
         isLoading={isDeleting}
         variant="danger"
       />
+
+      {/* Customer Selection Modal */}
+      <CustomerSelectionModal
+        isOpen={isCustomerSelectionModalOpen}
+        onClose={() => setIsCustomerSelectionModalOpen(false)}
+        onCustomerSelected={handleCustomerSelected}
+      />
+
+      {/* Quotation Creation Modal */}
+      {isQuotationModalOpen && selectedCustomer && (
+        <CustomerModal
+          isOpen={isQuotationModalOpen}
+          onClose={handleQuotationModalClose}
+          prePopulatedData={selectedCustomer}
+          mode="quotation"
+          allowCustomerCreation={false}
+          showBookingAmount={true}
+          quotationStatus="booked"
+          onQuotationCreated={handleQuotationCreated}
+        />
+      )}
     </div>
   );
 };

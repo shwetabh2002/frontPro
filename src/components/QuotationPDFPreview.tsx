@@ -262,6 +262,18 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       </tr>
                     )}
                     
+                    {/* Booking Amount Row */}
+                    {quotationData.bookingAmount > 0 && (
+                      <tr className="bg-green-50">
+                        <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
+                          Booking Amount
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">
+                          {formatCurrency(quotationData.bookingAmount, quotationData.currency)}
+                        </td>
+                      </tr>
+                    )}
+                    
                     <tr>
                       <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Total Amount ({quotationData.currency})</td>
                       <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
