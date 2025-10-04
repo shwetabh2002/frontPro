@@ -12,6 +12,7 @@ export interface Expense {
   subcategory: string;
   paymentMethod: string;
   status: 'pending' | 'approved' | 'rejected' | 'paid';
+  approvalNotes?: string;
   createdBy: {
     _id: string;
     name: string;
@@ -24,6 +25,13 @@ export interface Expense {
     email: string;
     id: string;
   };
+  approvedBy?: {
+    _id: string;
+    name: string;
+    email: string;
+    id: string;
+  };
+  approvedAt?: string;
   attachments: any[];
   createdAt: string;
   updatedAt: string;
@@ -206,6 +214,52 @@ export const expenseService = {
     } catch (error: any) {
       console.error('Error deleting expense:', error);
       throw new Error(error.response?.data?.message || ERROR_MESSAGES.EXPENSE.DELETE_FAILED);
+    }
+  },
+
+  /**
+   * Approve expense
+   * @param id - Expense ID
+   * @returns Promise<Expense>
+   * @throws ApiError
+   */
+  async approveExpense(id: string): Promise<Expense> {
+    try {
+      const response = await apiClientService.patch<{ success: boolean; message: string; data: Expense }>(
+        `/expenses/${id}/approve`
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error('Failed to approve expense');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error approving expense:', error);
+      throw new Error(error.response?.data?.message || 'Failed to approve expense');
+    }
+  },
+
+  /**
+   * Reject expense
+   * @param id - Expense ID
+   * @returns Promise<Expense>
+   * @throws ApiError
+   */
+  async rejectExpense(id: string): Promise<Expense> {
+    try {
+      const response = await apiClientService.patch<{ success: boolean; message: string; data: Expense }>(
+        `/expenses/${id}/reject`
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error('Failed to reject expense');
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error rejecting expense:', error);
+      throw new Error(error.response?.data?.message || 'Failed to reject expense');
     }
   }
 };

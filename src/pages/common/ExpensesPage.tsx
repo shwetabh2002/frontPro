@@ -51,6 +51,9 @@ const ExpensesPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -81,6 +84,7 @@ const ExpensesPage: React.FC = () => {
   useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
+
 
   const handleFilterChange = (key: keyof GetExpensesParams, value: string | number) => {
     setFilters(prev => ({
@@ -161,6 +165,67 @@ const ExpensesPage: React.FC = () => {
     setIsDeleteModalOpen(false);
     setExpenseToDelete(null);
   };
+
+  const handleApproveExpense = async (expenseId: string) => {
+    setIsApproving(true);
+    setDropdownOpen(null);
+    try {
+      await expenseService.approveExpense(expenseId);
+      showToast('Expense approved successfully!', 'success');
+      fetchExpenses();
+    } catch (error: any) {
+      console.error('Error approving expense:', error);
+      showToast(error.message || 'Failed to approve expense', 'error');
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleRejectExpense = async (expenseId: string) => {
+    setIsRejecting(true);
+    setDropdownOpen(null);
+    try {
+      await expenseService.rejectExpense(expenseId);
+      showToast('Expense rejected successfully!', 'success');
+      fetchExpenses();
+    } catch (error: any) {
+      console.error('Error rejecting expense:', error);
+      showToast(error.message || 'Failed to reject expense', 'error');
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
+  const toggleDropdown = (expenseId: string) => {
+    setDropdownOpen(dropdownOpen === expenseId ? null : expenseId);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownOpen) {
+        // Check if the click is outside any dropdown
+        const target = event.target as Element;
+        const dropdowns = document.querySelectorAll('.dropdown-menu');
+        let isInsideDropdown = false;
+        
+        dropdowns.forEach(dropdown => {
+          if (dropdown.contains(target)) {
+            isInsideDropdown = true;
+          }
+        });
+        
+        if (!isInsideDropdown) {
+          setDropdownOpen(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   const getStatusBadge = (status: string) => {
     const statusStyles = {
@@ -406,6 +471,67 @@ const ExpensesPage: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
+                        
+                        {/* 3-dot menu */}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleDropdown(expense.id);
+                            }}
+                            className="text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-50"
+                            title="More actions"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                            </svg>
+                          </button>
+                          
+                          {dropdownOpen === expense.id && (
+                            <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                <div className="py-1">
+                                  {expense.status === 'pending' && (
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleApproveExpense(expense.id);
+                                      }}
+                                      disabled={isApproving}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-green-50 disabled:opacity-50"
+                                    >
+                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      {isApproving ? 'Approving...' : 'Approve'}
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleRejectExpense(expense.id);
+                                      }}
+                                      disabled={isRejecting}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                    >
+                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                      {isRejecting ? 'Rejecting...' : 'Reject'}
+                                    </button>
+                                  </>
+                                )}
+                                  {expense.status !== 'pending' && (
+                                    <div className="px-4 py-2 text-sm text-gray-500">
+                                      Status: {expense.status}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
