@@ -96,7 +96,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
               <div className="flex gap-4 items-center">
                 <div className="w-24 h-24 rounded-lg overflow-hidden">
                   <img 
-                    src="/digital.webp" 
+                    src="/logo_extracted.png" 
                     alt="Company Logo" 
                     className="w-full h-full object-contain"
                   />

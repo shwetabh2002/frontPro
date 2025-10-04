@@ -104,7 +104,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             height: '50px', 
             marginBottom: '5px',
             marginLeft: 'auto',
-            backgroundImage: 'url(/digital.webp)',
+            backgroundImage: 'url(/logo_extracted.png)',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'

@@ -85,7 +85,7 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
             height: '96px', 
             borderRadius: '8px', 
             overflow: 'hidden',
-            backgroundImage: 'url(/digital.webp)',
+            backgroundImage: 'url(/logo_extracted.png)',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'
