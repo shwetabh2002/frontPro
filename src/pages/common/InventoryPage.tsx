@@ -610,7 +610,7 @@ const InventoryPage: React.FC = () => {
                 <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
                   <div className="p-2 border-r-2 border-gray-400 text-center">#</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Brand</div>
-                  <div className="p-2 border-r-2 border-gray-400">Name</div>
+                  <div className="p-2 border-r-2 border-gray-400">Kind of Car</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Type</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Category</div>
                   <div className="p-2 border-r-2 border-gray-400 text-center">Year</div>
