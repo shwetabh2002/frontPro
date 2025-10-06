@@ -172,6 +172,12 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
               <span className="font-semibold text-gray-800">Customer ID:</span>
               <span className="text-gray-700">{invoiceData.customer.custId || ''}</span>
             </div>
+            {invoiceData.exportTo && (
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-800">Export To:</span>
+                <span className="text-gray-700">{invoiceData.exportTo}</span>
+              </div>
+            )}
           </div>
         </div>
 

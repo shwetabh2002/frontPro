@@ -147,6 +147,12 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
               <span style={{ fontWeight: '600', color: '#1f2937' }}>Customer ID:</span>
               <span style={{ color: '#374151' }}>{invoiceData.customer.custId || ''}</span>
             </div>
+            {invoiceData.exportTo && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: '600', color: '#1f2937' }}>Export To:</span>
+                <span style={{ color: '#374151' }}>{invoiceData.exportTo}</span>
+              </div>
+            )}
           </div>
         </div>
 

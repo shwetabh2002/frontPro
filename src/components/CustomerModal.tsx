@@ -1041,7 +1041,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       <SimpleModal
         isOpen={isOpen}
         onClose={handleClose}
-        title={mode === 'quotation' ? 'Create Quotation' : 'Add New Customer'}
+        title={mode === 'quotation' ? (showBookingAmount ? 'Create Order' : 'Create Quotation') : 'Add New Customer'}
         maxWidth="max-w-6xl"
       >
         <div className="space-y-8">

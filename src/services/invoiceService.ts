@@ -111,6 +111,7 @@ export interface Invoice {
   paymentTerms: string;
   dueDate: string;
   notes: string;
+  exportTo?: string;
   createdBy: InvoiceCreatedBy;
   statusHistory: any[];
   createdAt: string;
