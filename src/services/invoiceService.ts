@@ -305,10 +305,17 @@ export interface MonthlyTrend {
   totalAmount: number;
 }
 
+export interface SalesByExportTo {
+  _id: string;
+  count: number;
+  totalAmount: number;
+}
+
 export interface AdditionalAnalytics {
   topCustomers: TopCustomer[];
   salesByStatus: SalesByStatus[];
   salesByCurrency: SalesByCurrency[];
+  salesByExportTo: SalesByExportTo[];
   monthlyTrend: MonthlyTrend[];
 }
 

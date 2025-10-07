@@ -33,6 +33,8 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+// @ts-ignore
+import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -324,7 +326,7 @@ const AdminDashboard: React.FC = () => {
 
   // Prepare chart data
   const prepareChartData = () => {
-    if (!analyticsData) return { timeSeries: [], currencyData: [], statusData: [] };
+    if (!analyticsData) return { timeSeries: [], currencyData: [], statusData: [], exportData: [] };
 
     const timeSeries = analyticsData.timeSeries.map(item => ({
       date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -346,7 +348,48 @@ const AdminDashboard: React.FC = () => {
       count: item.count
     }));
 
-    return { timeSeries, currencyData, statusData };
+    // Prepare export destination data for map
+    const exportData = analyticsData.additionalAnalytics.salesByExportTo?.map((item, index) => {
+      // Map country names to coordinates (simplified mapping)
+      const countryCoordinates: { [key: string]: [number, number] } = {
+        'india': [77.2090, 28.6139], // New Delhi
+        'australia': [133.7751, -25.2744], // Canberra
+        'usa': [-95.7129, 37.0902], // Center of USA
+        'uae': [54.3773, 24.2992], // Dubai
+        'uk': [-3.4360, 55.3781], // London
+        'germany': [10.4515, 51.1657], // Berlin
+        'france': [2.3522, 48.8566], // Paris
+        'canada': [-106.3468, 56.1304], // Ottawa
+        'japan': [138.2529, 36.2048], // Tokyo
+        'china': [104.1954, 35.8617], // Beijing
+      };
+
+      const coordinates = countryCoordinates[item._id.toLowerCase()] || [0, 0];
+      
+      // Assign consistent colors based on country name hash
+      const countryColors: { [key: string]: string } = {
+        'india': '#FF6B6B',      // Red
+        'australia': '#4ECDC4',  // Teal
+        'usa': '#45B7D1',        // Blue
+        'uae': '#96CEB4',        // Green
+        'uk': '#FFEAA7',         // Yellow
+        'germany': '#DDA0DD',    // Plum
+        'france': '#98D8C8',     // Mint
+        'canada': '#F7DC6F',     // Gold
+        'japan': '#BB8FCE',      // Lavender
+        'china': '#85C1E9',      // Light Blue
+      };
+      
+      return {
+        name: item._id.toLowerCase(), // Normalize to lowercase for consistent matching
+        coordinates: coordinates,
+        amount: item.totalAmount,
+        count: item.count,
+        fill: countryColors[item._id.toLowerCase()] || COLORS[index % COLORS.length] // Consistent color for each country
+      };
+    }) || [];
+
+    return { timeSeries, currencyData, statusData, exportData };
   };
 
   // Generate quotation stats from analytics data
@@ -460,7 +503,7 @@ const AdminDashboard: React.FC = () => {
 
   // Prepare quotation chart data
   const prepareQuotationChartData = () => {
-    if (!quotationData) return { timeSeries: [], currencyData: [], statusData: [] };
+    if (!quotationData) return { timeSeries: [], currencyData: [], statusData: [], exportData: [] };
 
     const timeSeries = quotationData.timeSeries.map(item => ({
       date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -479,7 +522,10 @@ const AdminDashboard: React.FC = () => {
       count: item.count
     }));
 
-    return { timeSeries, currencyData, statusData };
+    // Empty export data for quotations (not applicable)
+    const exportData: any[] = [];
+
+    return { timeSeries, currencyData, statusData, exportData };
   };
 
   const quickActions = [
@@ -976,7 +1022,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Compact Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {stats.map((stat, index) => (
+        {stats.map((stat, index) => (
             <div key={stat.name} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -988,7 +1034,7 @@ const AdminDashboard: React.FC = () => {
                     : 'bg-red-100 text-red-700'
                 }`}>
                   {stat.change}
-        </div>
+              </div>
       </div>
 
               <div>
@@ -1009,13 +1055,13 @@ const AdminDashboard: React.FC = () => {
                 {stat.name === 'Total Revenue Generated' && analyticsData && (
                   <div className="mt-2 text-xs text-gray-500">
                     Avg: {formatCurrency(analyticsData.summary.averageInvoiceValue)}
-                  </div>
+              </div>
                 )}
                 
                 {stat.name === 'Net Profit Earned' && analyticsData && (
                   <div className="mt-2 text-xs text-gray-500">
                     Margin: {((analyticsData.summary.totalProfitAmount / analyticsData.summary.totalAmount) * 100).toFixed(1)}%
-                  </div>
+              </div>
                 )}
                 
                 {stat.name === 'Invoices Paid' && analyticsData && (
@@ -1042,10 +1088,10 @@ const AdminDashboard: React.FC = () => {
                     Rate: {quotationData.summary.totalQuotations > 0 ? ((parseInt(stat.value) / quotationData.summary.totalQuotations) * 100).toFixed(1) : 0}%
                   </div>
                 )}
-              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
         {/* Compact Charts Section */}
         {((activeTab === 'invoices' && analyticsData) || (activeTab === 'quotations' && quotationData)) && (
@@ -1128,7 +1174,7 @@ const AdminDashboard: React.FC = () => {
                     }
           </div>
                   <div className="text-xs text-gray-500">Currencies</div>
-                </div>
+              </div>
               </div>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -1176,8 +1222,8 @@ const AdminDashboard: React.FC = () => {
         </div>
             ))}
       </div>
-        </div>
-      </div>
+              </div>
+            </div>
         )}
 
         {/* Compact Analytics */}
@@ -1197,8 +1243,8 @@ const AdminDashboard: React.FC = () => {
                     }
             </div>
                   <div className="text-xs text-gray-500">Types</div>
-                </div>
-              </div>
+                  </div>
+                  </div>
               <div className="space-y-3">
                 {(activeTab === 'invoices' 
                   ? analyticsData?.additionalAnalytics.salesByStatus || []
@@ -1220,7 +1266,7 @@ const AdminDashboard: React.FC = () => {
                           }`}></div>
                           <span className="font-medium text-gray-900 capitalize">{status._id}</span>
                           <span className="text-xs text-gray-500">{percentage}%</span>
-                        </div>
+                  </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-900">{formatCurrency(status.totalAmount)}</p>
                           <p className="text-xs text-gray-500">{status.count} {activeTab === 'invoices' ? 'invoices' : 'quotations'}</p>
@@ -1276,28 +1322,158 @@ const AdminDashboard: React.FC = () => {
                             isCurrentMonth ? 'bg-purple-500' : 'bg-purple-400'
                           }`}>
                             {trend._id.month}
-                          </div>
+                  </div>
                           <div>
                             <p className="font-medium text-gray-900">{monthName}</p>
                             <p className="text-xs text-gray-500">{trend.count} {activeTab === 'invoices' ? 'invoices' : 'quotations'}</p>
                             {isCurrentMonth && (
                               <span className="text-xs text-purple-600 font-medium">Current</span>
                             )}
-                          </div>
-                        </div>
+                  </div>
+                </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-900">{formatCurrency(trend.totalAmount)}</p>
                           <p className="text-xs text-gray-500">
                             Avg: {formatCurrency(trend.totalAmount / trend.count)}
                           </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
+        </div>
+                  );
+                })}
+      </div>
+            </div>
+
+            {/* Export Destinations Map - Clean Design */}
+            {activeTab === 'invoices' && analyticsData?.additionalAnalytics.salesByExportTo && analyticsData.additionalAnalytics.salesByExportTo.length > 0 && (
+              <div className="col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="mr-2 text-xl">🌍</span>
+                    Export Destinations
+                  </h3>
+                  <p className="text-sm text-gray-600">Global distribution of car exports</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <ComposableMap
+                    projection="geoMercator"
+                    projectionConfig={{
+                      scale: 120,
+                      center: [0, 20]
+                    }}
+                    width={800}
+                    height={350}
+                    style={{ width: "100%", height: "auto" }}
+                  >
+                    <Geographies geography="https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson">
+                      {({ geographies }: any) => {
+                        return geographies.map((geo: any) => {
+                          // Only apply colors if we have export data
+                          let fillColor = "#F3F4F6"; // Default light gray
+                          let strokeColor = "#E5E7EB"; // Default light border
+                          let strokeWidth = 0.5; // Default thin border
+                          
+                          // Default colors for all countries
+                          fillColor = "#F3F4F6"; // Default light gray
+                          strokeColor = "#E5E7EB"; // Default light border
+                          strokeWidth = 0.5;
+                          
+                          if (chartData.exportData && chartData.exportData.length > 0) {
+                            
+                            // Get all possible names for this geography (try different property names)
+                            const geoName = geo.properties.NAME?.toLowerCase() || geo.properties.name?.toLowerCase() || '';
+                            const geoNameEn = geo.properties.NAME_EN?.toLowerCase() || geo.properties.name_en?.toLowerCase() || '';
+                            const geoNameLong = geo.properties.NAME_LONG?.toLowerCase() || geo.properties.name_long?.toLowerCase() || '';
+                            const geoSovereign = geo.properties.SOVEREIGNT?.toLowerCase() || geo.properties.sovereignt?.toLowerCase() || '';
+                            const geoAdmin = geo.properties.ADMIN?.toLowerCase() || geo.properties.admin?.toLowerCase() || '';
+                            
+                            // Create a comprehensive list of all possible geo names for this country
+                            const allGeoNames = [geoName, geoNameEn, geoNameLong, geoSovereign, geoAdmin].filter(Boolean);
+                            
+                            
+                            // Check if any export destination matches this country
+                            const exportCountry = chartData.exportData.find((dest: any) => {
+                              const exportToName = dest.name.toLowerCase();
+                              
+                              // Direct exact match
+                              if (allGeoNames.includes(exportToName)) {
+                                return true;
+                              }
+                              
+                              // Specific country mappings for common variations
+                              const countryMappings: { [key: string]: string[] } = {
+                                'india': ['india', 'republic of india', 'bharat'],
+                                'australia': ['australia', 'commonwealth of australia'],
+                                'usa': ['united states', 'usa', 'us', 'united states of america', 'america'],
+                                'uae': ['united arab emirates', 'uae', 'emirates'],
+                                'uk': ['united kingdom', 'uk', 'britain', 'great britain', 'england'],
+                                'germany': ['germany', 'deutschland', 'federal republic of germany'],
+                                'france': ['france', 'french republic'],
+                                'canada': ['canada'],
+                                'japan': ['japan', 'nippon'],
+                                'china': ['china', 'people\'s republic of china', 'prc']
+                              };
+                              
+                              // Check if export name has specific mappings
+                              if (countryMappings[exportToName]) {
+                                return countryMappings[exportToName].some(variation => 
+                                  allGeoNames.includes(variation)
+                                );
+                              }
+                              
+                              // Additional fallback: check if any geo name contains the export name (for partial matches)
+                              return allGeoNames.some(geoName => 
+                                geoName.includes(exportToName) || exportToName.includes(geoName)
+                              );
+                            });
+                            
+                            // Apply colors only if this is an export country
+                            if (exportCountry) {
+                              fillColor = exportCountry.fill;
+                              strokeColor = "#1F2937";
+                              strokeWidth = 1.5;
+                            }
+                          }
+                          
+                          
+                          return (
+                            <Geography
+                              key={geo.rsmKey}
+                              geography={geo}
+                              fill={fillColor}
+                              stroke={strokeColor}
+                              strokeWidth={strokeWidth}
+                              style={{
+                                default: {
+                                  fill: fillColor,
+                                  stroke: strokeColor,
+                                  strokeWidth: strokeWidth,
+                                  outline: "none",
+                                },
+                                hover: {
+                                  fill: fillColor,
+                                  stroke: strokeColor === "#1F2937" ? "#000000" : "#9CA3AF",
+                                  strokeWidth: strokeWidth === 1.5 ? 2 : 1,
+                                  outline: "none",
+                                },
+                                pressed: {
+                                  fill: fillColor,
+                                  stroke: strokeColor === "#1F2937" ? "#000000" : "#6B7280",
+                                  strokeWidth: strokeWidth === 1.5 ? 2 : 1,
+                                  outline: "none",
+                                },
+                              }}
+                            />
+                          );
+                        });
+                      }}
+                    </Geographies>
+                  </ComposableMap>
+                </div>
+              </div>
+            )}
+is          </div>
         )}
 
         {/* Compact Currency Breakdown */}
@@ -1312,9 +1488,9 @@ const AdminDashboard: React.FC = () => {
                     ? analyticsData?.currencySummaries.length || 0
                     : quotationData?.additionalAnalytics.quotationsByCurrency.length || 0
                   }
-                </div>
+            </div>
                 <div className="text-xs text-gray-500">Currencies</div>
-              </div>
+          </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {(activeTab === 'invoices' 
@@ -1379,7 +1555,7 @@ const AdminDashboard: React.FC = () => {
                           <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
                             <span className="text-white font-bold text-sm">{quotationCurrency._id}</span>
                           </div>
-                          <div>
+                           <div>
                             <h4 className="font-semibold text-gray-900">{quotationCurrency._id}</h4>
                             <p className="text-xs text-gray-500">{quotationCurrency.count} quotations</p>
                           </div>
