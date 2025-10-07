@@ -91,6 +91,8 @@ export interface Invoice {
   quotationId: {
     _id: string;
     quotationNumber: string;
+    bookingAmount?: number;
+    createdAt?: string;
   };
   quotationNumber: string;
   customer: InvoiceCustomer;
