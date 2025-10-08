@@ -1472,9 +1472,9 @@ const AdminDashboard: React.FC = () => {
                   </ComposableMap>
                 </div>
               </div>
-            )}
-is          </div>
-        )}
+              )}
+            </div>
+          )}
 
         {/* Compact Currency Breakdown */}
         {((activeTab === 'invoices' && analyticsData && analyticsData.currencySummaries.length > 0) || 
