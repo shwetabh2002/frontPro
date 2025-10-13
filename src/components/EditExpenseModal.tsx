@@ -200,7 +200,7 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">د.إ</span>
+                      <span className="text-gray-500 sm:text-sm">AED</span>
                     </div>
                     <input
                       type="number"

@@ -44,7 +44,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   
   // Middle East currencies
   'SAR': 'ر.س', // Saudi Riyal
-  'AED': 'د.إ', // UAE Dirham
+  'AED': 'AED', // UAE Dirham
   'QAR': 'ر.ق', // Qatari Riyal
   'KWD': 'د.ك', // Kuwaiti Dinar
   'BHD': 'د.ب', // Bahraini Dinar

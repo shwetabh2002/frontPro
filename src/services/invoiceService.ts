@@ -239,6 +239,9 @@ export interface SalesAnalyticsSummary {
   maxProfitPerInvoice: number;
   maxProfitPerInvoiceWithoutVAT: number;
   maxProfitPerInvoiceWithVAT: number;
+  totalExpenses: number;
+  netProfitAfterExpense: number;
+  expenseRatio: number;
 }
 
 export interface TimeSeriesData {

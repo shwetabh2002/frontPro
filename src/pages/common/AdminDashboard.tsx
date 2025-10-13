@@ -50,6 +50,15 @@ const AdminDashboard: React.FC = () => {
   const [filters, setFilters] = useState<SalesAnalyticsFilters>({});
   const [quotationFilters, setQuotationFilters] = useState<QuotationFilters>({});
   const [activeTab, setActiveTab] = useState<'invoices' | 'quotations'>('invoices');
+  
+  // Map tooltip state
+  const [tooltipContent, setTooltipContent] = useState<{
+    country: string;
+    count: number;
+    amount: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Initialize filters with default values from API response
   const initializeFilters = (data: SalesAnalyticsData) => {
@@ -321,6 +330,30 @@ const AdminDashboard: React.FC = () => {
       color: 'from-emerald-500 to-emerald-600',
       bgColor: 'bg-emerald-50',
       iconColor: 'text-emerald-600'
+    },
+    {
+      name: 'Total Company Expenses',
+      value: formatCurrency(summary.totalExpenses),
+      change: getPercentageChange(summary.totalExpenses, summary.totalExpenses * 0.8),
+      changeType: 'negative',
+      icon: '💸',
+      description: 'Company operational expenses',
+      subtitle: 'Water, rent, food bills, etc.',
+      color: 'from-red-500 to-red-600',
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600'
+    },
+    {
+      name: 'Net Profit After Expenses',
+      value: formatCurrency(summary.netProfitAfterExpense),
+      change: getPercentageChange(summary.netProfitAfterExpense, summary.netProfitAfterExpense * 0.85),
+      changeType: 'positive',
+      icon: '💎',
+      description: 'Final profit after all expenses',
+      subtitle: `${((summary.netProfitAfterExpense / summary.totalAmount) * 100).toFixed(1)}% final margin`,
+      color: 'from-indigo-500 to-indigo-600',
+      bgColor: 'bg-indigo-50',
+      iconColor: 'text-indigo-600'
     },
   ];
 
@@ -1075,6 +1108,18 @@ const AdminDashboard: React.FC = () => {
                     Amount: {formatCurrency(analyticsData.summary.pendingAmount)}
                   </div>
                 )}
+                
+                {stat.name === 'Total Company Expenses' && analyticsData && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Expense Ratio: {(analyticsData.summary.expenseRatio * 100).toFixed(2)}%
+                  </div>
+                )}
+                
+                {stat.name === 'Net Profit After Expenses' && analyticsData && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Final Margin: {((analyticsData.summary.netProfitAfterExpense / analyticsData.summary.totalAmount) * 100).toFixed(1)}%
+                  </div>
+                )}
 
                 {/* Additional context for quotation stats */}
                 {stat.name === 'Total Quotation Value' && activeTab === 'quotations' && quotationData && (
@@ -1355,7 +1400,26 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600">Global distribution of car exports</p>
                 </div>
                 
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50 rounded-lg p-4 relative">
+                  {/* Tooltip */}
+                  {tooltipContent && (
+                    <div 
+                      className="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-3 pointer-events-none"
+                      style={{
+                        left: tooltipContent.x + 10,
+                        top: tooltipContent.y - 10,
+                        transform: 'translateY(-100%)'
+                      }}
+                    >
+                      <div className="text-sm font-semibold text-gray-900 mb-1">
+                        {tooltipContent.country}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {tooltipContent.count} export{tooltipContent.count !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  )}
+                  
                   <ComposableMap
                     projection="geoMercator"
                     projectionConfig={{
@@ -1444,6 +1508,65 @@ const AdminDashboard: React.FC = () => {
                               fill={fillColor}
                               stroke={strokeColor}
                               strokeWidth={strokeWidth}
+                              onMouseEnter={(event: any) => {
+                                // Only show tooltip for export countries
+                                if (chartData.exportData && chartData.exportData.length > 0) {
+                                  const geoName = geo.properties.NAME?.toLowerCase() || geo.properties.name?.toLowerCase() || '';
+                                  const geoNameEn = geo.properties.NAME_EN?.toLowerCase() || geo.properties.name_en?.toLowerCase() || '';
+                                  const geoNameLong = geo.properties.NAME_LONG?.toLowerCase() || geo.properties.name_long?.toLowerCase() || '';
+                                  const geoSovereign = geo.properties.SOVEREIGNT?.toLowerCase() || geo.properties.sovereignt?.toLowerCase() || '';
+                                  const geoAdmin = geo.properties.ADMIN?.toLowerCase() || geo.properties.admin?.toLowerCase() || '';
+                                  
+                                  const allGeoNames = [geoName, geoNameEn, geoNameLong, geoSovereign, geoAdmin].filter(Boolean);
+                                  
+                                  const exportCountry = chartData.exportData.find((dest: any) => {
+                                    const exportToName = dest.name.toLowerCase();
+                                    
+                                    if (allGeoNames.includes(exportToName)) {
+                                      return true;
+                                    }
+                                    
+                                    const countryMappings: { [key: string]: string[] } = {
+                                      'india': ['india', 'republic of india', 'bharat'],
+                                      'australia': ['australia', 'commonwealth of australia'],
+                                      'usa': ['united states', 'usa', 'us', 'united states of america', 'america'],
+                                      'uae': ['united arab emirates', 'uae', 'emirates'],
+                                      'uk': ['united kingdom', 'uk', 'britain', 'great britain', 'england'],
+                                      'germany': ['germany', 'deutschland', 'federal republic of germany'],
+                                      'france': ['france', 'french republic'],
+                                      'canada': ['canada'],
+                                      'japan': ['japan', 'nippon'],
+                                      'china': ['china', 'people\'s republic of china', 'prc']
+                                    };
+                                    
+                                    if (countryMappings[exportToName]) {
+                                      return countryMappings[exportToName].some(variation => 
+                                        allGeoNames.includes(variation)
+                                      );
+                                    }
+                                    
+                                    return allGeoNames.some(geoName => 
+                                      geoName.includes(exportToName) || exportToName.includes(geoName)
+                                    );
+                                  });
+                                  
+                                  if (exportCountry) {
+                                    const rect = event.target.getBoundingClientRect();
+                                    const mapRect = event.target.closest('.bg-gray-50').getBoundingClientRect();
+                                    
+                                    setTooltipContent({
+                                      country: exportCountry.name.charAt(0).toUpperCase() + exportCountry.name.slice(1),
+                                      count: exportCountry.count,
+                                      amount: exportCountry.amount,
+                                      x: rect.left - mapRect.left + rect.width / 2,
+                                      y: rect.top - mapRect.top + rect.height / 2
+                                    });
+                                  }
+                                }
+                              }}
+                              onMouseLeave={() => {
+                                setTooltipContent(null);
+                              }}
                               style={{
                                 default: {
                                   fill: fillColor,
