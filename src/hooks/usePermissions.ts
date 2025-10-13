@@ -76,6 +76,14 @@ export const usePermissions = () => {
     return hasPermission(userRoles, 'customers', 'customers', 'delete');
   };
   
+  const canEditApprovedExpenses = (): boolean => {
+    return hasPermission(userRoles, 'expenses', 'expenses', 'editApproved');
+  };
+  
+  const canDeleteApprovedExpenses = (): boolean => {
+    return hasPermission(userRoles, 'expenses', 'expenses', 'deleteApproved');
+  };
+  
   return {
     userRoles,
     isAdmin,
@@ -91,5 +99,7 @@ export const usePermissions = () => {
     canViewCostPrice,
     canManageInventory,
     canDeleteCustomers,
+    canEditApprovedExpenses,
+    canDeleteApprovedExpenses,
   };
 };

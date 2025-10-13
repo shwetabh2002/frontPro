@@ -78,6 +78,8 @@ export interface Permission {
       edit: boolean;
       delete: boolean;
       approve: boolean;
+      editApproved: boolean; // Can edit approved expenses
+      deleteApproved: boolean; // Can delete approved expenses
     };
     
     // Employee features
@@ -159,6 +161,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         edit: true,
         delete: true,
         approve: true,
+        editApproved: true,
+        deleteApproved: true,
       },
       employees: {
         view: true,
@@ -234,6 +238,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         edit: true,
         delete: true,
         approve: false, // Cannot approve expenses
+        editApproved: false, // Cannot edit approved expenses
+        deleteApproved: false, // Cannot delete approved expenses
       },
       employees: {
         view: false,
@@ -253,16 +259,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       dashboard: false, // Hidden - only for admin
       inventory: false,
       customers: true,
-      quotations: true,
-      orders: true,
+      quotations: false, // Hidden
+      orders: false, // Hidden
       invoices: true,
       receipts: true,
       expenses: true,
       employees: false,
       analytics: true,
-      suppliers: true,
+      suppliers: false, // Hidden
       invoiceRequests: true,
-      reviewOrders: true,
+      reviewOrders: false, // Hidden
     },
     features: {
       inventory: {
@@ -274,7 +280,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       },
       customers: {
         view: true,
-        add: false, // Only detail view access
+        add: false, // Hidden - no create customer button
         edit: false, // Only detail view access
         delete: false,
       },
@@ -286,16 +292,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         exportExcel: false, // Hidden export to Excel button
       },
       quotations: {
-        view: true,
-        add: true,
-        edit: true,
-        delete: true,
+        view: false, // Hidden page
+        add: false, // Hidden - no create quotation button
+        edit: false,
+        delete: false,
       },
       orders: {
-        view: true,
-        add: true,
-        edit: true,
-        delete: true,
+        view: false, // Hidden page
+        add: false,
+        edit: false,
+        delete: false,
       },
       receipts: {
         view: true,
@@ -309,6 +315,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         edit: true,
         delete: true,
         approve: false, // Cannot approve expenses
+        editApproved: false, // Cannot edit approved expenses
+        deleteApproved: false, // Cannot delete approved expenses
       },
       employees: {
         view: false,
