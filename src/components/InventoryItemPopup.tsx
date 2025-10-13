@@ -1,5 +1,6 @@
 import React from 'react';
 import { DetailedInventoryItem } from '../services/inventoryService';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface InventoryItemPopupProps {
   item: DetailedInventoryItem | null;
@@ -8,6 +9,8 @@ interface InventoryItemPopupProps {
 }
 
 const InventoryItemPopup: React.FC<InventoryItemPopupProps> = ({ item, isOpen, onClose }) => {
+  const { canViewCostPrice } = usePermissions();
+  
   if (!isOpen || !item) return null;
 
   return (
@@ -148,10 +151,12 @@ const InventoryItemPopup: React.FC<InventoryItemPopupProps> = ({ item, isOpen, o
                 </h3>
                 <div className="space-y-4">
                   <div className="bg-blue-200/50 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600 text-sm">Cost Price</span>
-                      <span className="text-gray-800 font-mono">${item.costPrice.toLocaleString()}</span>
-                    </div>
+                    {canViewCostPrice() && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600 text-sm">Cost Price</span>
+                        <span className="text-gray-800 font-mono">${item.costPrice.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center">
                       <span className="text-blue-400 text-sm font-medium">Selling Price</span>
                       <span className="text-blue-400 font-bold text-lg">${item.sellingPrice.toLocaleString()}</span>

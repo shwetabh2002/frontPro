@@ -7,9 +7,11 @@ import CustomerDetailsModal from '../../components/CustomerDetailsModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { customerService, type Customer } from '../../services/customerService';
 import { useToast } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const CustomersPage: React.FC = () => {
   const { showToast } = useToast();
+  const { canDeleteCustomers } = usePermissions();
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
   const [isCustomerDetailsModalOpen, setIsCustomerDetailsModalOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -249,24 +251,26 @@ const CustomersPage: React.FC = () => {
       header: 'Actions',
       render: (value: any, item: Customer) => (
         <div className="flex items-center space-x-1">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="bg-red-100 border-red-400 text-red-700 hover:bg-red-200 hover:text-red-900 shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => handleDeleteCustomer(item._id, item.name)}
-            disabled={isDeleting === item._id}
-          >
-            {isDeleting === item._id ? (
-              <svg className="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            )}
-            {isDeleting === item._id ? 'Deleting...' : 'Delete'}
-          </Button>
+          {canDeleteCustomers() && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-red-100 border-red-400 text-red-700 hover:bg-red-200 hover:text-red-900 shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => handleDeleteCustomer(item._id, item.name)}
+              disabled={isDeleting === item._id}
+            >
+              {isDeleting === item._id ? (
+                <svg className="w-3 h-3 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              )}
+              {isDeleting === item._id ? 'Deleting...' : 'Delete'}
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="sm" 

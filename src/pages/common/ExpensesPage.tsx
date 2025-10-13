@@ -8,10 +8,12 @@ import { useToast } from '../../contexts/ToastContext';
 import AddExpenseModal from '../../components/AddExpenseModal';
 import EditExpenseModal from '../../components/EditExpenseModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const ExpensesPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
+  const { canApproveExpenses } = usePermissions();
   
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -491,7 +493,7 @@ const ExpensesPage: React.FC = () => {
                           {dropdownOpen === expense.id && (
                             <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                                 <div className="py-1">
-                                  {expense.status === 'pending' && (
+                                  {expense.status === 'pending' && canApproveExpenses() && (
                                   <>
                                     <button
                                       onClick={(e) => {
