@@ -50,15 +50,15 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
       case 'draft':
         return { color: 'bg-gray-500', text: 'Draft', textColor: 'text-gray-700' };
       case 'accepted':
-        return { color: 'bg-blue-500', text: 'Accepted', textColor: 'text-blue-700' };
+        return { color: 'bg-gray-500', text: 'Accepted', textColor: 'text-gray-700' };
       case 'review':
-        return { color: 'bg-yellow-500', text: 'Under Review', textColor: 'text-yellow-700' };
+        return { color: 'bg-gray-500', text: 'Under Review', textColor: 'text-gray-700' };
       case 'approved':
-        return { color: 'bg-green-500', text: 'Approved by Admin', textColor: 'text-green-700' };
+        return { color: 'bg-gray-500', text: 'Approved by Admin', textColor: 'text-gray-700' };
       case 'confirmed':
-        return { color: 'bg-purple-500', text: 'Confirmed', textColor: 'text-purple-700' };
+        return { color: 'bg-gray-500', text: 'Confirmed', textColor: 'text-gray-700' };
       case 'rejected':
-        return { color: 'bg-red-500', text: 'Rejected', textColor: 'text-red-700' };
+        return { color: 'bg-gray-500', text: 'Rejected', textColor: 'text-gray-700' };
       default:
         return { color: 'bg-gray-500', text: status, textColor: 'text-gray-700' };
     }
@@ -68,7 +68,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <div className="bg-gray-600 text-white p-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold">PDF Preview - {quotationData.quotationNumber}</h3>
           <button
             onClick={onClose}
@@ -513,7 +513,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
             disabled={isGenerating || !isDownloadEnabled}
             className={`px-6 py-2 rounded-lg transition-colors flex items-center ${
               isDownloadEnabled && !isGenerating
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-gray-600 text-white hover:bg-blue-700'
                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >

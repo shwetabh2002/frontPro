@@ -17,6 +17,23 @@ export interface CompanySocialMedia {
   facebook?: string;
 }
 
+export interface BankDetails {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  iban: string;
+  swiftCode: string;
+  branch: string;
+  address: string;
+  _id: string;
+}
+
+export interface CurrencyBankDetails {
+  AED?: BankDetails;
+  USD?: BankDetails;
+  EURO?: BankDetails;
+}
+
 export interface Company {
   name: string;
   legalName: string;
@@ -33,6 +50,7 @@ export interface Company {
   paymentTerms: string;
   socialMedia: CompanySocialMedia;
   termCondition: string;
+  bankDetails: CurrencyBankDetails;
 }
 
 export interface CompanyResponse {

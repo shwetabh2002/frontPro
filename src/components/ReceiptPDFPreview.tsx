@@ -92,7 +92,7 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold">Receipt Preview</h2>
           <button
             onClick={onClose}

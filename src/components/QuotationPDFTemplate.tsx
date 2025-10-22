@@ -111,7 +111,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           }}></div>
           
           {/* Invoice Details */}
-          <div style={{ fontSize: '9px', color: '#374151' }}>
+          <div style={{ fontSize: '9px', color: '#000000' }}>
             <div>Quote Date: {formatDate(quotationData.createdAt)}</div>
             <div>Sales Quote #: {quotationData.quotationNumber}</div>
             <div>Validity: {formatDate(quotationData.validTill)}</div>
@@ -124,10 +124,10 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           textAlign: 'center', 
           fontSize: '18px', 
           fontWeight: 'bold', 
-          color: '#1e40af',
+          color: '#000000',
           marginTop: '80px',
           marginBottom: '15px',
-          borderBottom: '2px solid #3b82f6',
+          borderBottom: '2px solid #000000',
           paddingBottom: '10px'
         }}>
           {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER INVOICE'}
@@ -144,15 +144,15 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
         <div style={{ 
           flex: '1', 
           minWidth: '280px',
-          backgroundColor: '#f0f9ff',
-          border: '1px solid #bae6fd',
+          backgroundColor: '#f9f9f9',
+          border: '1px solid #000000',
           borderRadius: '6px',
           padding: '10px'
         }}>
           <h3 style={{ 
             fontSize: '11px', 
             fontWeight: 'bold', 
-            color: '#374151',
+            color: '#000000',
             margin: '0 0 8px 0'
           }}>
             Bill / Export To
@@ -199,15 +199,15 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
         <div style={{ 
           flex: '1', 
           minWidth: '280px',
-          backgroundColor: '#f0f9ff',
-          border: '1px solid #bae6fd',
+          backgroundColor: '#f9f9f9',
+          border: '1px solid #000000',
           borderRadius: '6px',
           padding: '10px'
         }}>
           <h3 style={{ 
             fontSize: '11px', 
             fontWeight: 'bold', 
-            color: '#374151',
+            color: '#000000',
             margin: '0 0 8px 0'
           }}>
             PI Details
@@ -319,7 +319,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             
             {/* Notes Row */}
             {quotationData.notes && (
-              <tr style={{ backgroundColor: '#f0f9ff' }}>
+              <tr style={{ backgroundColor: '#f9f9f9' }}>
                 <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'center' }}>-</td>
                 <td colSpan={5} style={{ border: '1px solid #d1d5db', padding: '6px' }}>
                   <div>

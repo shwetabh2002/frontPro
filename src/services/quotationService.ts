@@ -50,6 +50,7 @@ export interface CreateQuotationData {
   discountType: 'fixed' | 'percentage';
   VAT: number;
   currency: string;
+  bankCurrency?: string;
   notes?: string;
   exportTo?: string;
   bookingAmount: number;

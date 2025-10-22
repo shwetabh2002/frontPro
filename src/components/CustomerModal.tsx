@@ -8,6 +8,7 @@ import { createQuotation, type CreateQuotationData, type QuotationItem } from '.
 import { type Customer } from '../services/customerService';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
 import { getCompanyName, getCompanyCurrency } from '../utils/companyUtils';
+import { useCompany } from '../hooks/useCompany';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
 import { useToast } from '../contexts/ToastContext';
 import CountryDropdown from './CountryDropdown';
@@ -103,6 +104,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add', allowCustomerCreation = false, showBookingAmount = false, quotationStatus = 'pending', onQuotationCreated }) => {
   const { showToast } = useToast();
+  const { company } = useCompany();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -115,6 +117,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     paymentMethod: 'cash',
     description: '',
   });
+  const [selectedPaymentCurrency, setSelectedPaymentCurrency] = useState<string>('AED');
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -559,6 +562,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       newErrors.address = 'Address is required';
     }
 
+    if (!formData.exportTo?.trim()) {
+      newErrors.exportTo = 'Export destination is required';
+    }
+
     // Validate additional expenses
     if (additionalExpenses.expenceType !== 'none') {
       if (!additionalExpenses.description?.trim()) {
@@ -874,6 +881,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         discountType: discountType,
         VAT: 5, // Default VAT rate
         currency: selectedCurrency?.code || 'USD',
+        bankCurrency: selectedPaymentCurrency || 'AED',
         notes: formData.notes || undefined,
         exportTo: formData.exportTo || undefined,
         bookingAmount: formData.bookingAmount,
@@ -2193,20 +2201,20 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
               )}
 
               {/* Export To Input Section - Below Notes */}
-              <div className="mt-6 p-4 bg-gradient-to-br from-green-100 to-white border border-green-500/30 rounded-lg">
+              <div className="mt-6 p-4 bg-gradient-to-br from-orange-100 to-white border border-orange-500/30 rounded-lg">
                 <label className="block text-sm font-bold text-slate-700 mb-3">
                   <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                   </svg>
-                  Export To (Optional)
+                  Export To (Required) *
                 </label>
                 <input
                   type="text"
                   value={formData.exportTo}
                   onChange={(e) => setFormData(prev => ({ ...prev, exportTo: e.target.value }))}
-                  placeholder="Enter export destination country or location..."
+                  placeholder="Enter export destination country or location... (Required)"
                   className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-all duration-200 bg-white text-slate-800 ${
-                    errors.exportTo ? 'border-red-400 bg-red-50' : 'border-green-300 hover:border-green-400 hover:shadow-md'
+                    errors.exportTo ? 'border-red-400 bg-red-50' : 'border-orange-300 hover:border-orange-400 hover:shadow-md'
                   }`}
                 />
                 {errors.exportTo && (
@@ -2218,6 +2226,32 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   </p>
                 )}
               </div>
+
+              {/* Payment Method Dropdown - Only show for quotation mode with booking amount */}
+              {mode === 'quotation' && showBookingAmount && (
+                <div className="mt-6 p-4 bg-gradient-to-br from-blue-100 to-white border border-blue-500/30 rounded-lg">
+                  <label className="block text-sm font-bold text-slate-700 mb-3">
+                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Payment Bank (Currency) *
+                  </label>
+                  
+                  <select
+                    value={selectedPaymentCurrency}
+                    onChange={(e) => setSelectedPaymentCurrency(e.target.value)}
+                    className="block w-full px-4 py-3 border-2 border-blue-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-slate-800 hover:border-blue-400 hover:shadow-md"
+                  >
+                    <option value="AED">AED</option>
+                    <option value="USD">USD</option>
+                    <option value="EURO">EURO</option>
+                  </select>
+                  
+                  <p className="mt-2 text-xs text-blue-600">
+                    Selected currency will be used for the bank details
+                  </p>
+                </div>
+              )}
 
               {requirements.category && filteredItems.length === 0 && !isInventoryLoading && (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">

@@ -44,11 +44,11 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
       case 'draft':
         return { color: 'bg-gray-500', text: 'Draft', textColor: 'text-gray-700' };
       case 'sent':
-        return { color: 'bg-blue-500', text: 'Sent', textColor: 'text-blue-700' };
+        return { color: 'bg-gray-500', text: 'Sent', textColor: 'text-gray-700' };
       case 'paid':
-        return { color: 'bg-green-500', text: 'Paid', textColor: 'text-green-700' };
+        return { color: 'bg-gray-500', text: 'Paid', textColor: 'text-gray-700' };
       case 'overdue':
-        return { color: 'bg-red-500', text: 'Overdue', textColor: 'text-red-700' };
+        return { color: 'bg-gray-500', text: 'Overdue', textColor: 'text-gray-700' };
       default:
         return { color: 'bg-gray-500', text: status, textColor: 'text-gray-700' };
     }
@@ -65,7 +65,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
               <button
                 onClick={onDownload}
                 disabled={isGenerating}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 flex items-center space-x-2"
               >
                 {isGenerating ? (
                   <>
@@ -124,7 +124,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
               <div>
                     <a href={invoiceData.company?.website || 'https://www.alkaramamotors.com'} 
                        target="_blank" rel="noopener noreferrer" 
-                       className="text-blue-600 hover:underline">
+                       className="text-gray-600 hover:underline">
                   {invoiceData.company?.website || 'www.alkaramamotors.com'}
                 </a>
               </div>
@@ -186,19 +186,8 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Invoice Details</h3>
           <div className="text-sm text-gray-700 space-y-1">
             <div><strong>Invoice Date:</strong> {formatDate(invoiceData.createdAt)}</div>
-            <div><strong>Due Date:</strong> {formatDate(invoiceData.dueDate)}</div>
             <div><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</div>
             <div><strong>Sales Reference:</strong> {invoiceData.createdBy?.name || 'System Administrator'}</div>
-            <div className="mt-2">
-              <strong>Chassis No(s):</strong>
-              <ul className="ml-4 mt-1 space-y-1">
-                {invoiceData.items.map((item: any, index: number) => 
-                  item.vinNumbers?.map((vin: any, vinIndex: number) => (
-                    <li key={`${index}-${vinIndex}`} className="text-xs">{vin.chasisNumber}</li>
-                  ))
-                )}
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -416,7 +405,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
               
               <tr className="bg-blue-50">
                 <td className="px-4 py-3 text-lg font-bold text-gray-900">Grand Total ({invoiceData.currency}):</td>
-                <td className="px-4 py-3 text-lg font-bold text-blue-600 text-right">{formatCurrency(invoiceData.finalTotal, invoiceData.currency)}</td>
+                <td className="px-4 py-3 text-lg font-bold text-gray-600 text-right">{formatCurrency(invoiceData.finalTotal, invoiceData.currency)}</td>
               </tr>
             </tbody>
           </table>
@@ -433,30 +422,16 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                 <div className="font-semibold text-gray-800 mb-1">Payment Status:</div>
                 <div className="text-gray-600">{invoiceData.customerPayment.paymentStatus.replace('_', ' ').toUpperCase()}</div>
               </div>
-              <div className="text-sm text-gray-700 mt-2">
-                <div className="font-semibold text-gray-800 mb-1">Amount Paid:</div>
-                <div className="text-gray-600">{formatCurrency(invoiceData.customerPayment.paymentAmount, invoiceData.currency)}</div>
-              </div>
             </div>
             <div>
-              <div className="text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-1">Payment Method:</div>
-                <div className="text-gray-600">{invoiceData.customerPayment.paymentMethod.replace('_', ' ').toUpperCase()}</div>
-              </div>
-              <div className="text-sm text-gray-700 mt-2">
-                <div className="font-semibold text-gray-800 mb-1">Payment Date:</div>
-                <div className="text-gray-600">{formatDate(invoiceData.customerPayment.paymentDate)}</div>
-              </div>
+              {invoiceData.customerPayment.paymentNotes && (
+                <div className="text-sm text-gray-700">
+                  <div className="font-semibold text-gray-800 mb-1">Payment Notes:</div>
+                  <div className="text-gray-600">{invoiceData.customerPayment.paymentNotes}</div>
+                </div>
+              )}
             </div>
           </div>
-          {invoiceData.customerPayment.paymentNotes && (
-            <div className="mt-3">
-              <div className="text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-1">Payment Notes:</div>
-                <div className="text-gray-600">{invoiceData.customerPayment.paymentNotes}</div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
