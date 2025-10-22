@@ -561,14 +561,6 @@ const AdminDashboard: React.FC = () => {
     return { timeSeries, currencyData, statusData, exportData };
   };
 
-  const quickActions = [
-    { name: 'New Quotation', icon: '📝', description: 'Create a new quotation', color: 'from-blue-600 to-blue-500', path: '/quotations' },
-    { name: 'View Orders', icon: '📦', description: 'Manage sales orders', color: 'from-green-600 to-green-500', path: '/orders' },
-    { name: 'Review Orders', icon: '🔍', description: 'Review pending orders', color: 'from-yellow-600 to-yellow-500', path: '/review-orders' },
-    { name: 'Invoice Requests', icon: '📄', description: 'Generate invoices', color: 'from-purple-600 to-purple-500', path: '/invoice-requests' },
-    { name: 'View Invoices', icon: '📊', description: 'Manage invoices', color: 'from-indigo-600 to-indigo-500', path: '/invoices' },
-    { name: 'Inventory', icon: '🏷️', description: 'Manage inventory', color: 'from-pink-600 to-pink-500', path: '/inventory' },
-  ];
 
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
@@ -1702,37 +1694,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Compact Quick Actions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-            <div className="text-right">
-              <div className="text-lg font-bold text-indigo-600">
-                {quickActions.length}
-              </div>
-              <div className="text-xs text-gray-500">Actions</div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {quickActions.map((action, index) => (
-              <button
-                key={action.name}
-                onClick={() => navigate(action.path)}
-                className={`group relative p-4 rounded-lg bg-gradient-to-br ${action.color} text-white hover:shadow-lg transition-all duration-300 transform hover:scale-105`}
-              >
-                <div className="text-center">
-                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {action.icon}
-                  </div>
-                  <h4 className="font-semibold text-sm mb-1">{action.name}</h4>
-                  <p className="text-xs opacity-90 leading-tight">
-                    {action.description}
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

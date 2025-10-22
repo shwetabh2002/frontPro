@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppSelector } from '../app/hooks';
 import PrivateRoute from './PrivateRoute';
+import RBACRoute from './RBACRoute';
+import RoleBasedRedirect from '../components/RoleBasedRedirect';
 import LoginPage from '../pages/LoginPage';
 import AdminLayout from '../layouts/AdminLayout';
 import AdminDashboard from '../pages/common/AdminDashboard';
@@ -38,7 +40,7 @@ const AppRoutes: React.FC = () => {
           path="/login" 
           element={
             isAuthenticated ? (
-              <Navigate to="/admin/dashboard" replace />
+              <RoleBasedRedirect />
             ) : (
               <LoginPage />
             )
@@ -50,7 +52,7 @@ const AppRoutes: React.FC = () => {
           path="/" 
           element={
             isAuthenticated ? (
-              <Navigate to="/admin/dashboard" replace />
+              <RoleBasedRedirect />
             ) : (
               <Navigate to="/login" replace />
             )
@@ -66,19 +68,67 @@ const AppRoutes: React.FC = () => {
             </PrivateRoute>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="employees" element={<EmployeesPage />} />
-          <Route path="inventory" element={<InventoryPage />} />
-          <Route path="customers" element={<CustomersPage />} />
-          <Route path="quotations" element={<QuotationsPage />} />
-          <Route path="suppliers" element={<SuppliersPage />} />
-          <Route path="expenses" element={<ExpensesPage />} />
-          <Route path="receipts" element={<ReceiptsPage />} />
-          <Route path="invoices" element={<InvoicesPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="review-orders" element={<ReviewOrdersPage />} />
-          <Route path="invoice-requests" element={<InvoiceRequestsPage />} />
+          <Route index element={<RoleBasedRedirect />} />
+          <Route path="dashboard" element={
+            <RBACRoute page="dashboard">
+              <AdminDashboard />
+            </RBACRoute>
+          } />
+          <Route path="employees" element={
+            <RBACRoute page="employees">
+              <EmployeesPage />
+            </RBACRoute>
+          } />
+          <Route path="inventory" element={
+            <RBACRoute page="inventory">
+              <InventoryPage />
+            </RBACRoute>
+          } />
+          <Route path="customers" element={
+            <RBACRoute page="customers">
+              <CustomersPage />
+            </RBACRoute>
+          } />
+          <Route path="quotations" element={
+            <RBACRoute page="quotations">
+              <QuotationsPage />
+            </RBACRoute>
+          } />
+          <Route path="suppliers" element={
+            <RBACRoute page="suppliers">
+              <SuppliersPage />
+            </RBACRoute>
+          } />
+          <Route path="expenses" element={
+            <RBACRoute page="expenses">
+              <ExpensesPage />
+            </RBACRoute>
+          } />
+          <Route path="receipts" element={
+            <RBACRoute page="receipts">
+              <ReceiptsPage />
+            </RBACRoute>
+          } />
+          <Route path="invoices" element={
+            <RBACRoute page="invoices">
+              <InvoicesPage />
+            </RBACRoute>
+          } />
+          <Route path="orders" element={
+            <RBACRoute page="orders">
+              <OrdersPage />
+            </RBACRoute>
+          } />
+          <Route path="review-orders" element={
+            <RBACRoute page="reviewOrders">
+              <ReviewOrdersPage />
+            </RBACRoute>
+          } />
+          <Route path="invoice-requests" element={
+            <RBACRoute page="invoiceRequests">
+              <InvoiceRequestsPage />
+            </RBACRoute>
+          } />
         </Route>
 
         {/* Catch all route */}

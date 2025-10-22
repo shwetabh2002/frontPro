@@ -95,6 +95,20 @@ export interface Permission {
       view: boolean;
       export: boolean;
     };
+    
+    // Invoice Requests features
+    invoiceRequests: {
+      view: boolean;
+      approve: boolean;
+      reject: boolean;
+    };
+    
+    // Review Orders features
+    reviewOrders: {
+      view: boolean;
+      approve: boolean;
+      reject: boolean;
+    };
   };
 }
 
@@ -174,6 +188,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         view: true,
         export: true,
       },
+      invoiceRequests: {
+        view: true,
+        approve: true,
+        reject: true,
+      },
+      reviewOrders: {
+        view: true,
+        approve: true,
+        reject: true,
+      },
     },
   },
   
@@ -186,11 +210,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       orders: true,
       invoices: true,
       receipts: true,
-      expenses: true,
+      expenses: false, // Hidden - removed for sales role
       employees: false, // Hidden
       analytics: false, // Hidden
       suppliers: false, // Hidden
-      invoiceRequests: false, // Hidden
+      invoiceRequests: true, // Hidden
       reviewOrders: false, // Hidden
     },
     features: {
@@ -250,6 +274,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       analytics: {
         view: false,
         export: false,
+      },
+      invoiceRequests: {
+        view: true, // Can view invoice requests
+        approve: false, // Cannot approve
+        reject: false, // Cannot reject
+      },
+      reviewOrders: {
+        view: false,
+        approve: false,
+        reject: false,
       },
     },
   },
@@ -327,6 +361,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       analytics: {
         view: true,
         export: true,
+      },
+      invoiceRequests: {
+        view: true,
+        approve: true,
+        reject: true,
+      },
+      reviewOrders: {
+        view: false,
+        approve: false,
+        reject: false,
       },
     },
   },

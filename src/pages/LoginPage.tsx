@@ -27,8 +27,46 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     // Only redirect if auth state is initialized and user is authenticated
     if (isInitialized && isAuthenticated && user) {
-      const redirectPath = user.type === 'admin' ? '/admin/dashboard' : '/employee/dashboard';
-      navigate(redirectPath, { replace: true });
+      // Use RBAC to determine the first accessible page
+      const pagePriority = [
+        'dashboard',
+        'customers', 
+        'quotations',
+        'orders',
+        'invoices',
+        'receipts',
+        'expenses',
+        'inventory',
+        'employees',
+        'suppliers',
+        'invoiceRequests',
+        'reviewOrders',
+        'analytics'
+      ];
+
+      // Check user roles and find first accessible page
+      const userRoles = user.roles?.map((role: any) => role.name?.toUpperCase()) || [];
+      const isAdmin = userRoles.includes('ADMIN');
+      const isSales = userRoles.includes('SALES');
+      const isFinance = userRoles.includes('FINANCE');
+
+      let firstAccessiblePage = 'customers'; // fallback
+
+      if (isAdmin) {
+        firstAccessiblePage = 'dashboard';
+      } else if (isSales) {
+        // SALES can access: inventory, customers, quotations, orders, invoices, receipts, invoiceRequests
+        firstAccessiblePage = pagePriority.find(page => 
+          ['customers', 'quotations', 'orders', 'invoices', 'receipts', 'inventory', 'invoiceRequests'].includes(page)
+        ) || 'customers';
+      } else if (isFinance) {
+        // FINANCE can access: customers, invoices, receipts, expenses, analytics, invoiceRequests
+        firstAccessiblePage = pagePriority.find(page => 
+          ['customers', 'invoices', 'receipts', 'expenses', 'analytics', 'invoiceRequests'].includes(page)
+        ) || 'customers';
+      }
+
+      navigate(`/admin/${firstAccessiblePage}`, { replace: true });
     }
   }, [isInitialized, isAuthenticated, user, navigate]);
 
