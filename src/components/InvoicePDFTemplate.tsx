@@ -117,7 +117,7 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
       {/* Invoice Title - Centered above cards */}
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#000000', margin: 0 }}>
-          {invoiceData.status === 'draft' ? 'PROFORMA INVOICE' : 'CUSTOMER INVOICE'}
+          {invoiceData.status === 'draft' ? 'PROFORMA INVOICE' : 'COMMERCIAL INVOICE'}
         </h1>
       </div>
 
@@ -527,7 +527,7 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
       <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #000000', textAlign: 'center', fontSize: '14px', color: '#000000' }}>
         <p style={{ margin: '0 0 8px 0' }}>Thank you for your business!</p>
         <p style={{ margin: 0 }}>
-          {invoiceData.status === 'draft' ? 'Proforma Invoice' : 'Customer Invoice'} — {invoiceData.invoiceNumber}
+          {invoiceData.status === 'draft' ? 'Proforma Invoice' : 'Commercial Invoice'} — {invoiceData.invoiceNumber}
         </p>
       </div>
     </div>

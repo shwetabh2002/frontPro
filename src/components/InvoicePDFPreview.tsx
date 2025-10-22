@@ -142,7 +142,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
       {/* Invoice Title - Centered above cards */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">
-          {invoiceData.status === 'draft' ? 'PROFORMA INVOICE' : 'CUSTOMER INVOICE'}
+          {invoiceData.status === 'draft' ? 'PROFORMA INVOICE' : 'COMMERCIAL INVOICE'}
         </h1>
       </div>
 
@@ -528,7 +528,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
       <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
         <p>Thank you for your business!</p>
         <p className="mt-2">
-          {invoiceData.status === 'draft' ? 'Proforma Invoice' : 'Customer Invoice'} — {invoiceData.invoiceNumber}
+          {invoiceData.status === 'draft' ? 'Proforma Invoice' : 'Commercial Invoice'} — {invoiceData.invoiceNumber}
         </p>
       </div>
 
