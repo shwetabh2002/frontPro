@@ -81,8 +81,8 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{ 
-            width: '96px', 
-            height: '96px', 
+            width: '130px', 
+            height: '130px', 
             borderRadius: '8px', 
             overflow: 'hidden',
             backgroundImage: 'url(/logo_extracted.png)',

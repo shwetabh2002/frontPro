@@ -562,9 +562,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       newErrors.address = 'Address is required';
     }
 
-    if (!formData.exportTo?.trim()) {
-      newErrors.exportTo = 'Export destination is required';
-    }
+    // exportTo validation is handled separately in the quotation creation step
 
     // Validate additional expenses
     if (additionalExpenses.expenceType !== 'none') {

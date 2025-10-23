@@ -1340,8 +1340,8 @@ const AdminDashboard: React.FC = () => {
                     }
           </div>
                   <div className="text-xs text-gray-500">Months</div>
+                  </div>
                 </div>
-              </div>
               <div className="space-y-3">
                 {(activeTab === 'invoices' 
                   ? analyticsData?.additionalAnalytics.monthlyTrend || []
@@ -1359,7 +1359,7 @@ const AdminDashboard: React.FC = () => {
                             isCurrentMonth ? 'bg-purple-500' : 'bg-purple-400'
                           }`}>
                             {trend._id.month}
-                  </div>
+          </div>
                           <div>
                             <p className="font-medium text-gray-900">{monthName}</p>
                             <p className="text-xs text-gray-500">{trend.count} {activeTab === 'invoices' ? 'invoices' : 'quotations'}</p>
@@ -1373,10 +1373,10 @@ const AdminDashboard: React.FC = () => {
                           <p className="text-xs text-gray-500">
                             Avg: {formatCurrency(trend.totalAmount / trend.count)}
                           </p>
-            </div>
-          </div>
         </div>
-                  );
+      </div>
+    </div>
+  );
                 })}
       </div>
             </div>

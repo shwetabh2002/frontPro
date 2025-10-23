@@ -107,7 +107,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
       {/* Header Section */}
       <header className="flex items-center justify-between gap-4 mb-5">
         <div className="flex gap-4 items-center">
-          <div className="w-24 h-24 rounded-lg overflow-hidden">
+          <div className="w-28 h-28 rounded-lg overflow-hidden">
             <img 
               src="/logo_extracted.png" 
               alt="Company Logo" 
