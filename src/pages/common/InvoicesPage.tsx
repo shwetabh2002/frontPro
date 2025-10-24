@@ -743,7 +743,7 @@ const InvoicesPage: React.FC = () => {
                           >
                             {isLoadingPDF ? 'Loading...' : 'View'}
                           </Button>
-                          <Button
+                          {/* <Button
                             onClick={() => {
                               // TODO: Implement download invoice
                               showToast('Download invoice functionality coming soon', 'info');
@@ -751,7 +751,7 @@ const InvoicesPage: React.FC = () => {
                             className="text-green-600 hover:text-green-900"
                           >
                             Download
-                          </Button>
+                          </Button> */}
                         </div>
                       </td>
                     </tr>
