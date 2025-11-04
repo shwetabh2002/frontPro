@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getApiBaseUrl } from '../config/api';
+import { getApiBaseUrl, API_CONFIG } from '../config/api';
+import { apiClientService } from './apiClient';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -250,5 +251,22 @@ export const authService = {
         }
       }
     }, 5 * 60 * 1000); // 5 minutes
+  },
+
+  // Change password
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string; data: any }> {
+    try {
+      const response = await apiClientService.put<{ success: boolean; message: string; data: any }>(
+        API_CONFIG.ENDPOINTS.AUTH.CHANGE_PASSWORD,
+        {
+          currentPassword,
+          newPassword,
+        }
+      );
+      return response;
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      throw new Error(error.response?.data?.message || 'Failed to change password');
+    }
   },
 };

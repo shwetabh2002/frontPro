@@ -19,6 +19,7 @@ import InventoryPage from '../pages/common/InventoryPage';
 import SuppliersPage from '../pages/common/SuppliersPage';
 import ExpensesPage from '../pages/common/ExpensesPage';
 import ReceiptsPage from '../pages/common/ReceiptsPage';
+import ProfilePage from '../pages/common/ProfilePage';
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
@@ -129,6 +130,7 @@ const AppRoutes: React.FC = () => {
               <InvoiceRequestsPage />
             </RBACRoute>
           } />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* Catch all route */}

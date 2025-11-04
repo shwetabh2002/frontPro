@@ -7,6 +7,7 @@ export const API_CONFIG = {
       LOGIN: '/auth/login',
       REFRESH: '/auth/refresh',
       LOGOUT: '/auth/logout',
+      CHANGE_PASSWORD: '/auth/change-password',
     },
     
     // Users
