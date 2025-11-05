@@ -699,14 +699,14 @@ const InventoryPage: React.FC = () => {
                     {/* Selling Price */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
                       <div className="text-xs text-blue-600 font-medium">
-                        ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
+                      د.إ{item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
                       </div>
                     </div>
 
                     {/* Currency */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
                       <div className="text-xs text-gray-600">
-                        {item.currencyType || 'USD'}
+                        {item.currencyType || 'AED'}
                       </div>
                     </div>
 

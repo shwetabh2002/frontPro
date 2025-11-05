@@ -612,7 +612,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                   <label className="block text-sm font-medium text-gray-300 mb-2">Cost Price *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-400 text-sm">$</span>
+                      <span className="text-gray-400 text-sm">د.إ</span>
                     </div>
                     <input
                       type="number"
@@ -639,7 +639,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                   <label className="block text-sm font-medium text-gray-300 mb-2">Selling Price *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-400 text-sm">$</span>
+                      <span className="text-gray-400 text-sm">د.إ</span>
                     </div>
                     <input
                       type="number"
@@ -679,7 +679,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       } />
                     </svg>
                     {formData.sellingPrice > formData.costPrice 
-                      ? `Profit Margin: $${(formData.sellingPrice - formData.costPrice).toFixed(2)} (${(((formData.sellingPrice - formData.costPrice) / formData.costPrice) * 100).toFixed(1)}%)`
+                      ? `Profit Margin: د.إ${(formData.sellingPrice - formData.costPrice).toFixed(2)} (${(((formData.sellingPrice - formData.costPrice) / formData.costPrice) * 100).toFixed(1)}%)`
                       : 'Selling price must be greater than cost price'
                     }
                   </div>
