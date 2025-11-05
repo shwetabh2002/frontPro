@@ -1,5 +1,6 @@
 import React from 'react';
 import InvoicePDFTemplate from './InvoicePDFTemplate';
+import { toWords } from 'number-to-words';
 
 interface InvoicePDFPreviewProps {
   invoiceData: any;
@@ -479,13 +480,13 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                   </div>
                   <div className="border-t border-gray-300 pt-3 mt-3">
                     <div className="font-semibold text-gray-800 mb-1">Amount in words:</div>
-                    <div className="text-gray-600">{invoiceData.finalTotal.toLocaleString()} Only</div>
+                    <div className="text-gray-600">{toWords(Math.floor(invoiceData.finalTotal))} Only</div>
                   </div>
                 </div>
               ) : (
                 <div className="text-sm text-gray-600">
                   <div className="font-semibold text-gray-800 mb-1">Amount in words:</div>
-                  <div>{invoiceData.finalTotal.toLocaleString()} Only</div>
+                  <div>{toWords(Math.floor(invoiceData.finalTotal))} Only</div>
                 </div>
               )}
             </div>

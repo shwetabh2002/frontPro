@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { toWords } from 'number-to-words';
 
 interface InvoicePDFTemplateProps {
   invoiceData: any;
@@ -478,13 +479,13 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
                   </div>
                   <div style={{ borderTop: '1px solid #000000', paddingTop: '12px', marginTop: '12px' }}>
                     <div style={{ fontWeight: '600', color: '#000000', marginBottom: '4px' }}>Amount in words:</div>
-                    <div style={{ color: '#000000' }}>{invoiceData.finalTotal.toLocaleString()} Only</div>
+                    <div style={{ color: '#000000' }}>{toWords(Math.floor(invoiceData.finalTotal))} Only</div>
                   </div>
                 </div>
               ) : (
                 <div style={{ fontSize: '14px', color: '#000000' }}>
                   <div style={{ fontWeight: '600', color: '#000000', marginBottom: '4px' }}>Amount in words:</div>
-                  <div>{invoiceData.finalTotal.toLocaleString()} Only</div>
+                  <div>{toWords(Math.floor(invoiceData.finalTotal))} Only</div>
                 </div>
               )}
             </div>
