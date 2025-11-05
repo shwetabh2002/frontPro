@@ -398,7 +398,7 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
               )}
               
               <tr style={{ borderBottom: '1px solid #000000' }}>
-                <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '500' }}>VAT ({invoiceData.VAT || 5}%):</td>
+                <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', fontWeight: '500' }}>VAT ({invoiceData.VAT || 0}%):</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000000', textAlign: 'right' }}>{formatCurrency(invoiceData.vatAmount, invoiceData.currency)}</td>
               </tr>
               
@@ -517,6 +517,17 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
                     <span style={{ color: '#000000' }}>{invoiceData.company.bankDetails.swiftCode}</span>
                   </div>
                 </div>
+              </div>
+              {/* Company Stamp */}
+              <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+                <img 
+                  src="/stamp-planet-sky.png" 
+                  alt="Company Stamp" 
+                  style={{ height: '120px', width: 'auto' }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               </div>
             </div>
           )}

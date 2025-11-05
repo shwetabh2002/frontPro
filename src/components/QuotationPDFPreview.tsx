@@ -31,7 +31,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
   // Determine if download should be enabled
   const isDownloadEnabled = isFromOrdersPage 
-    ? quotationData.status === 'approved' 
+    ? quotationData.status === 'approved' || quotationData.status === 'confirmed'
     : true; // Always enabled for quotations page
 
   // Helper function to format date
@@ -367,7 +367,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                     
                     {quotationData.VAT > 0 && (
                       <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({quotationData.VAT || 5}%):</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({quotationData.VAT || 0}%):</td>
                         <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(quotationData.vatAmount, quotationData.currency)}</td>
                       </tr>
                     )}
@@ -479,13 +479,24 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                         </div>
                       </div>
                     </div>
+                    {/* Company Stamp */}
+                    <div className="mt-4 flex justify-end">
+                      <img 
+                        src="/stamp-planet-sky.png" 
+                        alt="Company Stamp" 
+                        className="h-32 w-auto"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             </section>
 
             {/* Footer */}
-            <div className="flex justify-between items-center mt-5 text-sm text-gray-600">
+            <div className="flex justify-between items-end mt-5 text-sm text-gray-600">
               <div>
                 <div><strong>Prepared by:</strong></div>
                 <div className="mt-1 italic">{quotationData.createdBy?.name || 'SYSTEM'} — Sales Ref</div>

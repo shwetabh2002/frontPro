@@ -399,7 +399,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
               )}
               
               <tr className="border-b border-gray-200">
-                <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({invoiceData.VAT || 5}%):</td>
+                <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({invoiceData.VAT || 0}%):</td>
                 <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(invoiceData.vatAmount, invoiceData.currency)}</td>
               </tr>
               
@@ -518,6 +518,17 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                     <span className="text-gray-700">{invoiceData.company.bankDetails.swiftCode}</span>
                   </div>
                 </div>
+              </div>
+              {/* Company Stamp */}
+              <div className="mt-4 flex justify-end">
+                <img 
+                  src="/stamp-planet-sky.png" 
+                  alt="Company Stamp" 
+                  className="h-32 w-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               </div>
             </div>
           )}

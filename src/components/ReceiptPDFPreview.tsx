@@ -215,7 +215,7 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
             </div>
 
             {/* Amount Section */}
-            <div className="mb-4">
+            <div className="mb-2">
               <div className="bg-gray-50 p-3 rounded">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -271,13 +271,25 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* Export Terms */}
                 {receipt.company?.termCondition?.export && (
-                  <div className="bg-blue-50 p-2 rounded">
+                  <div className="p-2 rounded">
                     <div className="font-semibold text-gray-800 mb-2 text-center text-sm">Export Terms</div>
                     <div className="text-xs text-gray-700 space-y-1">
                       <div><strong>Price:</strong> {receipt.company.termCondition.export.price}</div>
                       <div><strong>Delivery:</strong> {receipt.company.termCondition.export.delivery}</div>
                       <div><strong>Payment:</strong> {receipt.company.termCondition.export.payment}</div>
                       <div><strong>Validity:</strong> {receipt.company.termCondition.export.validity}</div>
+                    </div>
+                    {/* Company Stamp */}
+                    <div className="mt-4 flex justify-center">
+                      <img 
+                        src="/stamp-planet-sky.png" 
+                        alt="Company Stamp" 
+                        className="h-28 w-auto max-w-full"
+                        style={{ objectFit: 'contain' }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
                     </div>
                   </div>
                 )}
@@ -305,14 +317,14 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
             <div className="mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="border-t-2 border-gray-400 pt-1">
-                    <div className="text-sm font-semibold text-gray-700">Customer Signature</div>
+                  <div className="pt-1">
+                    <div className="text-sm font-semibold text-gray-700">Accountant/Cashier Signature</div>
                     <div className="text-xs text-gray-500 mt-2">Date: _______________</div>
                   </div>
                 </div>
                 <div>
                   <div className="border-t-2 border-gray-400 pt-1">
-                    <div className="text-sm font-semibold text-gray-700">Accountant/Cashier Signature</div>
+                    <div className="text-sm font-semibold text-gray-700">Customer Signature</div>
                     <div className="text-xs text-gray-500 mt-2">Date: _______________</div>
                   </div>
                 </div>

@@ -402,7 +402,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             {(quotationData.VAT > 0 || quotationData.company?.VAT > 0) && (
               <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
                 <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  VAT ({quotationData.company?.VAT || quotationData.VAT || 5}%)
+                  VAT ({quotationData.company?.VAT || quotationData.VAT || 0}%)
                 </td>
                 <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
                   {formatCurrency(quotationData.vatAmount, quotationData.currency)}
@@ -521,6 +521,17 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <strong>SWIFT CODE:</strong> {quotationData.company?.bankDetails?.swiftCode || 'EBILAEAD'}
             </div>
           </div>
+          {/* Company Stamp */}
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+            <img 
+              src="/stamp-planet-sky.png" 
+              alt="Company Stamp" 
+              style={{ height: '120px', width: 'auto' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -528,7 +539,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center',
+        alignItems: 'flex-end',
         marginTop: '20px',
         paddingTop: '10px',
         borderTop: '1px solid #e5e7eb',
