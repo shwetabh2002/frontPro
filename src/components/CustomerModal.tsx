@@ -12,6 +12,7 @@ import { useCompany } from '../hooks/useCompany';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
 import { useToast } from '../contexts/ToastContext';
 import CountryDropdown from './CountryDropdown';
+import CountryNameDropdown from './CountryNameDropdown';
 import CurrencyDropdown from './CurrencyDropdown';
 import Pagination from './Pagination';
 
@@ -160,11 +161,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   // Reset additional expenses when modal opens
   useEffect(() => {
     if (isOpen) {
-      setAdditionalExpenses({
-        expenceType: 'none',
-        description: '',
-        amount: 0
-      });
+      setAdditionalExpenses([]);
     }
   }, [isOpen]);
 
@@ -191,12 +188,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [discount, setDiscount] = useState<number>(0);
   const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
   
-  // Additional expenses state
-  const [additionalExpenses, setAdditionalExpenses] = useState({
-    expenceType: 'none' as 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other' | 'none',
-    description: '',
-    amount: 0
-  });
+  // Additional expenses state - now an array
+  const [additionalExpenses, setAdditionalExpenses] = useState<Array<{
+    expenceType: 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other';
+    description: string;
+    amount: number;
+  }>>([]);
 
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>(APP_CONSTANTS.DEFAULTS.COUNTRY_CODE);
 
@@ -565,14 +562,14 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     // exportTo validation is handled separately in the quotation creation step
 
     // Validate additional expenses
-    if (additionalExpenses.expenceType !== 'none') {
-      if (!additionalExpenses.description?.trim()) {
-        newErrors.additionalExpensesDescription = 'Description is required for additional expenses';
+    additionalExpenses.forEach((expense, index) => {
+      if (!expense.description?.trim()) {
+        newErrors[`additionalExpensesDescription_${index}`] = 'Description is required for additional expenses';
       }
-      if (additionalExpenses.amount <= 0) {
-        newErrors.additionalExpensesAmount = 'Amount must be greater than 0 for additional expenses';
+      if (expense.amount <= 0) {
+        newErrors[`additionalExpensesAmount_${index}`] = 'Amount must be greater than 0 for additional expenses';
       }
-    }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -624,9 +621,36 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           showToast(response.message || 'Failed to create customer', 'error');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating customer:', error);
-      showToast(ERROR_MESSAGES.CUSTOMER.CREATE_FAILED, 'error');
+      
+      // Handle 400 validation errors with phone number length
+      if (error.response?.status === 400) {
+        const errorData = error.response?.data;
+        const errorMessage = errorData?.errors || errorData?.message || '';
+        
+        // Check if it's a phone number length validation error
+        if (errorMessage.toLowerCase().includes('phone number') && errorMessage.toLowerCase().includes('at least')) {
+          const phoneError = errorMessage;
+          setErrors({
+            phone: phoneError
+          });
+          showToast(phoneError, 'error');
+        } else if (errorData?.message?.includes('already exists')) {
+          // Handle existing customer errors
+          setErrors({
+            email: ERROR_MESSAGES.CUSTOMER.ALREADY_EXISTS,
+            phone: ERROR_MESSAGES.CUSTOMER.PHONE_ALREADY_EXISTS,
+          });
+          showToast(errorData.message || 'Customer already exists', 'error');
+        } else {
+          // Other validation errors
+          showToast(errorMessage || errorData?.message || 'Failed to create customer', 'error');
+        }
+      } else {
+        // Other errors
+        showToast(ERROR_MESSAGES.CUSTOMER.CREATE_FAILED, 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -754,7 +778,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const getFinalTotal = () => {
     const subtotal = getSubtotal();
     const discountAmount = getDiscountAmount();
-    const additionalExpenseAmount = additionalExpenses.expenceType !== 'none' ? additionalExpenses.amount : 0;
+    const additionalExpenseAmount = additionalExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     return Math.max(0, subtotal - discountAmount + additionalExpenseAmount); // Total cannot be negative
   };
 
@@ -851,6 +875,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       return;
     }
 
+    // Validate exportTo
+    if (!formData.exportTo || !formData.exportTo.trim()) {
+      setErrors(prev => ({ ...prev, exportTo: 'Export destination country is required' }));
+      showToast('Please select an export destination country', 'error');
+      return;
+    }
+
     // Validate booking details when creating from Orders page
     if (showBookingAmount) {
       if (formData.bookingAmount <= 0) {
@@ -870,11 +901,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       const quotationData: CreateQuotationData = {
         custId: customerId,
         items: convertToQuotationItems(),
-        additionalExpenses: additionalExpenses.expenceType !== 'none' ? {
-          expenceType: additionalExpenses.expenceType,
-          description: additionalExpenses.description,
-          amount: additionalExpenses.amount
-        } : undefined,
+        additionalExpenses: additionalExpenses.length > 0 ? additionalExpenses : undefined,
         discount: discount || 0,
         discountType: discountType,
         VAT: 5, // Default VAT rate
@@ -960,11 +987,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     setSelectedChassisNumbers({});
     setDiscount(0);
     setDiscountType('fixed');
-    setAdditionalExpenses({
-      expenceType: 'none',
-      description: '',
-      amount: 0
-    });
+    setAdditionalExpenses([]);
     setSelectedCurrency(null);
     setFilterSummary({ category: [], brand: [], model: [], year: [], color: [] });
     setCurrentPage(APP_CONSTANTS.DEFAULTS.PAGINATION.DEFAULT_PAGE);
@@ -1062,7 +1085,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-amber-500">{getCompanyName()}</h3>
-                  <p className="text-sm text-gray-600">Default Currency: <span className="font-medium text-amber-500">{getCompanyCurrency()}</span></p>
+                  {/* <p className="text-sm text-gray-600">Default Currency: <span className="font-medium text-amber-500">{getCompanyCurrency()}</span></p> */}
                 </div>
               </div>
               <div className="text-right text-sm text-gray-400">
@@ -1719,108 +1742,181 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                             </svg>
                           </div>
                           <label className="text-sm font-black text-slate-800">Additional Expenses</label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="relative">
-                            <select
-                              value={additionalExpenses.expenceType}
-                              onChange={(e) => setAdditionalExpenses(prev => ({
-                                ...prev,
-                                expenceType: e.target.value as any,
-                                description: e.target.value === 'none' ? '' : prev.description,
-                                amount: e.target.value === 'none' ? 0 : prev.amount
-                              }))}
-                              className="appearance-none px-4 py-2 pr-8 text-sm bg-gray-600 border-2 border-blue-300 rounded-lg text-white focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition-colors cursor-pointer font-semibold"
-                            >
-                              <option value="none" className="bg-gray-600 text-white font-semibold">Select Expense Type</option>
-                              <option value="shipping" className="bg-gray-600 text-white font-semibold">🚚 Shipping</option>
-                              <option value="accessories" className="bg-gray-600 text-white font-semibold">🔧 Accessories</option>
-                              <option value="Rta Fees" className="bg-gray-600 text-white font-semibold">📋 RTA Fees</option>
-                              <option value="COO Fees" className="bg-gray-600 text-white font-semibold">📄 COO Fees</option>
-                              <option value="Customs" className="bg-gray-600 text-white font-semibold">🏛️ Customs</option>
-                              <option value="Insurance" className="bg-gray-600 text-white font-semibold">🛡️ Insurance</option>
-                              <option value="Other" className="bg-gray-600 text-white font-semibold">📝 Other</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                              <svg className="w-4 h-4 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {additionalExpenses.expenceType !== 'none' && (
-                        <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <label className="text-xs font-black text-white uppercase tracking-wide">Description</label>
-                              <input
-                                type="text"
-                                placeholder="Enter expense description..."
-                                value={additionalExpenses.description}
-                                onChange={(e) => setAdditionalExpenses(prev => ({
-                                  ...prev,
-                                  description: e.target.value
-                                }))}
-                                 className={`w-full px-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
-                                  errors.additionalExpensesDescription 
-                                    ? 'border-red-400 focus:border-red-400' 
-                                    : 'border-gray-400 focus:border-blue-300'
-                                }`}
-                              />
-                              {errors.additionalExpensesDescription && (
-                                <p className="text-xs text-red-400 font-medium">{errors.additionalExpensesDescription}</p>
-                              )}
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-black text-white uppercase tracking-wide">Amount</label>
-                              <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                  <span className="text-blue-100 font-black">
-                                    {getCurrencySymbol(selectedCurrency?.code || 'USD')}
-                                  </span>
-                                </div>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  value={additionalExpenses.amount || ''}
-                                  onChange={(e) => setAdditionalExpenses(prev => ({
-                                    ...prev,
-                                    amount: Math.max(0, parseFloat(e.target.value) || 0)
-                                  }))}
-                                   className={`w-full pl-8 pr-3 py-2 text-sm bg-gray-600 border-2 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
-                                    errors.additionalExpensesAmount 
-                                      ? 'border-red-400 focus:border-red-400' 
-                                      : 'border-gray-400 focus:border-blue-300'
-                                  }`}
-                                />
-                              </div>
-                              {errors.additionalExpensesAmount && (
-                                <p className="text-xs text-red-400 font-medium">{errors.additionalExpensesAmount}</p>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {additionalExpenses.amount > 0 && (
-                            <div className="flex items-center justify-between p-3 bg-blue-500/30 border-2 border-blue-300/60 rounded-lg">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-blue-100 rounded-full"></div>
-                                <span className="text-sm font-black text-slate-800">Additional Expense Added</span>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-black text-slate-800">
-                                  +{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}
-                                </div>
-                                <div className="text-xs text-slate-600 font-bold">
-                                  {additionalExpenses.expenceType}
-                                </div>
-                              </div>
-                            </div>
+                          {additionalExpenses.length > 0 && (
+                            <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full font-bold">
+                              {additionalExpenses.length}
+                            </span>
                           )}
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdditionalExpenses(prev => [...prev, {
+                              expenceType: 'shipping',
+                              description: '',
+                              amount: 0
+                            }]);
+                          }}
+                          className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 transition-all duration-200 font-semibold text-sm flex items-center space-x-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          <span>Add Expense</span>
+                        </button>
+                      </div>
+                      
+                      {/* List of Expenses */}
+                      {additionalExpenses.length > 0 && (
+                        <div className="space-y-3">
+                          {additionalExpenses.map((expense, index) => (
+                            <div key={index} className="p-3 bg-gray-600 rounded-lg border-2 border-gray-400 space-y-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-black text-white uppercase tracking-wide">
+                                  Expense #{index + 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAdditionalExpenses(prev => prev.filter((_, i) => i !== index));
+                                    // Clear errors for this index
+                                    setErrors(prev => {
+                                      const newErrors = { ...prev };
+                                      delete newErrors[`additionalExpensesDescription_${index}`];
+                                      delete newErrors[`additionalExpensesAmount_${index}`];
+                                      return newErrors;
+                                    });
+                                  }}
+                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                  title="Remove expense"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                  <label className="text-xs font-black text-white uppercase tracking-wide">Type</label>
+                                  <div className="relative">
+                                    <select
+                                      value={expense.expenceType}
+                                      onChange={(e) => {
+                                        setAdditionalExpenses(prev => prev.map((exp, i) => 
+                                          i === index ? { ...exp, expenceType: e.target.value as any } : exp
+                                        ));
+                                      }}
+                                      className="w-full px-3 py-2 text-sm bg-gray-700 border-2 border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-colors cursor-pointer font-semibold appearance-none"
+                                    >
+                                      <option value="shipping" className="bg-gray-700 text-white font-semibold">🚚 Shipping</option>
+                                      <option value="accessories" className="bg-gray-700 text-white font-semibold">🔧 Accessories</option>
+                                      <option value="Rta Fees" className="bg-gray-700 text-white font-semibold">📋 RTA Fees</option>
+                                      <option value="COO Fees" className="bg-gray-700 text-white font-semibold">📄 COO Fees</option>
+                                      <option value="Customs" className="bg-gray-700 text-white font-semibold">🏛️ Customs</option>
+                                      <option value="Insurance" className="bg-gray-700 text-white font-semibold">🛡️ Insurance</option>
+                                      <option value="Other" className="bg-gray-700 text-white font-semibold">📝 Other</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                      <svg className="w-4 h-4 text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <label className="text-xs font-black text-white uppercase tracking-wide">Description</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter expense description..."
+                                    value={expense.description}
+                                    onChange={(e) => {
+                                      setAdditionalExpenses(prev => prev.map((exp, i) => 
+                                        i === index ? { ...exp, description: e.target.value } : exp
+                                      ));
+                                      // Clear error when user starts typing
+                                      if (errors[`additionalExpensesDescription_${index}`]) {
+                                        setErrors(prev => {
+                                          const newErrors = { ...prev };
+                                          delete newErrors[`additionalExpensesDescription_${index}`];
+                                          return newErrors;
+                                        });
+                                      }
+                                    }}
+                                    className={`w-full px-3 py-2 text-sm bg-gray-700 border-2 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
+                                      errors[`additionalExpensesDescription_${index}`] 
+                                        ? 'border-red-400 focus:border-red-400' 
+                                        : 'border-gray-500 focus:border-emerald-300'
+                                    }`}
+                                  />
+                                  {errors[`additionalExpensesDescription_${index}`] && (
+                                    <p className="text-xs text-red-400 font-medium">{errors[`additionalExpensesDescription_${index}`]}</p>
+                                  )}
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <label className="text-xs font-black text-white uppercase tracking-wide">Amount</label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                      <span className="text-blue-100 font-black">
+                                        {getCurrencySymbol(selectedCurrency?.code || 'USD')}
+                                      </span>
+                                    </div>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      value={expense.amount || ''}
+                                      onChange={(e) => {
+                                        setAdditionalExpenses(prev => prev.map((exp, i) => 
+                                          i === index ? { ...exp, amount: Math.max(0, parseFloat(e.target.value) || 0) } : exp
+                                        ));
+                                        // Clear error when user starts typing
+                                        if (errors[`additionalExpensesAmount_${index}`]) {
+                                          setErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors[`additionalExpensesAmount_${index}`];
+                                            return newErrors;
+                                          });
+                                        }
+                                      }}
+                                      className={`w-full pl-12 pr-3 py-2 text-sm bg-gray-700 border-2 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-300 transition-colors font-semibold ${
+                                        errors[`additionalExpensesAmount_${index}`] 
+                                          ? 'border-red-400 focus:border-red-400' 
+                                          : 'border-gray-500 focus:border-emerald-300'
+                                      }`}
+                                    />
+                                  </div>
+                                  {errors[`additionalExpensesAmount_${index}`] && (
+                                    <p className="text-xs text-red-400 font-medium">{errors[`additionalExpensesAmount_${index}`]}</p>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {expense.amount > 0 && (
+                                <div className="flex items-center justify-between p-2 bg-blue-500/30 border border-blue-300/60 rounded-lg mt-2">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-blue-100 rounded-full"></div>
+                                    <span className="text-xs font-black text-slate-800">{expense.expenceType}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-sm font-black text-slate-800">
+                                      +{formatPrice(expense.amount, selectedCurrency?.code || 'USD')}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {additionalExpenses.length === 0 && (
+                        <p className="text-sm text-gray-600 text-center py-4">
+                          No additional expenses added. Click "Add Expense" to add one.
+                        </p>
                       )}
                     </div>
 
@@ -1836,15 +1932,31 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                           <span className="text-sm font-black text-slate-800">{formatPrice(getSubtotal(), selectedCurrency?.code || 'USD')}</span>
                         </div>
                         
-                        {additionalExpenses.expenceType !== 'none' && additionalExpenses.amount > 0 && (
-                          <div className="flex justify-between items-center py-1">
-                            <div className="flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                              <span className="text-sm font-black text-slate-800">Additional Expenses</span>
-                              <span className="text-xs text-slate-600 font-bold">({additionalExpenses.expenceType})</span>
-                            </div>
-                            <span className="text-sm font-black text-slate-800">+{formatPrice(additionalExpenses.amount, selectedCurrency?.code || 'USD')}</span>
-                          </div>
+                        {additionalExpenses.length > 0 && additionalExpenses.some(exp => exp.amount > 0) && (
+                          <>
+                            {additionalExpenses.map((expense, index) => (
+                              expense.amount > 0 && (
+                                <div key={index} className="flex justify-between items-center py-1">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                                    <span className="text-sm font-black text-slate-800">Additional Expense ({expense.expenceType})</span>
+                                  </div>
+                                  <span className="text-sm font-black text-slate-800">+{formatPrice(expense.amount, selectedCurrency?.code || 'USD')}</span>
+                                </div>
+                              )
+                            ))}
+                            {additionalExpenses.filter(exp => exp.amount > 0).length > 1 && (
+                              <div className="flex justify-between items-center py-1 border-t border-slate-300 mt-1 pt-1">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+                                  <span className="text-sm font-black text-slate-800">Total Additional Expenses</span>
+                                </div>
+                                <span className="text-sm font-black text-slate-800">
+                                  +{formatPrice(additionalExpenses.reduce((sum, exp) => sum + exp.amount, 0), selectedCurrency?.code || 'USD')}
+                                </span>
+                              </div>
+                            )}
+                          </>
                         )}
                         
                         {discount > 0 && (
@@ -2112,7 +2224,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         Booking Amount
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                           <span className="text-slate-600 font-medium">
                             {getCurrencySymbol(selectedCurrency?.code || 'USD')}
                           </span>
@@ -2124,7 +2236,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                           placeholder="0.00"
                           step="0.01"
                           min="0"
-                          className="block w-full pl-10 pr-3 py-2 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
+                          className="block w-full pl-14 pr-3 py-2 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
                         />
                       </div>
                     </div>
@@ -2206,14 +2318,23 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                   </svg>
                   Export To (Required) *
                 </label>
-                <input
-                  type="text"
+                <CountryNameDropdown
                   value={formData.exportTo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, exportTo: e.target.value }))}
-                  placeholder="Enter export destination country or location... (Required)"
-                  className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm transition-all duration-200 bg-white text-slate-800 ${
-                    errors.exportTo ? 'border-red-400 bg-red-50' : 'border-orange-300 hover:border-orange-400 hover:shadow-md'
-                  }`}
+                  onChange={(countryName) => {
+                    setFormData(prev => ({ ...prev, exportTo: countryName }));
+                    // Clear error when user selects a country
+                    if (errors.exportTo) {
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.exportTo;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  countries={countries}
+                  placeholder="Select export destination country... (Required)"
+                  isLoading={countries.length === 0}
+                  hasError={!!errors.exportTo}
                 />
                 {errors.exportTo && (
                   <p className="mt-2 text-sm text-red-400 flex items-center">
@@ -2240,9 +2361,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                     onChange={(e) => setSelectedPaymentCurrency(e.target.value)}
                     className="block w-full px-4 py-3 border-2 border-blue-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-slate-800 hover:border-blue-400 hover:shadow-md"
                   >
-                    <option value="AED">AED</option>
-                    <option value="USD">USD</option>
-                    <option value="EURO">EURO</option>
+                    <option value="AED">Mashreq Bank (AED)</option>
+                    <option value="USD">Mashreq Bank (USD)</option>
+                    <option value="EURO">Mashreq Bank (EURO)</option>
                   </select>
                   
                   <p className="mt-2 text-xs text-blue-600">

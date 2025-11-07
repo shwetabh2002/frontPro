@@ -274,7 +274,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
                     <div style={{ fontSize: '9px', color: '#666666' }}>
                       {item.brand} {item.model} {item.year}
                     </div>
-                    {item.vinNumbers && item.vinNumbers.length > 0 && (
+                    {item.vinNumbers && item.vinNumbers.length > 0 && quotationData.status?.toLowerCase() !== 'draft' && (
                       <div style={{ fontSize: '9px', color: '#666666', marginTop: '2px' }}>
                         Chassis: {item.vinNumbers.map((vin: any) => vin.chasisNumber).join(', ')}
                       </div>

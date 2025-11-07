@@ -41,11 +41,11 @@ export interface QuotationItem {
 export interface CreateQuotationData {
   custId: string;
   items: QuotationItem[];
-  additionalExpenses?: {
-    expenceType: 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other' | 'none';
+  additionalExpenses?: Array<{
+    expenceType: 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other';
     description: string;
     amount: number;
-  };
+  }>;
   discount: number;
   discountType: 'fixed' | 'percentage';
   VAT: number;

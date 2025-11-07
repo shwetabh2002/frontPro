@@ -55,14 +55,14 @@ const LoginPage: React.FC = () => {
       if (isAdmin) {
         firstAccessiblePage = 'dashboard';
       } else if (isSales) {
-        // SALES can access: inventory, customers, quotations, orders, invoices, receipts, invoiceRequests
+        // SALES can access: inventory, customers, quotations, orders, invoices, invoiceRequests
         firstAccessiblePage = pagePriority.find(page => 
-          ['customers', 'quotations', 'orders', 'invoices', 'receipts', 'inventory', 'invoiceRequests'].includes(page)
+          ['customers', 'quotations', 'orders', 'invoices', 'inventory', 'invoiceRequests'].includes(page)
         ) || 'customers';
       } else if (isFinance) {
-        // FINANCE can access: customers, invoices, receipts, expenses, analytics, invoiceRequests
+        // FINANCE can access: customers, invoices, expenses, analytics, invoiceRequests
         firstAccessiblePage = pagePriority.find(page => 
-          ['customers', 'invoices', 'receipts', 'expenses', 'analytics', 'invoiceRequests'].includes(page)
+          ['customers', 'invoices', 'expenses', 'analytics', 'invoiceRequests'].includes(page)
         ) || 'customers';
       }
 

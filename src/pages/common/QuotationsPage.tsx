@@ -8,10 +8,12 @@ import Input from '../../components/Input';
 import Pagination from '../../components/Pagination';
 import CustomerModal from '../../components/CustomerModal';
 import QuotationPDF from '../../components/QuotationPDF';
-import { getQuotations, getQuotationById, acceptQuotation, rejectQuotation } from '../../services/quotationService';
+import ConfirmationModal from '../../components/ConfirmationModal';
+import { getQuotations, getQuotationById, acceptQuotation, rejectQuotation, deleteQuotation } from '../../services/quotationService';
 import { formatPrice, getCurrencySymbol } from '../../utils/currencyUtils';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 import { useToast } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
 
 // Quotation interfaces specific to this page
 interface QuotationCustomer {
@@ -208,7 +210,11 @@ const QuotationsPage: React.FC = () => {
   const [isLoadingPDF, setIsLoadingPDF] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [deletingQuotationId, setDeletingQuotationId] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
   const { showToast } = useToast();
+  const { isAdmin } = usePermissions();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Zero state component
@@ -565,6 +571,43 @@ const QuotationsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteQuotation = (quotation: Quotation) => {
+    setQuotationToDelete(quotation);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!quotationToDelete) return;
+
+    try {
+      setDeletingQuotationId(quotationToDelete._id);
+      const response = await deleteQuotation(quotationToDelete._id);
+      
+      if (response.success) {
+        showToast(`Quotation ${quotationToDelete.quotationNumber} deleted successfully`, 'success');
+        // Refresh the quotations list
+        await fetchQuotations(pagination.page, pagination.limit);
+        // Close modal and reset state
+        setIsDeleteModalOpen(false);
+        setQuotationToDelete(null);
+      } else {
+        showToast(response.message || 'Failed to delete quotation', 'error');
+      }
+    } catch (error: any) {
+      console.error('Error deleting quotation:', error);
+      showToast(error.message || 'Failed to delete quotation. Please try again.', 'error');
+    } finally {
+      setDeletingQuotationId(null);
+    }
+  };
+
+  const handleDeleteModalClose = () => {
+    if (!deletingQuotationId) {
+      setIsDeleteModalOpen(false);
+      setQuotationToDelete(null);
+    }
+  };
+
   // Get status badge color
   const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -698,59 +741,31 @@ const QuotationsPage: React.FC = () => {
             View
           </Button>
           
-          {/* 3-dots dropdown menu */}
-          <div className="relative dropdown-container">
+          {/* Delete button - Only visible to admin */}
+          {isAdmin && (
             <Button
-              onClick={() => handleDropdownToggle(quotation._id)}
-              className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors"
+              onClick={() => handleDeleteQuotation(quotation)}
+              disabled={deletingQuotationId === quotation._id}
+              className="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
+              {deletingQuotationId === quotation._id ? (
+                <>
+                  <svg className="w-4 h-4 mr-1 animate-spin inline" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Quotation
+                </>
+              )}
             </Button>
-            
-            {/* Dropdown menu */}
-            {openDropdownId === quotation._id && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button
-                    onClick={() => handleStatusUpdate(quotation._id, QUOTATION_STATUS.REJECTED)}
-                    disabled={updatingStatusId === quotation._id}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {updatingStatusId === quotation._id ? (
-                      <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    )}
-                    Rejected by Customer
-                  </button>
-                  <button
-                    onClick={() => handleStatusUpdate(quotation._id, QUOTATION_STATUS.ACCEPTED)}
-                    disabled={updatingStatusId === quotation._id}
-                    className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {updatingStatusId === quotation._id ? (
-                      <svg className="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                    Customer Accepted
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       )
     }
@@ -1078,6 +1093,19 @@ const QuotationsPage: React.FC = () => {
           onClose={handlePDFModalClose}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Quotation"
+        message={`Are you sure you want to permanently delete quotation ${quotationToDelete?.quotationNumber}? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        isLoading={deletingQuotationId !== null}
+        variant="danger"
+      />
     </div>
   );
 };

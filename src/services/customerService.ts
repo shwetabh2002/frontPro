@@ -121,6 +121,12 @@ export const customerService = {
       return response;
     } catch (error: any) {
       console.error('Error creating customer:', error);
+      // Preserve the original error structure so the caller can access error.response
+      if (error.response) {
+        // Re-throw the original axios error to preserve response structure
+        throw error;
+      }
+      // For non-axios errors, throw a new Error
       throw new Error(error.response?.data?.message || 'Failed to create customer');
     }
   },

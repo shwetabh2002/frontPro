@@ -209,7 +209,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       quotations: true,
       orders: true,
       invoices: true,
-      receipts: true,
+      receipts: false, // Hidden - only for admin
       expenses: false, // Hidden - removed for sales role
       employees: false, // Hidden
       analytics: false, // Hidden
@@ -251,10 +251,10 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         delete: true,
       },
       receipts: {
-        view: true,
-        add: true,
-        edit: true,
-        delete: true,
+        view: false, // Hidden - only for admin
+        add: false,
+        edit: false,
+        delete: false,
       },
       expenses: {
         view: true,
@@ -296,7 +296,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       quotations: false, // Hidden
       orders: false, // Hidden
       invoices: true,
-      receipts: true,
+      receipts: false, // Hidden - only for admin
       expenses: true,
       employees: false,
       analytics: true,
@@ -338,10 +338,10 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
         delete: false,
       },
       receipts: {
-        view: true,
-        add: true,
-        edit: true,
-        delete: true,
+        view: false, // Hidden - only for admin
+        add: false,
+        edit: false,
+        delete: false,
       },
       expenses: {
         view: true,

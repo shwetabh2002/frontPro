@@ -209,7 +209,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                         <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">{index + 1}</td>
                         <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
                           <div className="font-medium text-gray-900">{item.name} {item.brand} {item.model} {item.year}</div>
-                          {item.vinNumbers && item.vinNumbers.length > 0 && (
+                          {item.vinNumbers && item.vinNumbers.length > 0 && quotationData.status?.toLowerCase() !== 'draft' && (
                             <div className="mt-1 text-xs text-gray-500">
                               <div className="font-medium">Chassis No:</div>
                               {item.vinNumbers.map((vin: any, vinIndex: number) => (

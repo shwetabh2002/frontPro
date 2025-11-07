@@ -3,6 +3,7 @@ import Button from './Button';
 import Input from './Input';
 import { updateAcceptedOrder } from '../services/quotationService';
 import { useToast } from '../contexts/ToastContext';
+import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
 
 interface EditOrderModalProps {
   isOpen: boolean;
@@ -15,11 +16,11 @@ interface EditableFields {
   deliveryAddress: string;
   discount: number;
   discountType: string;
-  additionalExpenses: {
+  additionalExpenses: Array<{
     expenceType: string;
     description: string;
     amount: number;
-  };
+  }>;
 }
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({
@@ -32,11 +33,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     deliveryAddress: '',
     discount: 0,
     discountType: 'fixed',
-    additionalExpenses: {
-      expenceType: '',
-      description: '',
-      amount: 0
-    }
+    additionalExpenses: []
   });
 
   const [originalData, setOriginalData] = useState<EditableFields | null>(null);
@@ -46,22 +43,43 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   // Initialize form data when modal opens
   useEffect(() => {
     if (isOpen && orderData) {
+      // Handle additionalExpenses - could be array or single object (for backward compatibility)
+      let additionalExpensesArray: Array<{
+        expenceType: string;
+        description: string;
+        amount: number;
+      }> = [];
+      
+      if (Array.isArray(orderData.additionalExpenses)) {
+        // Already an array
+        additionalExpensesArray = orderData.additionalExpenses.map((exp: any) => ({
+          expenceType: exp.expenceType || '',
+          description: exp.description || '',
+          amount: exp.amount || 0
+        }));
+      } else if (orderData.additionalExpenses && typeof orderData.additionalExpenses === 'object') {
+        // Single object - convert to array (backward compatibility)
+        if (orderData.additionalExpenses.expenceType && orderData.additionalExpenses.expenceType !== 'none') {
+          additionalExpensesArray = [{
+            expenceType: orderData.additionalExpenses.expenceType || '',
+            description: orderData.additionalExpenses.description || '',
+            amount: orderData.additionalExpenses.amount || 0
+          }];
+        }
+      }
+      
       const initialData: EditableFields = {
         deliveryAddress: orderData.deliveryAddress || '',
         discount: orderData.totalDiscount || 0,
         discountType: orderData.discountType || 'fixed',
-        additionalExpenses: {
-          expenceType: orderData.additionalExpenses?.expenceType || '',
-          description: orderData.additionalExpenses?.description || '',
-          amount: orderData.additionalExpenses?.amount || 0
-        }
+        additionalExpenses: additionalExpensesArray
       };
       
       setFormData(initialData);
       setOriginalData({
         ...initialData,
-        additionalExpenses: { ...initialData.additionalExpenses }
-      }); // Create a deep copy
+        additionalExpenses: additionalExpensesArray.map(exp => ({ ...exp })) // Deep copy
+      });
     }
   }, [isOpen, orderData]);
 
@@ -84,20 +102,10 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
       changes.discountType = formData.discountType;
     }
 
-    // Check additional expenses
-    const expenseChanges: any = {};
-    if (formData.additionalExpenses.expenceType !== originalData.additionalExpenses.expenceType) {
-      expenseChanges.expenceType = formData.additionalExpenses.expenceType;
-    }
-    if (formData.additionalExpenses.description !== originalData.additionalExpenses.description) {
-      expenseChanges.description = formData.additionalExpenses.description;
-    }
-    if (Number(formData.additionalExpenses.amount) !== Number(originalData.additionalExpenses.amount)) {
-      expenseChanges.amount = Number(formData.additionalExpenses.amount);
-    }
-
-    if (Object.keys(expenseChanges).length > 0) {
-      changes.additionalExpenses = expenseChanges;
+    // Check additional expenses - compare arrays
+    const expensesChanged = JSON.stringify(formData.additionalExpenses) !== JSON.stringify(originalData.additionalExpenses);
+    if (expensesChanged) {
+      changes.additionalExpenses = formData.additionalExpenses;
     }
 
     // Debug logging for change detection
@@ -105,9 +113,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     console.log('Delivery address changed:', formData.deliveryAddress !== originalData.deliveryAddress);
     console.log('Discount changed:', Number(formData.discount) !== Number(originalData.discount));
     console.log('Discount type changed:', formData.discountType !== originalData.discountType);
-    console.log('Expense type changed:', formData.additionalExpenses.expenceType !== originalData.additionalExpenses.expenceType);
-    console.log('Expense description changed:', formData.additionalExpenses.description !== originalData.additionalExpenses.description);
-    console.log('Expense amount changed:', Number(formData.additionalExpenses.amount) !== Number(originalData.additionalExpenses.amount));
+    console.log('Additional expenses changed:', expensesChanged);
+    console.log('Form expenses:', formData.additionalExpenses);
+    console.log('Original expenses:', originalData.additionalExpenses);
 
     return changes;
   };
@@ -146,15 +154,48 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     setFormData(prev => {
       const keys = field.split('.');
       const newData = { ...prev };
-      let current: any = newData;
       
+      // Handle array indices (e.g., "additionalExpenses.0.expenceType")
+      if (keys[0] === 'additionalExpenses' && keys.length >= 3) {
+        const index = parseInt(keys[1]);
+        const property = keys[2];
+        const newExpenses = [...newData.additionalExpenses];
+        newExpenses[index] = {
+          ...newExpenses[index],
+          [property]: value
+        };
+        return {
+          ...newData,
+          additionalExpenses: newExpenses
+        };
+      }
+      
+      // Handle regular nested fields
+      let current: any = newData;
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
       }
-      
       current[keys[keys.length - 1]] = value;
       return newData;
     });
+  };
+
+  const handleAddExpense = () => {
+    setFormData(prev => ({
+      ...prev,
+      additionalExpenses: [...prev.additionalExpenses, {
+        expenceType: 'shipping',
+        description: '',
+        amount: 0
+      }]
+    }));
+  };
+
+  const handleRemoveExpense = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      additionalExpenses: prev.additionalExpenses.filter((_, i) => i !== index)
+    }));
   };
 
   if (!isOpen) return null;
@@ -353,46 +394,114 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
               {/* Additional Expenses */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 mb-3">Additional Expenses</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Expense Type</label>
-                    <select
-                      value={formData.additionalExpenses.expenceType}
-                      onChange={(e) => handleInputChange('additionalExpenses.expenceType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Select expense type</option>
-                      <option value="shipping">Shipping</option>
-                      <option value="accessories">Accessories</option>
-                      <option value="Rta Fees">RTA Fees</option>
-                      <option value="COO Fees">COO Fees</option>
-                      <option value="Customs">Customs</option>
-                      <option value="Insurance">Insurance</option>
-                      <option value="Other">Other</option>
-                      <option value="none">None</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-                    <Input
-                      type="number"
-                      value={formData.additionalExpenses.amount}
-                      onChange={(e) => handleInputChange('additionalExpenses.amount', parseFloat(e.target.value) || 0)}
-                      placeholder="Amount"
-                    />
-                  </div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-medium text-gray-900">Additional Expenses</h4>
+                  <button
+                    type="button"
+                    onClick={handleAddExpense}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors text-sm flex items-center space-x-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span>Add Expense</span>
+                  </button>
                 </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea
-                    value={formData.additionalExpenses.description}
-                    onChange={(e) => handleInputChange('additionalExpenses.description', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows={2}
-                    placeholder="Expense description..."
-                  />
-                </div>
+                
+                {formData.additionalExpenses.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">
+                    No additional expenses. Click "Add Expense" to add one.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {formData.additionalExpenses.map((expense, index) => (
+                      <div key={index} className="bg-white border border-gray-300 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-700">Expense #{index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExpense(index)}
+                            className="text-red-600 hover:text-red-700 transition-colors"
+                            title="Remove expense"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Expense Type</label>
+                            <select
+                              value={expense.expenceType}
+                              onChange={(e) => handleInputChange(`additionalExpenses.${index}.expenceType`, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Select expense type</option>
+                              <option value="shipping">Shipping</option>
+                              <option value="accessories">Accessories</option>
+                              <option value="Rta Fees">RTA Fees</option>
+                              <option value="COO Fees">COO Fees</option>
+                              <option value="Customs">Customs</option>
+                              <option value="Insurance">Insurance</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span className="text-gray-500 text-sm">
+                                  {getCurrencySymbol(orderData.currency || 'USD')}
+                                </span>
+                              </div>
+                              <Input
+                                type="number"
+                                value={expense.amount}
+                                onChange={(e) => handleInputChange(`additionalExpenses.${index}.amount`, parseFloat(e.target.value) || 0)}
+                                placeholder="Amount"
+                                className="pl-10"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Total</label>
+                            <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 font-medium">
+                              {formatPrice(expense.amount, orderData.currency || 'USD')}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                          <textarea
+                            value={expense.description}
+                            onChange={(e) => handleInputChange(`additionalExpenses.${index}.description`, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows={2}
+                            placeholder="Expense description..."
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Total Additional Expenses */}
+                    {formData.additionalExpenses.length > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700">Total Additional Expenses</span>
+                          <span className="text-lg font-semibold text-gray-900">
+                            {formatPrice(
+                              formData.additionalExpenses.reduce((sum, exp) => sum + (exp.amount || 0), 0),
+                              orderData.currency || 'USD'
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

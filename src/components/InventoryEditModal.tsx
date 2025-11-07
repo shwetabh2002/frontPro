@@ -857,7 +857,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
           </div>
 
           {/* VIN Numbers & Quantity - Only for cars */}
-          {formData.type === 'car' && (
+          {formData.type === 'car' && formData.status?.toLowerCase() !== 'sold' && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="p-2 bg-purple-500/20 rounded-lg">

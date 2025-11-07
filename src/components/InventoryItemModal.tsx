@@ -171,7 +171,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, isOpen, o
           </div>
 
           {/* VIN Numbers */}
-          {item.vinNumber && item.vinNumber.length > 0 && (
+          {item.vinNumber && item.vinNumber.length > 0 && item.status?.toLowerCase() !== 'sold' && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-amber-400">VIN Numbers</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
