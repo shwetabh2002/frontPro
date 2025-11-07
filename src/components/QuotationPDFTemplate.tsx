@@ -130,7 +130,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           borderBottom: '2px solid #000000',
           paddingBottom: '10px'
         }}>
-          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER INVOICE'}
+          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER '}
         </div>
 
       {/* Two Column Cards - Compact */}
@@ -170,7 +170,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>Phone:</span>
-              <span>{customer.phone || ''}</span>
+              <span>{customer.userId.countryCode + customer.phone || ''}</span>
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>Email:</span>
@@ -195,7 +195,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           </div>
         </div>
 
-        {/* PI Details Card */}
+        {/* PI Details Card / SO Details Card */}
         <div style={{ 
           flex: '1', 
           minWidth: '280px',
@@ -210,7 +210,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             color: '#000000',
             margin: '0 0 8px 0'
           }}>
-            PI Details
+            {quotationData.status?.toLowerCase() === 'draft' ? 'PI Details' : 'SO Details'}
           </h3>
           <div style={{ fontSize: '10px', lineHeight: '1.3' }}>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
@@ -222,7 +222,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <span>{formatDate(quotationData.validTill)}</span>
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 'bold' }}>Quotation #:</span>
+              <span style={{ fontWeight: 'bold' }}>{quotationData.status?.toLowerCase() === 'draft' ? 'Quotation #' : 'Sales Order #'}:</span>
               <span>{quotationData.quotationNumber}</span>
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
@@ -293,30 +293,6 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               </tr>
             ))}
             
-            {/* Additional Expenses Row */}
-            {quotationData.additionalExpenses?.amount > 0 && (
-              <tr style={{ backgroundColor: '#fef3c7' }}>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'center' }}>-</td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px' }}>
-                  <div>
-                    <div style={{ fontWeight: 'bold' }}>Additional Expenses ({quotationData.additionalExpenses.expenceType})</div>
-                    <div style={{ fontSize: '9px', color: '#666666' }}>
-                      {quotationData.additionalExpenses.description}
-                    </div>
-                  </div>
-                </td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px' }}>-</td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px' }}>-</td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'center' }}>1</td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  {formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
-                </td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  {formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
-                </td>
-              </tr>
-            )}
-            
             {/* Notes Row */}
             {quotationData.notes && (
               <tr style={{ backgroundColor: '#f9f9f9' }}>
@@ -350,29 +326,26 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               </td>
             </tr>
             
-            {/* Additional Expenses Row in Totals */}
-            {quotationData.additionalExpenses?.amount > 0 && (
-              <tr style={{ backgroundColor: '#fef3c7', fontWeight: 'bold' }}>
-                <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  +Additional Expenses ({quotationData.additionalExpenses.expenceType})
-                </td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  +{formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
-                </td>
-              </tr>
-            )}
-            
-            {/* Discount Row in Totals */}
-            {quotationData.totalDiscount > 0 && (
-              <tr style={{ backgroundColor: '#fef2f2', fontWeight: 'bold' }}>
-                <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
-                  -Discount ({quotationData.discountType})
-                </td>
-                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right', color: '#dc2626' }}>
-                  -{formatCurrency(quotationData.totalDiscount, quotationData.currency)}
-                </td>
-              </tr>
-            )}
+            {/* Additional Expenses Rows in Totals */}
+            {(() => {
+              // Handle both array and object formats for backward compatibility
+              const expenses = Array.isArray(quotationData.additionalExpenses) 
+                ? quotationData.additionalExpenses 
+                : (quotationData.additionalExpenses && quotationData.additionalExpenses.amount > 0 
+                  ? [quotationData.additionalExpenses] 
+                  : []);
+              
+              return expenses.map((expense: any, index: number) => (
+                <tr key={index} style={{ backgroundColor: '#fef3c7', fontWeight: 'bold' }}>
+                  <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                    +Additional Expenses ({expense.expenceType || 'Other'})
+                  </td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                    +{formatCurrency(expense.amount, quotationData.currency)}
+                  </td>
+                </tr>
+              ));
+            })()}
             
             {/* Booking Amount Row in Totals */}
             {quotationData.bookingAmount > 0 && (
@@ -393,12 +366,23 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
                 {formatCurrency(
                   quotationData.subtotal + 
-                  (quotationData.additionalExpenses?.amount || 0) - 
-                  (quotationData.totalDiscount || 0), 
+                  (Array.isArray(quotationData.additionalExpenses)
+                    ? quotationData.additionalExpenses.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0)
+                    : (quotationData.additionalExpenses?.amount || 0)), 
                   quotationData.currency
                 )}
               </td>
             </tr>
+            {quotationData.remainingAmount !== undefined && quotationData.remainingAmount !== null && (
+              <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
+                <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                  Remaining Amount ({quotationData.currency})
+                </td>
+                <td style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>
+                  {formatCurrency(quotationData.remainingAmount, quotationData.currency)}
+                </td>
+              </tr>
+            )}
             {(quotationData.VAT > 0 || quotationData.company?.VAT > 0) && (
               <tr style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}>
                 <td colSpan={6} style={{ border: '1px solid #d1d5db', padding: '6px', textAlign: 'right' }}>

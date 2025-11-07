@@ -129,7 +129,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
             {/* Proforma Invoice Title - Centered above cards */}
             <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">
-          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER INVOICE'}
+          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER '}
         </h1>
             </div>
 
@@ -149,7 +149,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold text-gray-800">Phone:</span>
-                    <span className="text-gray-700">{quotationData.customer.phone || ''}</span>
+                    <span className="text-gray-700">{quotationData.customer.userId.countryCode + quotationData.customer.phone || ''}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold text-gray-800">Email:</span>
@@ -174,13 +174,15 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                 </div>
               </div>
 
-              {/* PI Details Card */}
+              {/* PI Details Card / SO Details Card */}
               <div className="flex-1 min-w-80 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">PI Details</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  {quotationData.status?.toLowerCase() === 'draft' ? 'PI Details' : 'SO Details'}
+                </h3>
                 <div className="text-sm text-gray-700 space-y-1">
                   <div><strong>Quote Date:</strong> {formatDate(quotationData.createdAt)}</div>
                   <div><strong>Valid Till:</strong> {formatDate(quotationData.validTill)}</div>
-                  <div><strong>Quotation #:</strong> {quotationData.quotationNumber}</div>
+                  <div><strong>{quotationData.status?.toLowerCase() === 'draft' ? 'Quotation #' : 'Sales Order #'}:</strong> {quotationData.quotationNumber}</div>
                   <div><strong>Sales Reference:</strong> {quotationData.createdBy?.name || 'System Administrator'}</div>
                 </div>
               </div>
@@ -238,29 +240,26 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">{formatCurrency(quotationData.subtotal, quotationData.currency)}</td>
                     </tr>
                     
-                    {/* Additional Expenses Row */}
-                    {quotationData.additionalExpenses?.amount > 0 && (
-                      <tr className="bg-yellow-50">
-                        <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
-                          +Additional Expenses ({quotationData.additionalExpenses.expenceType})
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
-                          +{formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
-                        </td>
-                      </tr>
-                    )}
-                    
-                    {/* Discount Row */}
-                    {quotationData.totalDiscount > 0 && (
-                      <tr className="bg-red-50">
-                        <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
-                          -Discount ({quotationData.discountType})
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">
-                          -{formatCurrency(quotationData.totalDiscount, quotationData.currency)}
-                        </td>
-                      </tr>
-                    )}
+                    {/* Additional Expenses Rows */}
+                    {(() => {
+                      // Handle both array and object formats for backward compatibility
+                      const expenses = Array.isArray(quotationData.additionalExpenses) 
+                        ? quotationData.additionalExpenses 
+                        : (quotationData.additionalExpenses && quotationData.additionalExpenses.amount > 0 
+                          ? [quotationData.additionalExpenses] 
+                          : []);
+                      
+                      return expenses.map((expense: any, index: number) => (
+                        <tr key={index} className="bg-yellow-50">
+                          <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
+                            +Additional Expenses ({expense.expenceType || 'Other'})
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
+                            +{formatCurrency(expense.amount, quotationData.currency)}
+                          </td>
+                        </tr>
+                      ));
+                    })()}
                     
                     {/* Booking Amount Row */}
                     {quotationData.bookingAmount > 0 && (
@@ -279,104 +278,22 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
                         {formatCurrency(
                           quotationData.subtotal + 
-                          (quotationData.additionalExpenses?.amount || 0) - 
-                          (quotationData.totalDiscount || 0), 
+                          (Array.isArray(quotationData.additionalExpenses)
+                            ? quotationData.additionalExpenses.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0)
+                            : (quotationData.additionalExpenses?.amount || 0)), 
                           quotationData.currency
                         )}
                       </td>
                     </tr>
+                    {quotationData.remainingAmount !== undefined && quotationData.remainingAmount !== null && (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Remaining Amount ({quotationData.currency})</td>
+                        <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
+                          {formatCurrency(quotationData.remainingAmount, quotationData.currency)}
+                        </td>
+                      </tr>
+                    )}
                   </tfoot>
-                </table>
-              </div>
-            </section>
-
-            {/* Expenses Breakdown */}
-            {quotationData.additionalExpenses && quotationData.additionalExpenses.amount > 0 && (
-              <section className="mt-5">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Additional Expenses</h3>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-semibold text-gray-800">
-                        {quotationData.additionalExpenses.expenceType ? 
-                          quotationData.additionalExpenses.expenceType.charAt(0).toUpperCase() + 
-                          quotationData.additionalExpenses.expenceType.slice(1) : 
-                          'Additional Expense'
-                        }
-                      </div>
-                      {quotationData.additionalExpenses.description && (
-                        <div className="text-sm text-gray-600 mt-1">
-                          {quotationData.additionalExpenses.description}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-lg">
-                        {formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Discount Section */}
-            {quotationData.totalDiscount > 0 && (
-              <section className="mt-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-semibold text-gray-800">
-                        Discount ({quotationData.discountType === 'percentage' ? 'Percentage' : 'Fixed'})
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-lg text-green-600">
-                        -{formatCurrency(quotationData.totalDiscount, quotationData.currency)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Final Totals */}
-            <section className="mt-5">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Final Totals</h3>
-              <div className="bg-gray-50 border border-gray-300 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <tbody>
-                    <tr className="border-b border-gray-200">
-                      <td className="px-4 py-3 text-sm text-gray-700 font-medium">Subtotal:</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(quotationData.subtotal, quotationData.currency)}</td>
-                    </tr>
-                    
-                    {quotationData.additionalExpenses && quotationData.additionalExpenses.amount > 0 && (
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">Additional Expenses ({quotationData.currency}):</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 text-right">+{formatCurrency(quotationData.additionalExpenses.amount, quotationData.currency)}</td>
-                      </tr>
-                    )}
-                    
-                    {quotationData.totalDiscount > 0 && (
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">Discount:</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 text-right">-{formatCurrency(quotationData.totalDiscount, quotationData.currency)}</td>
-                      </tr>
-                    )}
-                    
-                    {quotationData.VAT > 0 && (
-                      <tr className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({quotationData.VAT || 0}%):</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(quotationData.vatAmount, quotationData.currency)}</td>
-                      </tr>
-                    )}
-                    
-                    <tr className="bg-blue-50">
-                      <td className="px-4 py-3 text-lg font-bold text-gray-900">Grand Total ({quotationData.currency}):</td>
-                      <td className="px-4 py-3 text-lg font-bold text-blue-600 text-right">{formatCurrency(quotationData.totalAmount, quotationData.currency)}</td>
-                    </tr>
-                  </tbody>
                 </table>
               </div>
             </section>
