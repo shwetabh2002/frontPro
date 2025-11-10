@@ -90,6 +90,7 @@ export interface QuotationsData {
     total: number;
     byStatus: Record<string, number>;
   };
+  totalBalance?: number;
 }
 
 export interface CustomerDetails {

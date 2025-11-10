@@ -268,25 +268,6 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                   </td>
                 </tr>
               )}
-              
-              {/* Discount Row */}
-              {invoiceData.discount > 0 && (
-                <tr className="bg-red-50">
-                  <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
-                    -Discount ({invoiceData.discountType})
-                  </td>
-                  <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">
-                    -{formatCurrency(invoiceData.discount, invoiceData.currency)}
-                  </td>
-                </tr>
-              )}
-              
-              <tr>
-                <td colSpan={6} className="px-4 py-3 text-sm text-right font-semibold text-gray-800">Total Amount ({invoiceData.currency})</td>
-                <td className="px-4 py-3 text-sm text-right font-semibold text-gray-800">
-                  {formatCurrency(invoiceData.totalAmount, invoiceData.currency)}
-                </td>
-              </tr>
             </tfoot>
           </table>
         </div>
@@ -346,95 +327,6 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
           </div>
         </section>
       )}
-
-      {/* Discount Section */}
-      {invoiceData.discountAmount > 0 && (
-        <section className="mt-4">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-semibold text-gray-800">
-                  Discount ({invoiceData.discountType === 'percentage' ? 'Percentage' : 'Fixed'})
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-lg text-green-600">
-                  -{formatCurrency(invoiceData.discountAmount, invoiceData.currency)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Final Totals */}
-      <section className="mt-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Final Totals</h3>
-        <div className="bg-gray-50 border border-gray-300 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <tbody>
-              <tr className="border-b border-gray-200">
-                <td className="px-4 py-3 text-sm text-gray-700 font-medium">Subtotal:</td>
-                <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(invoiceData.subtotal, invoiceData.currency)}</td>
-              </tr>
-              
-              {invoiceData.additionalExpenses && invoiceData.additionalExpenses.amount > 0 && (
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 text-sm text-gray-700 font-medium">Additional Expenses ({invoiceData.currency}):</td>
-                  <td className="px-4 py-3 text-sm text-gray-700 text-right">+{formatCurrency(invoiceData.additionalExpenses.amount, invoiceData.currency)}</td>
-                </tr>
-              )}
-
-              {invoiceData.moreExpense && invoiceData.moreExpense.amount > 0 && (
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 text-sm text-gray-700 font-medium">Invoice Level Expenses ({invoiceData.currency}):</td>
-                  <td className="px-4 py-3 text-sm text-gray-700 text-right">+{formatCurrency(invoiceData.moreExpense.amount, invoiceData.currency)}</td>
-                </tr>
-              )}
-              
-              {invoiceData.discountAmount > 0 && (
-                <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 text-sm text-gray-700 font-medium">Discount:</td>
-                  <td className="px-4 py-3 text-sm text-gray-700 text-right">-{formatCurrency(invoiceData.discountAmount, invoiceData.currency)}</td>
-                </tr>
-              )}
-              
-              <tr className="border-b border-gray-200">
-                <td className="px-4 py-3 text-sm text-gray-700 font-medium">VAT ({invoiceData.VAT || 0}%):</td>
-                <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(invoiceData.vatAmount, invoiceData.currency)}</td>
-              </tr>
-              
-              <tr className="bg-blue-50">
-                <td className="px-4 py-3 text-lg font-bold text-gray-900">Grand Total ({invoiceData.currency}):</td>
-                <td className="px-4 py-3 text-lg font-bold text-gray-600 text-right">{formatCurrency(invoiceData.finalTotal, invoiceData.currency)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Payment Information */}
-      <section className="mt-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Payment Information</h3>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-1">Payment Status:</div>
-                <div className="text-gray-600">{invoiceData.customerPayment.paymentStatus.replace('_', ' ').toUpperCase()}</div>
-              </div>
-            </div>
-            <div>
-              {invoiceData.customerPayment.paymentNotes && (
-                <div className="text-sm text-gray-700">
-                  <div className="font-semibold text-gray-800 mb-1">Payment Notes:</div>
-                  <div className="text-gray-600">{invoiceData.customerPayment.paymentNotes}</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Notes and Delivery Address - Two Column Layout */}
       {invoiceData.notes && (

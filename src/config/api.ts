@@ -73,6 +73,7 @@ export const API_CONFIG = {
     RECEIPTS: {
       GET: '/receipts',
       GET_BY_ID: '/receipts',
+      CREATE: '/receipts',
     },
   },
   

@@ -14,6 +14,11 @@ export interface VinNumber {
     status: string;
     createdAt: string;
     customerName: string;
+    createdBy?: {
+      _id: string;
+      name: string;
+      email?: string;
+    };
   };
 }
 

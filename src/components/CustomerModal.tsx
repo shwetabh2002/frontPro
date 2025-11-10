@@ -2232,10 +2232,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         <input
                           type="number"
                           value={formData.bookingAmount}
-                          onChange={(e) => setFormData(prev => ({ ...prev, bookingAmount: parseFloat(e.target.value) || 0 }))}
+                          onChange={(e) => {
+                            const finalTotal = getFinalTotal();
+                            let bookingAmount = parseFloat(e.target.value) || 0;
+                            
+                            // Cap the booking amount at final total
+                            if (bookingAmount > finalTotal) {
+                              bookingAmount = finalTotal;
+                            }
+                            
+                            setFormData(prev => ({ ...prev, bookingAmount }));
+                          }}
                           placeholder="0.00"
                           step="0.01"
                           min="0"
+                          max={getFinalTotal()}
                           className="block w-full pl-14 pr-3 py-2 border-2 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200 bg-white text-slate-800 border-slate-300 hover:border-slate-400 hover:shadow-md"
                         />
                       </div>

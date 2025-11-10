@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { customerService, CustomerDetails, Quotation } from '../services/customerService';
 import { useToast } from '../contexts/ToastContext';
+import { formatPrice } from '../utils/currencyUtils';
 
 interface CustomerDetailsModalProps {
   isOpen: boolean;
@@ -207,7 +208,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                 </div>
 
                 {/* Account Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-slate-100 rounded-lg p-4 border border-slate-300">
                     <div className="flex items-center space-x-2 mb-2">
                       <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,6 +228,20 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                     </div>
                     <p className="text-slate-800 font-medium">{formatDate(customerDetails.customer.updatedAt)}</p>
                   </div>
+
+                  {customerDetails.quotations.totalBalance !== undefined && customerDetails.quotations.totalBalance !== null && (
+                    <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg p-4 border border-emerald-500/30">
+                      <div className="flex items-center space-x-2 mb-2">
+                        {/* <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg> */}
+                        <span className="text-sm font-medium text-emerald-700">Total Balance</span>
+                      </div>
+                      <p className="text-emerald-700 font-bold text-lg">
+                        {customerDetails.quotations.totalBalance.toFixed(2)}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -240,8 +255,8 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-800">Quotations</h3>
-                      <p className="text-slate-600 text-sm">Customer quotation history and status</p>
+                      <h3 className="text-2xl font-bold text-slate-800">Orders</h3>
+                      <p className="text-slate-600 text-sm">Customer order history and status</p>
                     </div>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl px-4 py-2">
@@ -338,8 +353,8 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h4 className="text-lg font-semibold text-gray-400 mb-2">No Quotations Found</h4>
-                    <p className="text-gray-500">This customer doesn't have any quotations yet.</p>
+                    <h4 className="text-lg font-semibold text-gray-400 mb-2">No Orders Found</h4>
+                    <p className="text-gray-500">This customer doesn't have any orders yet.</p>
                   </div>
                 )}
 

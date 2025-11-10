@@ -111,6 +111,16 @@ export interface ReceiptsParams {
   dateTo?: string;
 }
 
+export interface CreateReceiptData {
+  customerId: string;
+  quotationId: string;
+  paymentMethod: string;
+  receiptDate: string;
+  amount: number;
+  currency: string;
+  description: string;
+}
+
 class ReceiptService {
   async getReceipts(params: ReceiptsParams = {}): Promise<ReceiptsResponse> {
     try {
@@ -147,6 +157,20 @@ class ReceiptService {
     } catch (error: any) {
       console.error('Error fetching receipt:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch receipt');
+    }
+  }
+
+  async createReceipt(data: CreateReceiptData): Promise<{ success: boolean; message: string; data: Receipt }> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string; data: Receipt }>(
+        API_CONFIG.ENDPOINTS.RECEIPTS.CREATE,
+        data
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error creating receipt:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create receipt');
     }
   }
 }

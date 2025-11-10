@@ -244,6 +244,12 @@ const InventoryItemPopup: React.FC<InventoryItemPopupProps> = ({ item, isOpen, o
                                 <span className="text-xs text-gray-600">Customer:</span>
                                 <span className="text-xs text-gray-800">{vin.quotation.customerName}</span>
                               </div>
+                              {vin.quotation.createdBy && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-gray-600">Created By:</span>
+                                  <span className="text-xs text-gray-800">{vin.quotation.createdBy.name}</span>
+                                </div>
+                              )}
                               <div className="flex justify-between items-center">
                                 <span className="text-xs text-gray-600">Status:</span>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
