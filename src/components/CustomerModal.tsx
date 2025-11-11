@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SimpleModal from './SimpleModal';
-import { inventoryService, type InventoryItem, type FilterSummary, type VinNumber } from '../services/inventoryService';
+import { inventoryService, type FilterSummary, type InventoryItem, type VinNumber } from '../services/inventoryService';
 import { customerService, type CreateCustomerData } from '../services/customerService';
 import { countriesService, type Country } from '../services/countriesService';
 import { currencyService, type Currency } from '../services/currencyService';
 import { createQuotation, type CreateQuotationData, type QuotationItem } from '../services/quotationService';
 import { type Customer } from '../services/customerService';
 import { formatPrice, getCurrencySymbol } from '../utils/currencyUtils';
-import { getCompanyName, getCompanyCurrency } from '../utils/companyUtils';
-import { useCompany } from '../hooks/useCompany';
+import { getCompanyName } from '../utils/companyUtils';
+// import { useCompany } from '../hooks/useCompany';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
 import { useToast } from '../contexts/ToastContext';
 import CountryDropdown from './CountryDropdown';
@@ -45,7 +45,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
     return null;
   }
 
-  const availableChassis = item.vinNumber.filter(vin => vin.status === 'active');
+  const availableChassis = item.vinNumber.filter((vin: VinNumber) => vin.status === 'active');
 
   const handleChassisToggle = (chassisNumber: string) => {
     if (selectedChassis.includes(chassisNumber)) {
@@ -66,7 +66,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
         </span>
       </div>
       <div className="grid grid-cols-1 gap-2">
-        {availableChassis.map((vin, index) => (
+        {availableChassis.map((vin: VinNumber, index: number) => (
           <label
             key={index}
             className={`flex items-center p-2 rounded border cursor-pointer transition-colors ${
@@ -105,7 +105,7 @@ const ChassisSelection: React.FC<ChassisSelectionProps> = ({
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopulatedData, mode = 'add', allowCustomerCreation = false, showBookingAmount = false, quotationStatus = 'pending', onQuotationCreated }) => {
   const { showToast } = useToast();
-  const { company } = useCompany();
+  // const { company } = useCompany();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -409,12 +409,54 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     loadCurrencies();
   }, []);
 
+  // Fetch inventory data function
+  const fetchInventoryData = useCallback(async () => {
+    if (!requirements.category || !selectedCurrency) return;
+    
+    console.log('🔄 fetchInventoryData called with currency:', selectedCurrency.code);
+    setIsInventoryLoading(true);
+    try {
+      const filters = {
+        category: requirements.category,
+        brand: requirements.brand || undefined,
+        model: requirements.model || undefined,
+        year: requirements.year || undefined,
+        color: requirements.color || undefined,
+        currencyType: selectedCurrency.code,
+      };
+      
+      console.log('🔍 Fetching inventory with filters:', filters);
+      console.log('🔍 Requirements state:', requirements);
+      console.log('🔍 Selected currency:', selectedCurrency);
+      console.log('🔍 Color value specifically:', requirements.color);
+      
+      const response = await inventoryService.getRequirementsCars(filters);
+
+      if (response.success) {
+        console.log('✅ API response received:', response.data.items.length, 'items');
+        console.log('💰 Sample item with pricing:', response.data.items[0]);
+        // Only update filtered items, don't overwrite allInventoryItems
+        // This preserves selected items from other categories
+        setFilteredInventoryItems(response.data.items);
+        setFilterSummary(response.data.summary);
+      } else {
+        console.error('API error:', response.message);
+        showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+      showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
+    } finally {
+      setIsInventoryLoading(false);
+    }
+  }, [requirements.category, requirements.brand, requirements.model, requirements.year, requirements.color, selectedCurrency, showToast]);
+
   // Fetch inventory data when requirements change
   useEffect(() => {
     if (showRequirements && requirements.category && selectedCurrency) {
       fetchInventoryData();
     }
-  }, [requirements.category, requirements.brand, requirements.model, requirements.year, requirements.color]);
+  }, [showRequirements, requirements.category, selectedCurrency, fetchInventoryData]);
 
   // Refetch inventory data when currency changes
   useEffect(() => {
@@ -433,6 +475,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         // Don't refresh automatically, wait for user decision in alert popup
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCurrency]);
 
   // Fetch all inventory items with just currency (no filters)
@@ -471,47 +514,6 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     } finally {
       setIsInventoryLoading(false);
       setIsRefreshing(false);
-    }
-  };
-
-  const fetchInventoryData = async () => {
-    if (!requirements.category || !selectedCurrency) return;
-    
-    console.log('🔄 fetchInventoryData called with currency:', selectedCurrency.code);
-    setIsInventoryLoading(true);
-    try {
-      const filters = {
-        category: requirements.category,
-        brand: requirements.brand || undefined,
-        model: requirements.model || undefined,
-        year: requirements.year || undefined,
-        color: requirements.color || undefined,
-        currencyType: selectedCurrency.code,
-      };
-      
-      console.log('🔍 Fetching inventory with filters:', filters);
-      console.log('🔍 Requirements state:', requirements);
-      console.log('🔍 Selected currency:', selectedCurrency);
-      console.log('🔍 Color value specifically:', requirements.color);
-      
-      const response = await inventoryService.getRequirementsCars(filters);
-
-      if (response.success) {
-        console.log('✅ API response received:', response.data.items.length, 'items');
-        console.log('💰 Sample item with pricing:', response.data.items[0]);
-        // Only update filtered items, don't overwrite allInventoryItems
-        // This preserves selected items from other categories
-        setFilteredInventoryItems(response.data.items);
-        setFilterSummary(response.data.summary);
-      } else {
-        console.error('API error:', response.message);
-        showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
-      }
-    } catch (error) {
-      console.error('Error fetching inventory:', error);
-      showToast(ERROR_MESSAGES.INVENTORY.FETCH_FAILED, 'error');
-    } finally {
-      setIsInventoryLoading(false);
     }
   };
 
@@ -735,9 +737,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     });
   };
 
-  const getSelectedItem = (itemId: string) => {
-    return allInventoryItems.find(item => item._id === itemId);
-  };
+  // const getSelectedItem = (itemId: string) => {
+  //   return allInventoryItems.find(item => item._id === itemId);
+  // };
 
   // Handle chassis number selection
   const handleChassisChange = (itemId: string, chassisNumbers: string[]) => {
@@ -1039,7 +1041,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   useEffect(() => {
     const filtered = getFilteredItems();
     setFilteredInventoryItems(filtered);
-  }, [requirements, allInventoryItems]);
+  }, [requirements, allInventoryItems, getFilteredItems]);
 
   // Update filtered items when allInventoryItems changes (e.g., after API call)
   useEffect(() => {
@@ -1047,21 +1049,21 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       const filtered = getFilteredItems();
       setFilteredInventoryItems(filtered);
     }
-  }, [allInventoryItems]);
+  }, [allInventoryItems, getFilteredItems]);
 
   // Fetch all inventory items when modal opens for selected items display
   useEffect(() => {
     if (isOpen && showRequirements) {
       fetchAllInventoryItems();
     }
-  }, [isOpen, showRequirements]);
+  }, [isOpen, showRequirements, fetchAllInventoryItems]);
 
   // Also fetch all items when requirements section is first shown
   useEffect(() => {
     if (showRequirements && allInventoryItems.length === 0) {
       fetchAllInventoryItems();
     }
-  }, [showRequirements]);
+  }, [showRequirements, allInventoryItems.length, fetchAllInventoryItems]);
 
   const filteredItems = filteredInventoryItems;
 

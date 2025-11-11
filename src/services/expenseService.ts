@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
+import { ERROR_MESSAGES } from '../constants';
 import { apiClientService } from './apiClient';
 
 export interface Expense {

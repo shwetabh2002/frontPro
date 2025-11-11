@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, API_RESPONSE_STATUS } from '../constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants';
 import { apiClientService } from './apiClient';
 
 // Types

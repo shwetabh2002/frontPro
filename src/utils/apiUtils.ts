@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES, HTTP_STATUS, API_RESPONSE_STATUS } from '../constants';
+import { ERROR_MESSAGES, HTTP_STATUS } from '../constants';
 
 // API Error Class for better error handling
 export class ApiError extends Error {

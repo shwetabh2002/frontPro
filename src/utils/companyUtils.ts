@@ -73,7 +73,7 @@ export const refreshCompanyInfo = async (): Promise<Company> => {
   return companyService.refreshCompany();
 };
 
-export default {
+const companyUtils = {
   getCompanyName,
   getCompanyCurrency,
   getCompanyAddress,
@@ -83,3 +83,5 @@ export default {
   isCompanyInfoAvailable,
   refreshCompanyInfo,
 };
+
+export default companyUtils;

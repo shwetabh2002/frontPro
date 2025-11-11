@@ -1,5 +1,4 @@
 import { API_CONFIG } from '../config/api';
-import { ERROR_MESSAGES } from '../constants';
 import { apiClientService } from '../services/apiClient';
 
 // Types

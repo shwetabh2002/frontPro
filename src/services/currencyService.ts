@@ -1,4 +1,3 @@
-import { httpClient } from '../utils/apiUtils';
 import { APP_CONSTANTS } from '../constants';
 
 export interface Currency {
