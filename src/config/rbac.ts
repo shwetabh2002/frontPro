@@ -17,6 +17,7 @@ export interface Permission {
     suppliers: boolean;
     invoiceRequests: boolean;
     reviewOrders: boolean;
+    salesReport: boolean;
   };
   
   // Feature-level permissions
@@ -129,6 +130,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       suppliers: true,
       invoiceRequests: true,
       reviewOrders: true,
+      salesReport: true, // Admin only
     },
     features: {
       inventory: {
@@ -216,6 +218,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       suppliers: false, // Hidden
       invoiceRequests: true, // Hidden
       reviewOrders: false, // Hidden
+      salesReport: false, // Hidden - only for admin
     },
     features: {
       inventory: {
@@ -303,6 +306,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       suppliers: false, // Hidden
       invoiceRequests: true,
       reviewOrders: false, // Hidden
+      salesReport: false, // Hidden - only for admin
     },
     features: {
       inventory: {

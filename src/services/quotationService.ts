@@ -405,6 +405,30 @@ export const getAcceptedOrders = async (page: number = 1, limit: number = 10): P
   }
 };
 
+/**
+ * Get confirmed orders (sales order history)
+ * Same response format as accepted-orders
+ */
+export const getConfirmedOrders = async (page: number = 1, limit: number = 10): Promise<OrdersResponse> => {
+  try {
+    const response = await apiClient.get<OrdersResponse>(`/quotations/confirmed-orders?page=${page}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching confirmed orders:', error);
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Failed to fetch confirmed orders',
+      500,
+      'Internal Server Error',
+      error
+    );
+  }
+};
+
 export const updateAcceptedOrder = async (orderId: string, updateData: any): Promise<QuotationResponse> => {
   try {
     const response = await apiClient.put<QuotationResponse>(`/quotations/accepted-orders/${orderId}`, updateData);

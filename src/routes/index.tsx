@@ -20,6 +20,7 @@ import SuppliersPage from '../pages/common/SuppliersPage';
 import ExpensesPage from '../pages/common/ExpensesPage';
 import ReceiptsPage from '../pages/common/ReceiptsPage';
 import ProfilePage from '../pages/common/ProfilePage';
+import SalesReportPage from '../pages/common/SalesReportPage';
 
 const AppRoutes: React.FC = () => {
   const { isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
@@ -128,6 +129,11 @@ const AppRoutes: React.FC = () => {
           <Route path="invoice-requests" element={
             <RBACRoute page="invoiceRequests">
               <InvoiceRequestsPage />
+            </RBACRoute>
+          } />
+          <Route path="sales-report" element={
+            <RBACRoute page="salesReport">
+              <SalesReportPage />
             </RBACRoute>
           } />
           <Route path="profile" element={<ProfilePage />} />
