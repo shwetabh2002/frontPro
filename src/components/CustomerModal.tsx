@@ -456,7 +456,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     if (showRequirements && requirements.category && selectedCurrency) {
       fetchInventoryData();
     }
-  }, [showRequirements, requirements.category, selectedCurrency, fetchInventoryData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showRequirements, requirements.category, requirements.brand, requirements.model, requirements.year, requirements.color, selectedCurrency]);
 
   // Refetch inventory data when currency changes
   useEffect(() => {
@@ -519,7 +520,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
   // Fetch all inventory items for selected items display (no filters)
   // Uses the same requirements-cars endpoint but without any filter parameters
-  const fetchAllInventoryItems = async () => {
+  const fetchAllInventoryItems = useCallback(async () => {
     if (!selectedCurrency) return;
     
     setIsAllItemsLoading(true);
@@ -538,7 +539,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     } finally {
       setIsAllItemsLoading(false);
     }
-  };
+  }, [selectedCurrency, showToast]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

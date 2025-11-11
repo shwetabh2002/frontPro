@@ -677,7 +677,7 @@ const SalesReportPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading sales order history...</p>
+          <p className="text-gray-600">Loading sales report...</p>
         </div>
       </div>
     );
@@ -688,7 +688,7 @@ const SalesReportPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Sales Order History</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Sales Report</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <Button
             onClick={() => fetchOrders()}
@@ -707,9 +707,9 @@ const SalesReportPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sales Order History</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Sales Report</h1>
             <p className="mt-2 text-gray-600">
-              View and analyze confirmed sales orders and performance metrics
+              View and analyze sales data and performance metrics
             </p>
           </div>
           <div className="flex items-center space-x-3">
@@ -727,7 +727,7 @@ const SalesReportPage: React.FC = () => {
         </div>
 
         {/* Sales Summary Cards */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -761,7 +761,7 @@ const SalesReportPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Average Order Value</p>
@@ -778,8 +778,8 @@ const SalesReportPage: React.FC = () => {
                 </svg>
               </div>
             </div>
-          </div>
-        </div> */}
+          </div> */}
+        </div>
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">

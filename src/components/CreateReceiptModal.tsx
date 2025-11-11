@@ -557,10 +557,10 @@ const CreateReceiptModal: React.FC<CreateReceiptModalProps> = ({ isOpen, onClose
                   }`}
                 >
                   <option value="cash">Cash</option>
-                  <option value="credit card">Credit Card</option>
+                  {/* <option value="credit card">Credit Card</option> */}
                   <option value="cheque">Cheque</option>
-                  <option value="tt">TT (Telegraphic Transfer)</option>
-                  <option value="bank transfer">Bank Transfer</option>
+                  <option value="tt">T/T</option>
+                  {/* <option value="bank transfer">Bank Transfer</option> */}
                 </select>
                 {errors.paymentMethod && (
                   <p className="mt-1 text-sm text-red-600">{errors.paymentMethod}</p>

@@ -218,7 +218,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
       suppliers: false, // Hidden
       invoiceRequests: true, // Hidden
       reviewOrders: false, // Hidden
-      salesReport: false, // Hidden - only for admin
+      salesReport: true, // Accessible to sales users
     },
     features: {
       inventory: {

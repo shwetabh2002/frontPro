@@ -144,7 +144,7 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      name: 'Sales Order History',
+      name: 'Sales Report',
       path: '/admin/sales-report',
       pageKey: 'salesReport',
       icon: (
