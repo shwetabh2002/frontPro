@@ -1012,7 +1012,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     setShowCloseConfirmation(false);
   };
 
-  const getFilteredItems = () => {
+  const getFilteredItems = useCallback(() => {
     return allInventoryItems.filter(item => {
       if (requirements.brand && item.brand !== requirements.brand) return false;
       if (requirements.model && item.model !== requirements.model) return false;
@@ -1020,7 +1020,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       if (requirements.color && item.color !== requirements.color) return false;
       return true;
     });
-  };
+  }, [allInventoryItems, requirements]);
 
   // Get all selected items (including those not in current filter)
   // This function now uses allInventoryItems instead of inventoryItems to ensure
@@ -1037,19 +1037,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     return selectedItems.has(itemId);
   };
 
-  // Update filtered items when requirements change
+  // Update filtered items when requirements or allInventoryItems change
   useEffect(() => {
     const filtered = getFilteredItems();
     setFilteredInventoryItems(filtered);
-  }, [requirements, allInventoryItems, getFilteredItems]);
-
-  // Update filtered items when allInventoryItems changes (e.g., after API call)
-  useEffect(() => {
-    if (allInventoryItems.length > 0) {
-      const filtered = getFilteredItems();
-      setFilteredInventoryItems(filtered);
-    }
-  }, [allInventoryItems, getFilteredItems]);
+  }, [getFilteredItems]);
 
   // Fetch all inventory items when modal opens for selected items display
   useEffect(() => {
