@@ -1301,10 +1301,10 @@ const InvoiceRequestsPage: React.FC = () => {
                             <span>Subtotal:</span>
                             <span>{selectedOrderForReview.subtotal} {selectedOrderForReview.currency}</span>
                           </div>
-                          <div className="flex justify-between">
+                          {/* <div className="flex justify-between">
                             <span>VAT ({selectedOrderForReview.VAT}%):</span>
                             <span>{selectedOrderForReview.vatAmount} {selectedOrderForReview.currency}</span>
-                          </div>
+                          </div> */}
                           {selectedOrderForReview.additionalExpenses?.amount && selectedOrderForReview.additionalExpenses.amount > 0 && (
                             <div className="flex justify-between">
                               <span>Order Additional Expenses:</span>
@@ -1325,10 +1325,10 @@ const InvoiceRequestsPage: React.FC = () => {
                             <span>Payment Received:</span>
                             <span>{invoiceFormData.customerPayment.paymentAmount} {selectedOrderForReview.currency}</span>
                           </div>
-                          <div className="flex justify-between text-red-600 font-bold">
+                          {/* <div className="flex justify-between text-red-600 font-bold">
                             <span>Outstanding Balance:</span>
                             <span>{((selectedOrderForReview.totalAmount + invoiceFormData.moreExpense.amount) - invoiceFormData.customerPayment.paymentAmount).toFixed(2)} {selectedOrderForReview.currency}</span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

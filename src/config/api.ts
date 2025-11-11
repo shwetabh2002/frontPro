@@ -28,6 +28,7 @@ export const API_CONFIG = {
       ITEMS: '/inventory/items',
       CATEGORIES: '/inventory/categories',
       GET_BY_ID: '/inventory',
+      BULK_UPLOAD: '/inventory/bulk-upload',
     },
     
     // Sales

@@ -558,6 +558,71 @@ class InventoryService {
       return [];
     }
   }
+
+  /**
+   * Bulk upload inventory items from XLSX file
+   * @param file - The XLSX file to upload
+   * @returns Promise with upload result
+   */
+  async bulkUploadInventory(file: File): Promise<{ success: boolean; message: string; data?: any }> {
+    try {
+      console.log('🔍 Uploading inventory file:', file.name);
+      
+      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.BULK_UPLOAD}`;
+      console.log('🔍 Bulk upload API URL:', url);
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } else {
+          const responseText = await response.text().catch(() => 'Unable to read response');
+          throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
+        }
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.log('✅ Non-JSON Response:', responseText);
+        return {
+          success: true,
+          message: 'File uploaded successfully',
+          data: responseText
+        };
+      }
+
+      const data = await response.json();
+      console.log('✅ Bulk upload successful:', data);
+      return {
+        success: true,
+        message: data.message || 'File uploaded successfully',
+        data: data.data
+      };
+    } catch (error) {
+      console.error('❌ Error uploading inventory file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload inventory file';
+      throw new Error(errorMessage);
+    }
+  }
 }
 
 // Export singleton instance

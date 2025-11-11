@@ -406,7 +406,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
       </div>
 
       {/* Delivery Address - Compact */}
-      {quotationData.deliveryAddress && (
+      {/* {quotationData.deliveryAddress && (
         <div style={{ marginBottom: '15px' }}>
           <h3 style={{ 
             fontSize: '12px', 
@@ -426,7 +426,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             {quotationData.deliveryAddress}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Terms & Conditions and Bank Details - Compact */}
       <div style={{ 
@@ -506,11 +506,11 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             </div>
           </div>
           {/* Company Stamp */}
-          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
             <img 
               src="/stamp-planet-sky.png" 
               alt="Company Stamp" 
-              style={{ height: '120px', width: 'auto' }}
+              style={{ height: '150px', width: 'auto' }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}

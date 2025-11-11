@@ -413,11 +413,11 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                 </div>
               </div>
               {/* Company Stamp */}
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-center">
                 <img 
                   src="/stamp-planet-sky.png" 
                   alt="Company Stamp" 
-                  className="h-32 w-auto"
+                  className="h-40 w-auto"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}

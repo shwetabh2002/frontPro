@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../app/hooks';
 import { logout } from '../../features/auth/authSlice';
@@ -40,6 +40,10 @@ const InventoryPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdatingProduct, setIsUpdatingProduct] = useState(false);
   const [editingItem, setEditingItem] = useState<DetailedInventoryItem | null>(null);
+  
+  // Bulk upload states
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Zero state component
   const ZeroState = () => (
@@ -361,6 +365,57 @@ const InventoryPage: React.FC = () => {
     }
   };
 
+  // Handle file input change
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      showToast('Please upload a valid Excel file (.xlsx or .xls)', 'error');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await inventoryService.bulkUploadInventory(file);
+      console.log('✅ Bulk upload successful:', response);
+      
+      // Refresh inventory data
+      await loadInventoryData();
+      
+      // Show success toast
+      showToast(response.message || 'Inventory uploaded successfully!', 'success', 5000);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Error uploading inventory:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to upload inventory file';
+      setError(errorMessage);
+      showToast(errorMessage, 'error', 5000);
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Handle upload button click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle download sample file
+  const handleDownloadSample = () => {
+    const link = document.createElement('a');
+    link.href = '/sample-inventory.xlsx';
+    link.download = 'sample-inventory.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -402,15 +457,48 @@ const InventoryPage: React.FC = () => {
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
           {canAddFeature('inventory') && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span>Add Product</span>
-            </button>
+            <>
+              <button
+                onClick={handleDownloadSample}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                title="Download sample inventory template"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download Sample</span>
+              </button>
+              <button
+                onClick={handleUploadClick}
+                disabled={isUploading}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center space-x-2"
+              >
+                <svg className={`w-5 h-5 ${isUploading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isUploading ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  )}
+                </svg>
+                <span>{isUploading ? 'Uploading...' : 'Upload XLSX'}</span>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Add Product</span>
+              </button>
+            </>
           )}
         </div>
       </div>

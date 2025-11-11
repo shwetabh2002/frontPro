@@ -387,11 +387,11 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
                 </div>
               </div>
               {/* Company Stamp */}
-              <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
                 <img 
                   src="/stamp-planet-sky.png" 
                   alt="Company Stamp" 
-                  style={{ height: '80px', width: 'auto' }}
+                  style={{ height: '150px', width: 'auto' }}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}

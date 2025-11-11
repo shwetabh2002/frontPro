@@ -315,7 +315,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                   )}
 
                   {/* Delivery Address Column */}
-                  {quotationData.deliveryAddress && (
+                  {/* {quotationData.deliveryAddress && (
                     <div className="flex-1 min-w-80">
                       <h3 className="text-sm font-semibold text-gray-700 mb-3">Delivery Address</h3>
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -324,7 +324,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </section>
             )}
@@ -397,11 +397,11 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                       </div>
                     </div>
                     {/* Company Stamp */}
-                    <div className="mt-4 flex justify-end">
+                    <div className="mt-4 flex justify-center">
                       <img 
                         src="/stamp-planet-sky.png" 
                         alt="Company Stamp" 
-                        className="h-32 w-auto"
+                        className="h-40 w-auto"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
