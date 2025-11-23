@@ -27,10 +27,10 @@ const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className={`flex items-center ${className}`}>
-      {/* Planetsky Logo Image */}
+      {/* Axeera POS Logo Image */}
       <img 
         src="/logo_extracted.png" 
-        alt="Planetsky POS Logo" 
+        alt="Axeera POS Logo" 
         className={`${sizeClasses[size]} object-contain`}
       />
 
@@ -38,7 +38,7 @@ const Logo: React.FC<LogoProps> = ({
       {showText && (
         <div className="ml-3">
           <h1 className={`font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${textSizeClasses[size]}`}>
-            Planetsky POS
+            Axeera POS
           </h1>
           <p className="text-xs text-gray-400 font-medium">
             Automotive Solutions
