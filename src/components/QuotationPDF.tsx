@@ -58,8 +58,15 @@ const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose, isF
         heightLeft -= pageHeight;
       }
 
-      // Save the PDF
-      pdf.save(`quotation-${quotationData.quotationNumber}.pdf`);
+      // Save the PDF with appropriate filename based on source
+      // Replace QUO with SO in filename when from Orders page
+      const displayNumber = isFromOrdersPage 
+        ? quotationData.quotationNumber.replace(/QUO/g, 'SO')
+        : quotationData.quotationNumber;
+      const fileName = isFromOrdersPage 
+        ? `salesOrder-${displayNumber}.pdf`
+        : `quotation-${quotationData.quotationNumber}.pdf`;
+      pdf.save(fileName);
       showToast('PDF generated successfully!', 'success');
       
     } catch (error) {

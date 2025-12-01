@@ -597,13 +597,18 @@ const ReviewOrdersPage: React.FC = () => {
   };
 
 
+  // Helper function to replace QUO with SO for display
+  const formatOrderNumber = (quotationNumber: string) => {
+    return quotationNumber.replace(/QUO/g, 'SO');
+  };
+
   // Table columns configuration
   const columns = [
     {
       key: 'quotationNumber',
       header: 'Order Number',
       render: (value: string, order: Order) => (
-        <div className="font-medium text-gray-900">{order.quotationNumber}</div>
+        <div className="font-medium text-gray-900">{formatOrderNumber(order.quotationNumber)}</div>
       )
     },
     {
@@ -1139,7 +1144,7 @@ const ReviewOrdersPage: React.FC = () => {
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-bold">Edit Order</h3>
-                <p className="text-blue-100 text-sm mt-1">#{selectedOrderForEdit.quotationNumber}</p>
+                <p className="text-blue-100 text-sm mt-1">#{formatOrderNumber(selectedOrderForEdit.quotationNumber)}</p>
               </div>
               <button
                 onClick={handleEditModalClose}

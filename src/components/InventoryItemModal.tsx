@@ -147,27 +147,6 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, isOpen, o
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-amber-400">Dimensions</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Length:</span>
-                  <span className="text-white">{item.dimensions.length} cm</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Width:</span>
-                  <span className="text-white">{item.dimensions.width} cm</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Height:</span>
-                  <span className="text-white">{item.dimensions.height} cm</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Weight:</span>
-                  <span className="text-white">{item.dimensions.weight} kg</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* VIN Numbers */}

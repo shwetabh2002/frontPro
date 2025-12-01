@@ -181,35 +181,6 @@ const InventoryItemPopup: React.FC<InventoryItemPopupProps> = ({ item, isOpen, o
                 <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
               </div>
 
-              {/* Dimensions */}
-              {item.dimensions && (item.dimensions.length > 0 || item.dimensions.width > 0 || item.dimensions.height > 0 || item.dimensions.weight > 0) && (
-                <div className="bg-blue-100/30 rounded-xl p-6 border border-gray-700/50">
-                  <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                    </svg>
-                    Dimensions
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-200/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-gray-800">{item.dimensions.length} cm</div>
-                      <div className="text-xs text-gray-600">Length</div>
-                    </div>
-                    <div className="bg-blue-200/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-gray-800">{item.dimensions.width} cm</div>
-                      <div className="text-xs text-gray-600">Width</div>
-                    </div>
-                    <div className="bg-blue-200/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-gray-800">{item.dimensions.height} cm</div>
-                      <div className="text-xs text-gray-600">Height</div>
-                    </div>
-                    <div className="bg-blue-200/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-blue-400">{item.dimensions.weight} kg</div>
-                      <div className="text-xs text-gray-600">Weight</div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Right Column - VIN Numbers & Tags */}

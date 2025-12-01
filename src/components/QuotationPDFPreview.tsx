@@ -69,7 +69,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gray-600 text-white p-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">PDF Preview - {quotationData.quotationNumber}</h3>
+          <h3 className="text-lg font-semibold">PDF Preview - {isFromOrdersPage ? quotationData.quotationNumber.replace(/QUO/g, 'SO') : quotationData.quotationNumber}</h3>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
@@ -121,7 +121,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
               <div className="text-right text-sm text-gray-700">
                 <div><strong>Quote Date:</strong> {formatDate(quotationData.createdAt)}</div>
-                <div><strong>Sales Quote #:</strong> {quotationData.quotationNumber}</div>
+                <div><strong>Sales Quote #:</strong> {isFromOrdersPage ? quotationData.quotationNumber.replace(/QUO/g, 'SO') : quotationData.quotationNumber}</div>
                 <div><strong>Validity:</strong> {formatDate(quotationData.validTill)}</div>
               </div>
             </header>
@@ -182,7 +182,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                 <div className="text-sm text-gray-700 space-y-1">
                   <div><strong>Quote Date:</strong> {formatDate(quotationData.createdAt)}</div>
                   <div><strong>Valid Till:</strong> {formatDate(quotationData.validTill)}</div>
-                  <div><strong>{quotationData.status?.toLowerCase() === 'draft' ? 'Quotation #' : 'Sales Order #'}:</strong> {quotationData.quotationNumber}</div>
+                  <div><strong>{quotationData.status?.toLowerCase() === 'draft' ? 'Quotation #' : 'Sales Order #'}:</strong> {isFromOrdersPage ? quotationData.quotationNumber.replace(/QUO/g, 'SO') : quotationData.quotationNumber}</div>
                   <div><strong>Sales Reference:</strong> {quotationData.createdBy?.name || 'System Administrator'}</div>
                 </div>
               </div>
@@ -387,7 +387,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
                           <span className="text-gray-700">{quotationData.company.bankDetails.accountNumber}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="font-semibold text-gray-800">IBAN ({quotationData.currency}):</span>
+                          <span className="font-semibold text-gray-800">IBAN ({quotationData.bankCurrency}):</span>
                           <span className="text-gray-700 text-xs">{quotationData.company.bankDetails.iban}</span>
                         </div>
                         <div className="flex justify-between">
@@ -421,7 +421,7 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
 
               <div className="text-right">
                 <div className="mb-2 font-bold">Customer Acceptance</div>
-                <div>{quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {quotationData.quotationNumber}</div>
+                <div>{quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {isFromOrdersPage ? quotationData.quotationNumber.replace(/QUO/g, 'SO') : quotationData.quotationNumber}</div>
                 <div className="mt-1">{quotationData.company?.address?.street || 'Show Room No: 377, Dubai Auto Zone'}</div>
               </div>
             </div>
@@ -470,7 +470,8 @@ const QuotationPDFPreview: React.FC<QuotationPDFPreviewProps> = ({
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
           <QuotationPDFTemplate 
             ref={templateRef}
-            quotationData={quotationData} 
+            quotationData={quotationData}
+            isFromOrdersPage={isFromOrdersPage}
           />
         </div>
       )}

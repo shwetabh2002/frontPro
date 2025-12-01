@@ -4,6 +4,7 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import CustomerModal from '../../components/CustomerModal';
 import CustomerDetailsModal from '../../components/CustomerDetailsModal';
+import EditCustomerModal from '../../components/EditCustomerModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { customerService, type Customer } from '../../services/customerService';
 import { useToast } from '../../contexts/ToastContext';
@@ -14,7 +15,9 @@ const CustomersPage: React.FC = () => {
   const { canDeleteCustomers } = usePermissions();
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
   const [isCustomerDetailsModalOpen, setIsCustomerDetailsModalOpen] = useState(false);
+  const [isEditCustomerModalOpen, setIsEditCustomerModalOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedCustomerForEdit, setSelectedCustomerForEdit] = useState<Customer | null>(null);
   const [isCreateQuotationModalOpen, setIsCreateQuotationModalOpen] = useState(false);
   const [quotationCustomerData, setQuotationCustomerData] = useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +103,21 @@ const CustomersPage: React.FC = () => {
   const handleCustomerDetailsModalClose = () => {
     setIsCustomerDetailsModalOpen(false);
     setSelectedCustomerId(null);
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setSelectedCustomerForEdit(customer);
+    setIsEditCustomerModalOpen(true);
+  };
+
+  const handleEditCustomerModalClose = () => {
+    setIsEditCustomerModalOpen(false);
+    setSelectedCustomerForEdit(null);
+  };
+
+  const handleEditCustomerSuccess = () => {
+    // Refresh the customers list after successful update
+    fetchCustomers(currentPage, searchTerm);
   };
 
   const handleCreateQuotation = (customerId: string) => {
@@ -251,6 +269,17 @@ const CustomersPage: React.FC = () => {
       header: 'Actions',
       render: (value: any, item: Customer) => (
         <div className="flex items-center space-x-1">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-blue-100 border-blue-400 text-blue-700 hover:bg-blue-200 hover:text-blue-900 shadow-md hover:shadow-lg text-xs px-2 py-1 transition-all duration-200"
+            onClick={() => handleEditCustomer(item)}
+          >
+            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </Button>
           {canDeleteCustomers() && (
             <Button 
               variant="outline" 
@@ -491,6 +520,14 @@ const CustomersPage: React.FC = () => {
         isOpen={isCustomerDetailsModalOpen}
         onClose={handleCustomerDetailsModalClose}
         customerId={selectedCustomerId}
+      />
+
+      {/* Edit Customer Modal */}
+      <EditCustomerModal
+        isOpen={isEditCustomerModalOpen}
+        onClose={handleEditCustomerModalClose}
+        customer={selectedCustomerForEdit}
+        onUpdateSuccess={handleEditCustomerSuccess}
       />
 
       {/* Create Quotation Modal */}

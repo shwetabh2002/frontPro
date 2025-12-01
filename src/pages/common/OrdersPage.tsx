@@ -557,7 +557,7 @@ const OrdersPage: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteQuotation(orderToDelete._id);
-      showToast(`Order ${orderToDelete.quotationNumber} deleted successfully`, 'success');
+      showToast(`Order ${formatOrderNumber(orderToDelete.quotationNumber)} deleted successfully`, 'success');
       
       // Refresh the orders list
       await fetchOrders(pagination.page, pagination.limit);
@@ -632,6 +632,11 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  // Helper function to replace QUO with SO for display
+  const formatOrderNumber = (quotationNumber: string) => {
+    return quotationNumber.replace(/QUO/g, 'SO');
+  };
+
   // Table columns configuration
   const columns = [
     {
@@ -639,7 +644,7 @@ const OrdersPage: React.FC = () => {
       header: 'Order Number',
       render: (value: string, order: Order) => (
         <div className="font-medium text-gray-900">
-          {order.quotationNumber}
+          {formatOrderNumber(order.quotationNumber)}
         </div>
       )
     },
@@ -1217,7 +1222,7 @@ const OrdersPage: React.FC = () => {
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}
         title="Delete Order"
-        message={`Are you sure you want to permanently delete order ${orderToDelete?.quotationNumber}? This action cannot be undone.`}
+        message={`Are you sure you want to permanently delete order ${orderToDelete ? formatOrderNumber(orderToDelete.quotationNumber) : ''}? This action cannot be undone.`}
         confirmText="Yes, Delete"
         cancelText="Cancel"
         isLoading={isDeleting}

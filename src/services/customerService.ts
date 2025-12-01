@@ -189,8 +189,9 @@ export const customerService = {
    */
   async updateCustomer(customerId: string, customerData: Partial<CreateCustomerData>): Promise<CustomerResponse> {
     try {
+      // Use /users/{customerId} endpoint as per API specification
       const response = await apiClientService.put<CustomerResponse>(
-        `${API_CONFIG.ENDPOINTS.USERS.CUSTOMER}/${customerId}`,
+        `/users/${customerId}`,
         customerData
       );
 

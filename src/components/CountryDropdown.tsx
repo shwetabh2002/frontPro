@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Country } from '../services/countriesService';
 
@@ -28,12 +28,76 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter countries based on search term
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    country.dial_code.includes(searchTerm) ||
-    country.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter countries based on search term - similar to CountryNameDropdown but with dial code support
+  const filteredCountries = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return countries; // Show all countries when search is empty
+    }
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const dialCodeClean = searchTerm.replace(/[+\s-]/g, ''); // Remove +, spaces, and dashes for comparison
+    
+    // Filter countries - similar to CountryNameDropdown approach
+    const filtered = countries.filter(country => {
+      const countryNameLower = country.name.toLowerCase();
+      const countryCodeLower = country.code.toLowerCase();
+      const countryDialCodeLower = country.dial_code.toLowerCase();
+      const countryDialCodeClean = country.dial_code.replace(/[+\s-]/g, '');
+      
+      // Search in country name (case-insensitive, partial match) - like CountryNameDropdown
+      const nameMatch = countryNameLower.includes(searchLower);
+      
+      // Search in country code (case-insensitive, partial match) - like CountryNameDropdown
+      const codeMatch = countryCodeLower.includes(searchLower);
+      
+      // Search in dial code (case-insensitive, partial match)
+      const dialCodeMatch = countryDialCodeLower.includes(searchLower) ||
+                           countryDialCodeClean.includes(dialCodeClean);
+      
+      return nameMatch || codeMatch || dialCodeMatch;
+    });
+    
+    // Sort by relevance: name matches first, then code, then dial code
+    return filtered.sort((a, b) => {
+      const aNameLower = a.name.toLowerCase();
+      const bNameLower = b.name.toLowerCase();
+      const aCodeLower = a.code.toLowerCase();
+      const bCodeLower = b.code.toLowerCase();
+      const aDialCodeClean = a.dial_code.replace(/[+\s-]/g, '');
+      const bDialCodeClean = b.dial_code.replace(/[+\s-]/g, '');
+      
+      // Calculate relevance scores
+      let aScore = 0;
+      let bScore = 0;
+      
+      // Name starts with search term gets highest priority
+      if (aNameLower.startsWith(searchLower)) aScore += 1000;
+      if (bNameLower.startsWith(searchLower)) bScore += 1000;
+      
+      // Name contains search term
+      if (aNameLower.includes(searchLower)) aScore += 500;
+      if (bNameLower.includes(searchLower)) bScore += 500;
+      
+      // Code starts with search term
+      if (aCodeLower.startsWith(searchLower)) aScore += 300;
+      if (bCodeLower.startsWith(searchLower)) bScore += 300;
+      
+      // Code contains search term
+      if (aCodeLower.includes(searchLower)) aScore += 200;
+      if (bCodeLower.includes(searchLower)) bScore += 200;
+      
+      // Dial code matches
+      if (aDialCodeClean.includes(dialCodeClean)) aScore += 100;
+      if (bDialCodeClean.includes(dialCodeClean)) bScore += 100;
+      
+      // If scores are equal, sort alphabetically by name
+      if (bScore === aScore) {
+        return aNameLower.localeCompare(bNameLower);
+      }
+      
+      return bScore - aScore; // Higher score first
+    });
+  }, [countries, searchTerm]);
 
   // Highlight search term in text
   const highlightText = (text: string, searchTerm: string) => {
@@ -45,11 +109,44 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
   // Get selected country object
   const selectedCountry = countries.find(country => country.dial_code === value);
 
+  // Reset highlighted index when filtered countries change
+  useEffect(() => {
+    if (filteredCountries.length > 0 && highlightedIndex >= filteredCountries.length) {
+      setHighlightedIndex(0);
+    }
+  }, [filteredCountries.length, highlightedIndex]);
+
   // Handle keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't interfere with typing in search input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' && target === searchInputRef.current) {
+        // Allow arrow keys and enter to work in search input
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (e.key === 'ArrowDown') {
+            setHighlightedIndex(prev => 
+              prev < filteredCountries.length - 1 ? prev + 1 : 0
+            );
+          } else {
+            setHighlightedIndex(prev => 
+              prev > 0 ? prev - 1 : filteredCountries.length - 1
+            );
+          }
+        } else if (e.key === 'Enter' && filteredCountries.length > 0) {
+          e.preventDefault();
+          const countryToSelect = filteredCountries[highlightedIndex] || filteredCountries[0];
+          onChange(countryToSelect.dial_code);
+          setIsOpen(false);
+          setSearchTerm('');
+          setHighlightedIndex(0);
+        }
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -115,7 +212,13 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
   // Focus search input when dropdown opens and handle window resize
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
+      // Use setTimeout to ensure the portal is rendered before focusing
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          searchInputRef.current.select(); // Select existing text if any
+        }
+      }, 100);
     }
     
     // Update position on window resize
@@ -257,9 +360,19 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search countries..."
+                placeholder="Search by name, code, or dial code (e.g., +971, UAE)..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setHighlightedIndex(0); // Reset highlight when searching
+                }}
+                onKeyDown={(e) => {
+                  // Prevent form submission when pressing Enter in search
+                  if (e.key === 'Enter' && filteredCountries.length > 0) {
+                    e.preventDefault();
+                    handleCountrySelect(filteredCountries[highlightedIndex] || filteredCountries[0]);
+                  }
+                }}
                 className="w-full pl-10 pr-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white text-slate-800 placeholder-slate-400 transition-all duration-200"
               />
             </div>
@@ -286,8 +399,8 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
               </div>
             ) : filteredCountries.length > 0 ? (
               <>
-                {/* Popular Countries Section */}
-                {searchTerm === '' && (
+                {/* Popular Countries Section - Only show when NOT searching */}
+                {!searchTerm && (
                   <>
                     <div className="px-4 py-3 bg-gradient-to-r from-blue-100 to-slate-100 border-b border-blue-200">
                       <div className="text-xs font-bold text-blue-600 uppercase tracking-wide flex items-center">
@@ -297,9 +410,9 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                         Popular Countries
                       </div>
                     </div>
-                    {getPopularCountries(filteredCountries).map((country, index) => (
+                    {getPopularCountries(countries).map((country) => (
                       <button
-                        key={`popular-${country.dial_code}`}
+                        key={`popular-${country.code}`}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
                         className={`w-full flex items-center px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-slate-50 focus:outline-none transition-all duration-200 ${
@@ -309,12 +422,9 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                         <div className="flex items-center space-x-3 flex-1">
                           <span className="text-xl">{getCountryFlag(country.code)}</span>
                           <div className="flex-1 min-w-0">
-                            <div 
-                              className="font-medium text-slate-800 truncate"
-                              dangerouslySetInnerHTML={{ 
-                                __html: highlightText(country.name, searchTerm) 
-                              }}
-                            />
+                            <div className="font-medium text-slate-800 truncate">
+                              {country.name}
+                            </div>
                             <div className="text-sm text-slate-600">
                               {country.dial_code}
                             </div>
@@ -338,37 +448,50 @@ const CountryDropdown: React.FC<CountryDropdownProps> = ({
                   </>
                 )}
                 
-                {/* All Countries */}
-                {filteredCountries.map((country, index) => (
-                  <button
-                    key={country.dial_code}
-                    type="button"
-                    onClick={() => handleCountrySelect(country)}
-                    className={`w-full flex items-center px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-indigo-50 focus:outline-none transition-all duration-200 ${
-                      index === highlightedIndex ? 'bg-gradient-to-r from-blue-100 to-indigo-100' : ''
-                    } ${country.dial_code === value ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-l-4 border-blue-500 shadow-sm' : ''}`}
-                  >
-                    <div className="flex items-center space-x-3 flex-1">
-                      <span className="text-xl">{getCountryFlag(country.code)}</span>
-                      <div className="flex-1 min-w-0">
-                        <div 
-                          className="font-medium text-gray-900 truncate"
-                          dangerouslySetInnerHTML={{ 
-                            __html: highlightText(country.name, searchTerm) 
-                          }}
-                        />
-                        <div className="text-sm text-gray-500">
-                          {country.dial_code}
+                {/* All Countries - When searching, show all filtered results sorted by relevance. When not searching, exclude popular countries */}
+                {(searchTerm 
+                  ? filteredCountries
+                  : filteredCountries.filter(country => !getPopularCountries(countries).some(pc => pc.dial_code === country.dial_code))
+                ).map((country, index) => {
+                  // Adjust index for filtered list when not searching
+                  const actualIndex = searchTerm 
+                    ? index
+                    : index + getPopularCountries(countries).length;
+                  
+                  return (
+                    <button
+                      key={country.code}
+                      type="button"
+                      onClick={() => handleCountrySelect(country)}
+                      className={`w-full flex items-center px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-indigo-50 focus:outline-none transition-all duration-200 ${
+                        actualIndex === highlightedIndex ? 'bg-gradient-to-r from-blue-100 to-indigo-100' : ''
+                      } ${country.dial_code === value ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-l-4 border-blue-500 shadow-sm' : ''}`}
+                    >
+                      <div className="flex items-center space-x-3 flex-1">
+                        <span className="text-xl">{getCountryFlag(country.code)}</span>
+                        <div className="flex-1 min-w-0">
+                          <div 
+                            className="font-medium text-gray-900 truncate"
+                            dangerouslySetInnerHTML={{ 
+                              __html: highlightText(country.name, searchTerm) 
+                            }}
+                          />
+                          <div 
+                            className="text-sm text-gray-500"
+                            dangerouslySetInnerHTML={{ 
+                              __html: highlightText(country.dial_code, searchTerm) 
+                            }}
+                          />
                         </div>
                       </div>
-                    </div>
-                    {country.dial_code === value && (
-                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
+                      {country.dial_code === value && (
+                        <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
               </>
             ) : (
               <div className="px-4 py-8 text-center text-slate-500">

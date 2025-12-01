@@ -118,7 +118,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     paymentMethod: 'cash',
     description: '',
   });
-  const [selectedPaymentCurrency, setSelectedPaymentCurrency] = useState<string>('AED');
+  const [selectedPaymentCurrency, setSelectedPaymentCurrency] = useState<string>('');
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -885,6 +885,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
       return;
     }
 
+    // Validate Payment Bank Currency (mandatory for all quotations)
+    if (!selectedPaymentCurrency || selectedPaymentCurrency.trim() === '') {
+      setErrors(prev => ({ ...prev, paymentBankCurrency: 'Payment Bank Currency is required' }));
+      showToast('Please select a Payment Bank Currency', 'error');
+      return;
+    }
+
     // Validate booking details when creating from Orders page
     if (showBookingAmount) {
       if (formData.bookingAmount <= 0) {
@@ -909,7 +916,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
         discountType: discountType,
         VAT: 5, // Default VAT rate
         currency: selectedCurrency?.code || 'USD',
-        bankCurrency: selectedPaymentCurrency || 'AED',
+        bankCurrency: selectedPaymentCurrency,
         notes: formData.notes || undefined,
         exportTo: formData.exportTo || undefined,
         bookingAmount: formData.bookingAmount,
@@ -982,6 +989,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     setShowRequirements(false);
     setRequirements({ category: '', brand: '', model: '', year: '', color: '' });
     setSelectedCountryCode('+971');
+    setSelectedPaymentCurrency(''); // Reset to empty (mandatory field)
     setAllInventoryItems([]);
     setFilteredInventoryItems([]);
     setIsAllItemsLoading(false);
@@ -2352,25 +2360,47 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                 )}
               </div>
 
-              {/* Payment Method Dropdown - Only show for quotation mode with booking amount */}
-              {mode === 'quotation' && showBookingAmount && (
+              {/* Payment Bank (Currency) - Show for all quotation modes */}
+              {mode === 'quotation' && (
                 <div className="mt-6 p-4 bg-gradient-to-br from-blue-100 to-white border border-blue-500/30 rounded-lg">
                   <label className="block text-sm font-bold text-slate-700 mb-3">
                     <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    Payment Bank (Currency) *
+                    Payment Bank (Currency) <span className="text-red-500">*</span> <span className="text-gray-500 text-xs">(Mandatory)</span>
                   </label>
                   
                   <select
                     value={selectedPaymentCurrency}
-                    onChange={(e) => setSelectedPaymentCurrency(e.target.value)}
-                    className="block w-full px-4 py-3 border-2 border-blue-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-slate-800 hover:border-blue-400 hover:shadow-md"
+                    onChange={(e) => {
+                      setSelectedPaymentCurrency(e.target.value);
+                      // Clear error when user selects a value
+                      if (errors.paymentBankCurrency) {
+                        setErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.paymentBankCurrency;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    className={`block w-full px-4 py-3 border-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200 bg-white text-slate-800 hover:border-blue-400 hover:shadow-md ${
+                      errors.paymentBankCurrency ? 'border-red-300 bg-red-50' : 'border-blue-300'
+                    }`}
                   >
+                    <option value="">Select Payment Bank Currency</option>
                     <option value="AED">Mashreq Bank (AED)</option>
                     <option value="USD">Mashreq Bank (USD)</option>
                     <option value="EURO">Mashreq Bank (EURO)</option>
                   </select>
+                  
+                  {errors.paymentBankCurrency && (
+                    <p className="mt-2 text-sm text-red-400 flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.paymentBankCurrency}
+                    </p>
+                  )}
                   
                   <p className="mt-2 text-xs text-blue-600">
                     Selected currency will be used for the bank details

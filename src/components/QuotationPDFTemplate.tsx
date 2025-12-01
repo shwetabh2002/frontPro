@@ -3,9 +3,14 @@ import { toWords } from 'number-to-words';
 
 interface QuotationPDFTemplateProps {
   quotationData: any;
+  isFromOrdersPage?: boolean;
 }
 
-const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProps>(({ quotationData }, ref) => {
+const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProps>(({ quotationData, isFromOrdersPage = false }, ref) => {
+  // Helper function to format order number (replace QUO with SO when from Orders page)
+  const formatOrderNumber = (quotationNumber: string) => {
+    return isFromOrdersPage ? quotationNumber.replace(/QUO/g, 'SO') : quotationNumber;
+  };
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-AE', {
       style: 'currency',
@@ -113,7 +118,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           {/* Invoice Details */}
           <div style={{ fontSize: '9px', color: '#000000' }}>
             <div>Quote Date: {formatDate(quotationData.createdAt)}</div>
-            <div>Sales Quote #: {quotationData.quotationNumber}</div>
+            <div>Sales Quote #: {formatOrderNumber(quotationData.quotationNumber)}</div>
             <div>Validity: {formatDate(quotationData.validTill)}</div>
           </div>
         </div>
@@ -223,7 +228,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>{quotationData.status?.toLowerCase() === 'draft' ? 'Quotation #' : 'Sales Order #'}:</span>
-              <span>{quotationData.quotationNumber}</span>
+              <span>{formatOrderNumber(quotationData.quotationNumber)}</span>
             </div>
             <div style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold' }}>Sales Reference:</span>
@@ -499,7 +504,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
               <strong>Account No:</strong> {quotationData.company?.bankDetails?.accountNumber || '101234567890'}
             </div>
             <div style={{ marginBottom: '3px' }}>
-              <strong>IBAN ({quotationData.currency}):</strong> {quotationData.company?.bankDetails?.iban || 'AE070331000000123456789'}
+              <strong>IBAN ({quotationData.bankCurrency}):</strong> {quotationData.company?.bankDetails?.iban || 'AE070331000000123456789'}
             </div>
             <div>
               <strong>SWIFT CODE:</strong> {quotationData.company?.bankDetails?.swiftCode || 'EBILAEAD'}
@@ -540,7 +545,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
             Customer Acceptance
           </div>
           <div style={{ fontWeight: 'bold' }}>
-            {quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {quotationData.quotationNumber}
+            {quotationData.status === 'draft' ? 'Proforma Invoice' : 'Sales Order Invoice'} — {formatOrderNumber(quotationData.quotationNumber)}
           </div>
           <div>{quotationData.company?.address?.street || 'Show Room No: 377, Dubai Auto Zone'}</div>
         </div>

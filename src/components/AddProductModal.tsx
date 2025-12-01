@@ -130,6 +130,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
         return value <= 0 ? 'Height must be greater than 0' : '';
       case 'dimensions.weight':
         return value <= 0 ? 'Weight must be greater than 0' : '';
+      case 'supplierId':
+        return !value ? 'Supplier is required' : '';
       default:
         return '';
     }
@@ -225,6 +227,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
     if (formData.sellingPrice <= 0) newErrors.sellingPrice = 'Selling price must be greater than 0';
     if (formData.costPrice >= formData.sellingPrice) {
       newErrors.sellingPrice = 'Selling price must be greater than cost price';
+    }
+    // Supplier validation
+    if (!formData.supplierId) {
+      newErrors.supplierId = 'Supplier is required';
     }
     // Type-specific validation
     if (formData.type === 'car') {
@@ -695,20 +701,28 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-purple-400">Supplier (Optional)</h3>
+                <h3 className="text-xl font-semibold text-purple-400">Supplier <span className="text-red-400 text-sm">(Mandatory)</span></h3>
               </div>
 
               <div className="space-y-4">
                 {/* Supplier Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Select Supplier</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Select Supplier <span className="text-red-400">*</span> <span className="text-gray-400 text-xs">(Mandatory)</span></label>
                   <div className="relative">
                     <select
                       value={formData.supplierId || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, supplierId: e.target.value || undefined }))}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      onChange={(e) => {
+                        const supplierId = e.target.value || undefined;
+                        setFormData(prev => ({ ...prev, supplierId }));
+                        // Validate supplier field
+                        const errorMessage = !supplierId ? 'Supplier is required' : '';
+                        setErrors(prev => ({ ...prev, supplierId: errorMessage }));
+                      }}
+                      className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors ${
+                        errors.supplierId ? 'border-red-500 bg-red-500/10' : 'border-gray-600'
+                      }`}
                     >
-                      <option value="">No Supplier Selected</option>
+                      <option value="">Select a supplier</option>
                       {isLoadingSuppliers ? (
                         <option disabled>Loading suppliers...</option>
                       ) : suppliers.length > 0 ? (
@@ -722,7 +736,15 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                       )}
                     </select>
                   </div>
-                  {formData.supplierId && (
+                  {errors.supplierId && (
+                    <p className="text-red-400 text-xs mt-2 flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors.supplierId}
+                    </p>
+                  )}
+                  {formData.supplierId && !errors.supplierId && (
                     <div className="mt-2 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                       <div className="flex items-center">
                         <svg className="w-4 h-4 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
