@@ -16,6 +16,7 @@ import {
 import { formatPrice } from '../../utils/currencyUtils';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import { companyService } from '../../services/companyService';
 import {
   LineChart,
   Line,
@@ -114,7 +115,14 @@ const AdminDashboard: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -179,7 +187,14 @@ const AdminDashboard: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

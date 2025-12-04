@@ -14,6 +14,7 @@ import { formatPrice, getCurrencySymbol } from '../../utils/currencyUtils';
 import { APP_CONSTANTS, ERROR_MESSAGES, SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 import { useToast } from '../../contexts/ToastContext';
 import { usePermissions } from '../../hooks/usePermissions';
+import { companyService } from '../../services/companyService';
 
 // Quotation interfaces specific to this page
 interface QuotationCustomer {
@@ -319,7 +320,14 @@ const QuotationsPage: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

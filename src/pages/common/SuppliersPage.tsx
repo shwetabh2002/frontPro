@@ -6,6 +6,7 @@ import { getSuppliers, Supplier, SupplierResponse } from '../../services/supplie
 import { useToast } from '../../contexts/ToastContext';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../constants';
 import AddSupplierModal from '../../components/AddSupplierModal';
+import { companyService } from '../../services/companyService';
 
 const SuppliersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -119,7 +120,14 @@ const SuppliersPage: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

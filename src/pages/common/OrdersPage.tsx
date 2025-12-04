@@ -16,6 +16,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { SUCCESS_MESSAGES, QUOTATION_STATUS } from '../../constants';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { type Customer } from '../../services/customerService';
+import { companyService } from '../../services/companyService';
 
 // Order interfaces
 interface OrderCustomer {
@@ -297,7 +298,14 @@ const OrdersPage: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

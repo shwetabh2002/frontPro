@@ -1,6 +1,7 @@
 import { API_CONFIG, buildApiUrl, getApiBaseUrl } from '../config/api';
 import { ERROR_MESSAGES } from '../constants';
 import { apiClientService } from './apiClient';
+import { companyService } from './companyService';
 
 // Types
 export interface VinNumber {
@@ -275,7 +276,17 @@ class InventoryService {
       }
 
       console.log('🔍 Final params object:', params);
-      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
+      let url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
+      
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      if (companyId) {
+        const urlObj = new URL(url);
+        if (!urlObj.searchParams.has('companyId')) {
+          urlObj.searchParams.append('companyId', companyId);
+        }
+        url = urlObj.toString();
+      }
       
       console.log('🔍 Inventory API URL:', url);
       console.log('🔍 API Parameters:', params);
@@ -323,7 +334,17 @@ class InventoryService {
       if (currencyType) {
         params.currencyType = currencyType;
       }
-      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
+      let url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.REQUIREMENTS_CARS, params);
+      
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      if (companyId) {
+        const urlObj = new URL(url);
+        if (!urlObj.searchParams.has('companyId')) {
+          urlObj.searchParams.append('companyId', companyId);
+        }
+        url = urlObj.toString();
+      }
       
       const token = localStorage.getItem('accessToken');
       if (!token) {
@@ -382,7 +403,18 @@ class InventoryService {
     try {
       console.log('🔍 Creating inventory item:', itemData);
       
-      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY}`;
+      let url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.INVENTORY}`;
+      
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      if (companyId) {
+        const urlObj = new URL(url);
+        if (!urlObj.searchParams.has('companyId')) {
+          urlObj.searchParams.append('companyId', companyId);
+        }
+        url = urlObj.toString();
+      }
+      
       console.log('🔍 Create inventory API URL:', url);
       
       const token = localStorage.getItem('accessToken');
@@ -531,7 +563,18 @@ class InventoryService {
    */
   async getCategories(): Promise<string[]> {
     try {
-      const url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.CATEGORIES);
+      let url = buildApiUrl(API_CONFIG.ENDPOINTS.INVENTORY.CATEGORIES);
+      
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      if (companyId) {
+        const urlObj = new URL(url);
+        if (!urlObj.searchParams.has('companyId')) {
+          urlObj.searchParams.append('companyId', companyId);
+        }
+        url = urlObj.toString();
+      }
+      
       const token = localStorage.getItem('accessToken');
       
       if (!token) {
@@ -568,7 +611,18 @@ class InventoryService {
     try {
       console.log('🔍 Uploading inventory file:', file.name);
       
-      const url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.BULK_UPLOAD}`;
+      let url = `${getApiBaseUrl()}${API_CONFIG.ENDPOINTS.INVENTORY.BULK_UPLOAD}`;
+      
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      if (companyId) {
+        const urlObj = new URL(url);
+        if (!urlObj.searchParams.has('companyId')) {
+          urlObj.searchParams.append('companyId', companyId);
+        }
+        url = urlObj.toString();
+      }
+      
       console.log('🔍 Bulk upload API URL:', url);
       
       const token = localStorage.getItem('accessToken');

@@ -10,6 +10,7 @@ import QuotationPDF from '../../components/QuotationPDF';
 import { getConfirmedOrders, getQuotationById } from '../../services/quotationService';
 import { formatPrice } from '../../utils/currencyUtils';
 import { useToast } from '../../contexts/ToastContext';
+import { companyService } from '../../services/companyService';
 
 // Order interfaces (same as OrdersPage)
 interface OrderCustomer {
@@ -279,7 +280,14 @@ const SalesReportPage: React.FC = () => {
           // Try to refresh token
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
-            const refreshResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/auth/refresh`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const refreshResponse = await fetch(refreshUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

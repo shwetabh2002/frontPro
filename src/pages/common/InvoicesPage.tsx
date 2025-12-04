@@ -11,6 +11,7 @@ import Pagination from '../../components/Pagination';
 import InvoicePDF from '../../components/InvoicePDF';
 import { usePermissions } from '../../hooks/usePermissions';
 import * as XLSX from 'xlsx';
+import { companyService } from '../../services/companyService';
 
 const InvoicesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -70,7 +71,14 @@ const InvoicesPage: React.FC = () => {
       if (err?.response?.status === 401) {
         try {
           // Try to refresh token
-          const refreshResponse = await fetch('/api/auth/refresh', {
+          // Add companyId to query parameters
+          const companyId = companyService.getCompanyId();
+          let refreshUrl = '/api/auth/refresh';
+          if (companyId) {
+            refreshUrl += `?companyId=${companyId}`;
+          }
+          
+          const refreshResponse = await fetch(refreshUrl, {
             method: 'POST',
             credentials: 'include'
           });

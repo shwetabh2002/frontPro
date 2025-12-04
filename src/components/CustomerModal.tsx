@@ -887,8 +887,15 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
 
     // Validate booking details when creating from Orders page
     if (showBookingAmount) {
+      const finalTotal = getFinalTotal();
+      
       if (formData.bookingAmount <= 0) {
         showToast('Please enter a valid booking amount greater than 0', 'error');
+        return;
+      }
+
+      if (formData.bookingAmount > finalTotal) {
+        showToast(`Booking amount cannot exceed the total amount of ${finalTotal.toFixed(2)} ${selectedCurrency?.code || 'USD'}`, 'error');
         return;
       }
 

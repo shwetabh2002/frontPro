@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getApiBaseUrl, API_CONFIG } from '../config/api';
 import { apiClientService } from './apiClient';
+import { companyService } from './companyService';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -12,13 +13,24 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and companyId
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add companyId to query parameters for all requests
+    const companyId = companyService.getCompanyId();
+    if (companyId) {
+      // Merge with existing params
+      config.params = {
+        ...config.params,
+        companyId: companyId,
+      };
+    }
+    
     return config;
   },
   (error) => {
@@ -38,7 +50,12 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+          // Add companyId to query parameters
+          // Fetch company details if not cached
+          const companyId = await companyService.getCompanyIdAsync();
+          const refreshUrl = `${API_BASE_URL}/auth/refresh-token?companyId=${companyId}`;
+          
+          const response = await axios.post(refreshUrl, {}, {
             headers: {
               'Authorization': `Bearer ${refreshToken}`,
               'Content-Type': 'application/json',
@@ -99,7 +116,14 @@ export interface LoginResponse {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<{ data: LoginResponse['data'] }> {
-    const response = await api.post<LoginResponse>('/auth/login', credentials);
+    // Add companyId to query parameters for login
+    // Fetch company details if not cached
+    const companyId = await companyService.getCompanyIdAsync();
+    const response = await api.post<LoginResponse>('/auth/login', credentials, {
+      params: {
+        companyId: companyId,
+      },
+    });
     
     // Store tokens and user data in localStorage
     localStorage.setItem('accessToken', response.data.data.accessToken);
@@ -112,7 +136,14 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      await api.post('/auth/logout');
+      // Add companyId to query parameters for logout
+      // Fetch company details if not cached
+      const companyId = await companyService.getCompanyIdAsync();
+      await api.post('/auth/logout', {}, {
+        params: {
+          companyId: companyId,
+        },
+      });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -122,6 +153,7 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<{ data: LoginResponse['data']['user'] }> {
+    // companyId is already added by the interceptor, but ensure it's there
     const response = await api.get('/auth/me');
     return response;
   },
@@ -199,7 +231,11 @@ export const authService = {
 
     // Token is expired, try to refresh
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+      // Add companyId to query parameters
+      const companyId = companyService.getCompanyId();
+      const refreshUrl = `${API_BASE_URL}/auth/refresh-token?companyId=${companyId}`;
+      
+      const response = await axios.post(refreshUrl, {}, {
         headers: {
           'Authorization': `Bearer ${refreshToken}`,
           'Content-Type': 'application/json',
@@ -234,7 +270,14 @@ export const authService = {
         try {
           const refreshToken = this.getRefreshToken();
           if (refreshToken) {
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {}, {
+            // Add companyId to query parameters
+            const companyId = companyService.getCompanyId();
+            let refreshUrl = `${API_BASE_URL}/auth/refresh-token`;
+            if (companyId) {
+              refreshUrl += `?companyId=${companyId}`;
+            }
+            
+            const response = await axios.post(refreshUrl, {}, {
               headers: {
                 'Authorization': `Bearer ${refreshToken}`,
                 'Content-Type': 'application/json',

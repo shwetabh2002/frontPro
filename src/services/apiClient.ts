@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getApiBaseUrl } from '../config/api';
+import { companyService } from './companyService';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -11,13 +12,22 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and companyId
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add companyId to query parameters for all requests
+    // getCompanyId() always returns ACTIVE_COMPANY_ID constant
+    const companyId = companyService.getCompanyId();
+    config.params = {
+      ...config.params,
+      companyId: companyId,
+    };
+    
     return config;
   },
   (error) => {
@@ -39,7 +49,12 @@ apiClient.interceptors.response.use(
         if (refreshToken) {
           console.log('🔄 Attempting to refresh token...');
           
-          const response = await axios.post(`${getApiBaseUrl()}/auth/refresh-token`, {}, {
+          // Add companyId to query parameters
+          // Response interceptor is async, so we can fetch company details if not cached
+          const companyId = await companyService.getCompanyIdAsync();
+          const refreshUrl = `${getApiBaseUrl()}/auth/refresh-token?companyId=${companyId}`;
+          
+          const response = await axios.post(refreshUrl, {}, {
             headers: {
               'Authorization': `Bearer ${refreshToken}`,
               'Content-Type': 'application/json',

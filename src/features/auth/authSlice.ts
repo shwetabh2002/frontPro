@@ -99,7 +99,13 @@ export const refreshToken = createAsyncThunk(
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch(`${getApiBaseUrl()}/auth/refresh-token`, {
+      // Add companyId to query parameters
+      // Fetch company details if not cached
+      const { companyService } = await import('../../services/companyService');
+      const companyId = await companyService.getCompanyIdAsync();
+      const refreshUrl = `${getApiBaseUrl()}/auth/refresh-token?companyId=${companyId}`;
+      
+      const response = await fetch(refreshUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

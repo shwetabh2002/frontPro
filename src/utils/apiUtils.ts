@@ -1,5 +1,6 @@
 import { API_CONFIG } from '../config/api';
 import { ERROR_MESSAGES, HTTP_STATUS } from '../constants';
+import { companyService } from '../services/companyService';
 
 // API Error Class for better error handling
 export class ApiError extends Error {
@@ -33,7 +34,16 @@ export class HttpClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = new URL(endpoint, this.baseUrl).toString();
+    const url = new URL(endpoint, this.baseUrl);
+    
+    // Add companyId to query parameters if not already present
+    // getCompanyId() always returns ACTIVE_COMPANY_ID constant
+    const companyId = companyService.getCompanyId();
+    if (!url.searchParams.has('companyId')) {
+      url.searchParams.append('companyId', companyId);
+    }
+    
+    const urlString = url.toString();
     
     const config: RequestInit = {
       ...options,
@@ -51,7 +61,7 @@ export class HttpClient {
     );
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(urlString, {
         ...config,
         signal: controller.signal,
       });
@@ -124,10 +134,22 @@ export class HttpClient {
   async get<T>(endpoint: string, params?: Record<string, string | number>): Promise<T> {
     const url = new URL(endpoint, this.baseUrl);
     
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
+    // Merge params with companyId if not already present in URL or params
+    const mergedParams = { ...params };
+    const companyId = companyService.getCompanyId();
+    
+    // Only add companyId if it's not already in the URL query params or in the params object
+    if (companyId && !url.searchParams.has('companyId') && !mergedParams?.companyId) {
+      mergedParams.companyId = companyId;
+    }
+    
+    if (mergedParams) {
+      Object.entries(mergedParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          url.searchParams.append(key, String(value));
+          // Only append if not already present in URL
+          if (!url.searchParams.has(key)) {
+            url.searchParams.append(key, String(value));
+          }
         }
       });
     }

@@ -91,6 +91,9 @@ export const API_CONFIG = {
   },
 } as const;
 
+// Company Constants
+export const COMPANY_IDS = { AXEERA: 'axeera', TEST: 'test',PLANETSKY: 'planetsky' };
+
 // Global function to get API base URL based on environment
 export const getApiBaseUrl = (): string => {
   // Use custom environment variable for environment detection

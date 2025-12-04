@@ -1,5 +1,5 @@
 import { httpClient, getAuthToken } from '../utils/apiUtils';
-import { API_CONFIG, buildApiUrl } from '../config/api';
+import { API_CONFIG, buildApiUrl, COMPANY_IDS } from '../config/api';
 import { ERROR_MESSAGES } from '../constants';
 
 // Types
@@ -51,6 +51,7 @@ export interface Company {
   socialMedia: CompanySocialMedia;
   termCondition: string;
   bankDetails: CurrencyBankDetails;
+  companyId: string;
 }
 
 export interface CompanyResponse {
@@ -64,11 +65,16 @@ const COMPANY_STORAGE_KEY = 'company_info';
 const COMPANY_CACHE_EXPIRY_KEY = 'company_cache_expiry';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
+// Active Company ID - Change this constant to switch between companies
+// This is the single source of truth for companyId across the application
+const ACTIVE_COMPANY_ID = COMPANY_IDS.AXEERA;
+
 class CompanyService {
   /**
    * Get company information from API
+   * @param companyId - Company ID to fetch. If not provided, uses ACTIVE_COMPANY_ID constant
    */
-  async getCompanyInfo(): Promise<Company> {
+  async getCompanyInfo(companyId?: string): Promise<Company> {
     try {
       console.log('🏢 Fetching company information...');
       
@@ -80,11 +86,23 @@ class CompanyService {
       httpClient.setAuthToken(token);
       console.log('🔑 Using auth token for company API:', token.substring(0, 20) + '...');
       
-      const url = buildApiUrl(API_CONFIG.ENDPOINTS.COMPANIES.GET_COMPANY_DOCUMENTS);
-      const response = await httpClient.get<CompanyResponse>(url);
+      // Use provided companyId or ACTIVE_COMPANY_ID constant
+      const idToUse = companyId || ACTIVE_COMPANY_ID;
+      
+      // Don't use buildApiUrl here since httpClient.get() will add companyId automatically
+      // Just pass the endpoint and let httpClient handle the companyId
+      const endpoint = API_CONFIG.ENDPOINTS.COMPANIES.GET_COMPANY_DOCUMENTS;
+      const response = await httpClient.get<CompanyResponse>(endpoint, {
+        companyId: idToUse
+      });
       
       if (response.success && response.data) {
         console.log('✅ Company information fetched successfully');
+        console.log('🏢 Company information:', response.data);
+        // Ensure companyId is set in the response data (in case API doesn't return it)
+        if (!response.data.companyId) {
+          response.data.companyId = idToUse;
+        }
         return response.data;
       } else {
         throw new Error(response.message || ERROR_MESSAGES.COMPANY.FETCH_FAILED);
@@ -157,7 +175,7 @@ class CompanyService {
    * Get company information (cached or fresh)
    * This is the main method to use throughout the app
    */
-  async getCompany(): Promise<Company> {
+  async getCompany(companyId?: string): Promise<Company> {
     // Try to get from cache first
     const cached = this.getCachedCompanyInfo();
     if (cached) {
@@ -165,7 +183,9 @@ class CompanyService {
     }
 
     // If not in cache or expired, fetch from API
-    const company = await this.getCompanyInfo();
+    // Use provided companyId or ACTIVE_COMPANY_ID constant
+    const idToUse = companyId || ACTIVE_COMPANY_ID;
+    const company = await this.getCompanyInfo(idToUse);
     this.cacheCompanyInfo(company);
     return company;
   }
@@ -213,6 +233,24 @@ class CompanyService {
   getCompanyAddress(): CompanyAddress | null {
     const cached = this.getCachedCompanyInfo();
     return cached?.address || null;
+  }
+
+  /**
+   * Get company ID (quick access - synchronous)
+   * Returns ACTIVE_COMPANY_ID constant - this is the single point of truth
+   * Change ACTIVE_COMPANY_ID constant at the top of this file to switch companies
+   */
+  getCompanyId(): string {
+    return ACTIVE_COMPANY_ID;
+  }
+
+  /**
+   * Get company ID (async version - same as sync version)
+   * Returns ACTIVE_COMPANY_ID constant
+   * This method exists for API compatibility but always returns the constant
+   */
+  async getCompanyIdAsync(): Promise<string> {
+    return ACTIVE_COMPANY_ID;
   }
 }
 
