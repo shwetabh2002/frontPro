@@ -92,7 +92,7 @@ export const API_CONFIG = {
 } as const;
 
 // Company Constants
-export const COMPANY_IDS = { AXEERA: 'axeera', TEST: 'test',PLANETSKY: 'planetsky' };
+export const COMPANY_IDS = { AXEERA: 'axeera', TEST: 'test',PLANETSKY: 'planetsky',DESIGNSTUDIO: 'designstudio' };
 
 // Global function to get API base URL based on environment
 export const getApiBaseUrl = (): string => {

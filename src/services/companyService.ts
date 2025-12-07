@@ -67,7 +67,7 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Active Company ID - Change this constant to switch between companies
 // This is the single source of truth for companyId across the application
-const ACTIVE_COMPANY_ID = COMPANY_IDS.PLANETSKY;
+const ACTIVE_COMPANY_ID = COMPANY_IDS.DESIGNSTUDIO;
 
 class CompanyService {
   /**

@@ -38,7 +38,7 @@ const Logo: React.FC<LogoProps> = ({
       {showText && (
         <div className="ml-3">
           <h1 className={`font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${textSizeClasses[size]}`}>
-            Axeera POS
+            Design Studio POS
           </h1>
           <p className="text-xs text-gray-400 font-medium">
             Automotive Solutions
