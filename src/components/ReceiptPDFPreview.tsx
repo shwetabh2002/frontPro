@@ -106,11 +106,11 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
 
         {/* PDF Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div ref={pdfRef} className="p-4 bg-white" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
+          <div ref={pdfRef} className="p-6 bg-white" style={{ width: '210mm', margin: '0 auto' }}>
             {/* Company Header */}
-            <div className="border-b-2 border-gray-800 pb-3 mb-4">
+            <div className="border-b-2 border-gray-800 pb-2 mb-3">
               {/* Receipt Voucher Title - Centered */}
-              <div className="text-center mb-3">
+              <div className="text-center mb-2">
                 <h1 className="text-xl font-bold text-gray-800">RECEIPT VOUCHER</h1>
               </div>
               
@@ -118,16 +118,18 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
               <div className="flex justify-between items-start">
                 {/* Left Side - Logo and Company Name */}
                 <div className="flex flex-col items-start">
-                  <img 
-                    src="/logo_extracted.png" 
-                    alt="Company Logo" 
-                    className="h-12 mb-2"
-                    onError={(e) => {
-                      // Fallback if logo doesn't load
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <div className="text-sm font-semibold text-gray-700">
+                  <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
+                    <img 
+                      src="/logo_extracted.png" 
+                      alt="Company Logo" 
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        // Fallback if logo doesn't load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="text-base font-semibold text-gray-700 mt-1">
                     {receipt.company?.name}
                   </div>
                 </div>
@@ -144,7 +146,7 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
                     <div>{receipt.company.address.country}</div>
                   )}
                   {receipt.company?.phone && (
-                    <div className="mt-2 font-medium">Phone: {receipt.company.phone}</div>
+                    <div className="mt-1 font-medium">Phone: {receipt.company.phone}</div>
                   )}
                   {receipt.company?.email && (
                     <div className="font-medium">Email: {receipt.company.email}</div>
@@ -157,32 +159,32 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
             </div>
 
             {/* Receipt Details */}
-            <div className="mb-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
+            <div className="mb-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Receipt Number:</span>
                     <span className="text-gray-900">{receipt.receiptNumber}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Receipt Date:</span>
                     <span className="text-gray-900">{formatDate(receipt.receiptDate, { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Payment Method:</span>
                     <span className="text-gray-900 capitalize">{receipt.paymentMethod}</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Customer Name:</span>
                     <span className="text-gray-900">{receipt.customer.name}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Contact:</span>
                     <span className="text-gray-900">{receipt.customer.phone}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Email:</span>
                     <span className="text-gray-900">{receipt.customer.email}</span>
                   </div>
@@ -190,8 +192,8 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
               </div>
               
               {receipt.customer.address && (
-                <div className="mt-4">
-                  <div className="flex justify-between">
+                <div className="mt-2">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">Address:</span>
                     <span className="text-gray-900">{receipt.customer.address}</span>
                   </div>
@@ -199,8 +201,8 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
               )}
 
               {receipt.customer.trn && (
-                <div className="mt-2">
-                  <div className="flex justify-between">
+                <div className="mt-1">
+                  <div className="flex justify-between text-sm">
                     <span className="font-semibold text-gray-700">TRN:</span>
                     <span className="text-gray-900">{receipt.customer.trn}</span>
                   </div>
@@ -209,19 +211,19 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
             </div>
 
             {/* Description Section */}
-            <div className="mb-4">
-              <h3 className="text-base font-bold text-gray-800 mb-1 border-b border-gray-300 pb-1">Description</h3>
+            <div className="mb-3">
+              <h3 className="text-sm font-bold text-gray-800 mb-1 border-b border-gray-300 pb-1">Description</h3>
               <p className="text-sm text-gray-700">{receipt.description}</p>
             </div>
 
             {/* Amount Section */}
-            <div className="mb-2">
-              <div className="bg-gray-50 p-3 rounded">
-                <div className="grid grid-cols-2 gap-4">
+            <div className="mb-3">
+              <div className="bg-gray-50 p-2 rounded">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center mb-1">
                       <span className="text-sm font-semibold text-gray-700">Amount:</span>
-                      <span className="text-lg font-bold text-gray-900">{formatCurrency(receipt.amount, receipt.currency)}</span>
+                      <span className="text-base font-bold text-gray-900">{formatCurrency(receipt.amount, receipt.currency)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-semibold text-gray-700">Currency:</span>
@@ -240,10 +242,10 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
 
             {/* Quotation Reference */}
             {receipt.quotationId && (
-              <div className="mb-4">
-                <h3 className="text-base font-bold text-gray-800 mb-1 border-b border-gray-300 pb-1">Related Order</h3>
+              <div className="mb-3">
+                <h3 className="text-sm font-bold text-gray-800 mb-1 border-b border-gray-300 pb-1">Related Order</h3>
                 <div className="bg-blue-50 p-2 rounded">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <span className="font-semibold text-gray-700">Order Number:</span>
                       <span className="ml-2 text-gray-900">{receipt.quotationId.quotationNumber}</span>
@@ -266,25 +268,25 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
             )}
 
             {/* Terms & Conditions */}
-            <div className="mb-4">
-              <h3 className="text-base font-bold text-gray-800 mb-2 border-b border-gray-300 pb-1">Terms & Conditions</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="mb-3">
+              <h3 className="text-sm font-bold text-gray-800 mb-1 border-b border-gray-300 pb-1">Terms & Conditions</h3>
+              <div className="grid grid-cols-2 gap-2">
                 {/* Export Terms */}
                 {receipt.company?.termCondition?.export && (
                   <div className="p-2 rounded">
-                    <div className="font-semibold text-gray-800 mb-2 text-center text-sm">Export Terms</div>
-                    <div className="text-xs text-gray-700 space-y-1">
+                    <div className="font-semibold text-gray-800 mb-1 text-center text-xs">Export Terms</div>
+                    <div className="text-xs text-gray-700 space-y-0.5">
                       <div><strong>Price:</strong> {receipt.company.termCondition.export.price}</div>
                       <div><strong>Delivery:</strong> {receipt.company.termCondition.export.delivery}</div>
                       <div><strong>Payment:</strong> {receipt.company.termCondition.export.payment}</div>
                       <div><strong>Validity:</strong> {receipt.company.termCondition.export.validity}</div>
                     </div>
                     {/* Company Stamp */}
-                    <div className="mt-4 flex justify-center">
+                    <div className="mt-2 flex justify-center">
                       <img 
                         src="/stamp-planet-sky.png" 
                         alt="Company Stamp" 
-                        className="h-28 w-auto max-w-full"
+                        className="h-20 w-auto max-w-full"
                         style={{ objectFit: 'contain' }}
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
@@ -295,45 +297,45 @@ const ReceiptPDFPreview: React.FC<ReceiptPDFPreviewProps> = ({ receipt, onClose 
                 )}
                 
                 {/* General Terms */}
-                <div className="bg-gray-50 p-3 rounded">
-                  <div className="font-semibold text-gray-800 mb-2 text-center text-sm">General Terms</div>
-                  <ol className="list-decimal list-inside space-y-1 text-xs text-gray-700 pl-2 pr-2">
-                    <li className="mb-1">Full payment before delivery of the vehicle.</li>
-                    <li className="mb-1">All banking charges are payable by the buyer.</li>
-                    <li className="mb-1">Payments accepted through T/T, cheques, or cash only.</li>
-                    <li className="mb-1">Receipt is valid for 3 days from the creation date.</li>
-                    <li className="mb-1">This document is valueless without an authorized signature and company stamp.</li>
-                    <li className="mb-1">Merchandise shall not be sold or shipped to embargoed countries.</li>
-                    <li className="mb-1">Company website's T&C apply.</li>
-                    <li className="mb-1">No returns or exchanges; advance payments are non-refundable.</li>
-                    <li className="mb-1">Buyer acknowledges inspecting and accepting the car as-is.</li>
-                    <li className="mb-1">Customs documentation must be refunded within the allowed period.</li>
+                <div className="bg-gray-50 p-2 rounded">
+                  <div className="font-semibold text-gray-800 mb-1 text-center text-xs">General Terms</div>
+                  <ol className="list-decimal list-inside text-xs text-gray-700 pl-1 pr-1 space-y-0">
+                    <li>Full payment before delivery of the vehicle.</li>
+                    <li>All banking charges are payable by the buyer.</li>
+                    <li>Payments accepted through T/T, cheques, or cash only.</li>
+                    <li>Receipt is valid for 3 days from the creation date.</li>
+                    <li>Document valueless without signature and stamp.</li>
+                    <li>Not to be sold/shipped to embargoed countries.</li>
+                    <li>Company website's T&C apply.</li>
+                    <li>No returns; advance payments are non-refundable.</li>
+                    <li>Buyer accepts the car as-is after inspection.</li>
+                    <li>Customs docs must be refunded within allowed period.</li>
                   </ol>
                 </div>
               </div>
             </div>
 
             {/* Signatures */}
-            <div className="mt-4">
+            <div className="mt-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="pt-1">
                     <div className="text-sm font-semibold text-gray-700">Accountant/Cashier Signature</div>
-                    <div className="text-xs text-gray-500 mt-2">Date: _______________</div>
+                    <div className="text-xs text-gray-500 mt-1">Date: _______________</div>
                   </div>
                 </div>
                 <div>
                   <div className="border-t-2 border-gray-400 pt-1">
                     <div className="text-sm font-semibold text-gray-700">Customer Signature</div>
-                    <div className="text-xs text-gray-500 mt-2">Date: _______________</div>
+                    <div className="text-xs text-gray-500 mt-1">Date: _______________</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="mt-4 text-center border-t border-gray-300 pt-2">
-              <div className="text-xs text-gray-600 space-y-0.5">
+            <div className="mt-3 text-center border-t border-gray-300 pt-2">
+              <div className="text-xs text-gray-600">
                 {receipt.company?.address && (
                   <div>
                     {receipt.company.address.street}, {receipt.company.address.city}, {receipt.company.address.state}, {receipt.company.address.country}

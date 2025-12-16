@@ -65,8 +65,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
 
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{9,15}$/.test(formData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = 'Please enter a valid phone number';
     }
 
     if (!formData.address.trim()) {

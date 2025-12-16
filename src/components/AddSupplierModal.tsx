@@ -125,16 +125,6 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({
     // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else {
-      // Remove country code from phone for validation
-      const cleanPhone = formData.phone.replace(formData.countryCode, '').trim();
-      if (cleanPhone.length < 7) {
-        newErrors.phone = 'Phone number must be at least 7 digits';
-      } else if (cleanPhone.length > 15) {
-        newErrors.phone = 'Phone number must be less than 15 digits';
-      } else if (!/^[\d\s\-\+\(\)]+$/.test(cleanPhone)) {
-        newErrors.phone = 'Phone number contains invalid characters';
-      }
     }
 
     // Country code validation
