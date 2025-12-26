@@ -4,9 +4,10 @@ import { toWords } from 'number-to-words';
 interface QuotationPDFTemplateProps {
   quotationData: any;
   isFromOrdersPage?: boolean;
+  isProformaMode?: boolean;
 }
 
-const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProps>(({ quotationData, isFromOrdersPage = false }, ref) => {
+const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProps>(({ quotationData, isFromOrdersPage = false, isProformaMode = false }, ref) => {
   // Helper function to format order number (replace QUO with SO when from Orders page)
   const formatOrderNumber = (quotationNumber: string) => {
     return isFromOrdersPage ? quotationNumber.replace(/QUO/g, 'SO') : quotationNumber;
@@ -135,7 +136,7 @@ const QuotationPDFTemplate = forwardRef<HTMLDivElement, QuotationPDFTemplateProp
           borderBottom: '2px solid #000000',
           paddingBottom: '10px'
         }}>
-          {quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER '}
+          {isProformaMode ? 'PROFORMA INVOICE' : (quotationData.status === 'draft' ? 'PROFORMA INVOICE' : 'SALES ORDER ')}
         </div>
 
       {/* Two Column Cards - Compact */}

@@ -13,16 +13,21 @@ interface QuotationPDFProps {
 
 const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose, isFromOrdersPage = false }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isProformaMode, setIsProformaMode] = useState(false);
   const { showToast } = useToast();
   const templateRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = async () => {
+  const generatePDF = async (asProforma: boolean = false) => {
     if (!templateRef.current) {
       showToast('Error: Template not found', 'error');
       return;
     }
 
     setIsGenerating(true);
+    if (asProforma) setIsProformaMode(true);
+    
+    // Wait a bit for the template to update with proforma mode
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     try {
       // Convert HTML to canvas
@@ -58,33 +63,45 @@ const QuotationPDF: React.FC<QuotationPDFProps> = ({ quotationData, onClose, isF
         heightLeft -= pageHeight;
       }
 
-      // Save the PDF with appropriate filename based on source
-      // Replace QUO with SO in filename when from Orders page
+      // Save the PDF with appropriate filename based on source and type
       const displayNumber = isFromOrdersPage 
         ? quotationData.quotationNumber.replace(/QUO/g, 'SO')
         : quotationData.quotationNumber;
-      const fileName = isFromOrdersPage 
-        ? `salesOrder-${displayNumber}.pdf`
-        : `quotation-${quotationData.quotationNumber}.pdf`;
+      
+      let fileName: string;
+      if (asProforma) {
+        fileName = `proforma-invoice-${displayNumber}.pdf`;
+      } else if (isFromOrdersPage) {
+        fileName = `salesOrder-${displayNumber}.pdf`;
+      } else {
+        fileName = `quotation-${quotationData.quotationNumber}.pdf`;
+      }
+      
       pdf.save(fileName);
-      showToast('PDF generated successfully!', 'success');
+      showToast(`${asProforma ? 'Proforma Invoice' : 'PDF'} generated successfully!`, 'success');
       
     } catch (error) {
       console.error('Error generating PDF:', error);
       showToast('Error generating PDF. Please try again.', 'error');
     } finally {
       setIsGenerating(false);
+      setIsProformaMode(false);
     }
   };
+
+  const handleDownload = () => generatePDF(false);
+  const handleDownloadProforma = () => generatePDF(true);
 
   return (
     <QuotationPDFPreview
       quotationData={quotationData}
       onClose={onClose}
       onDownload={handleDownload}
+      onDownloadProforma={handleDownloadProforma}
       templateRef={templateRef}
       isGenerating={isGenerating}
       isFromOrdersPage={isFromOrdersPage}
+      isProformaMode={isProformaMode}
     />
   );
 };
