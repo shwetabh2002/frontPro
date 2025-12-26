@@ -20,6 +20,7 @@ export interface QuotationItem {
     fuelType?: string;
     [key: string]: any;
   };
+  costPrice?: number;
   sellingPrice: number;
   condition: string;
   status: string;

@@ -108,6 +108,7 @@ export interface InventoryItem {
   description: string;
   costPrice: number;
   sellingPrice: number;
+  newCostPrice?: number;
   newSellingPrice?: number;
   currencyType?: string;
   quantity: number;

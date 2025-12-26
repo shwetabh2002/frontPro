@@ -1237,9 +1237,9 @@ const InvoiceRequestsPage: React.FC = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
                             <Input
                               type="number"
-                              value={invoiceFormData.moreExpense.amount}
+                              value={invoiceFormData.moreExpense.amount || ''}
                               onChange={(e) => handleInvoiceFormChange('moreExpense.amount', parseFloat(e.target.value) || 0)}
-                              placeholder="0.00"
+                              placeholder=""
                             />
                           </div>
                         </div>

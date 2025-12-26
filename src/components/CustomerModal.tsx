@@ -813,6 +813,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           transmission: 'Automatic',
           fuelType: 'Gasoline',
         },
+        costPrice: item.newCostPrice || item.costPrice,
         sellingPrice: item.newSellingPrice || item.sellingPrice,
         condition: item.condition || 'new',
         status: item.status || 'active',
@@ -1712,10 +1713,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                               min="0"
                               max={discountType === 'fixed' ? getSubtotal() : 100}
                               step={discountType === 'fixed' ? "0.01" : "1"}
-                              value={discount}
+                              value={discount || ''}
                               onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
                               className="w-20 px-2 py-1 text-sm bg-white border border-slate-300 rounded text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                              placeholder={discountType === 'fixed' ? "0.00" : "0"}
+                              placeholder=""
                             />
                             {discountType === 'percentage' && <span className="text-slate-600">%</span>}
                           </div>
@@ -1870,7 +1871,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                                       type="number"
                                       min="0"
                                       step="0.01"
-                                      placeholder="0.00"
+                                      placeholder=""
                                       value={expense.amount || ''}
                                       onChange={(e) => {
                                         setAdditionalExpenses(prev => prev.map((exp, i) => 
@@ -2234,7 +2235,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                         </div>
                         <input
                           type="number"
-                          value={formData.bookingAmount}
+                          value={formData.bookingAmount || ''}
                           onChange={(e) => {
                             const finalTotal = getFinalTotal();
                             let bookingAmount = parseFloat(e.target.value) || 0;
@@ -2246,7 +2247,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                             
                             setFormData(prev => ({ ...prev, bookingAmount }));
                           }}
-                          placeholder="0.00"
+                          placeholder=""
                           step="0.01"
                           min="0"
                           max={getFinalTotal()}

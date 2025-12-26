@@ -694,7 +694,8 @@ const InventoryPage: React.FC = () => {
           </div>
 
           {/* Excel-like Inventory Table */}
-          {inventoryData.data.items.length > 0 ? (
+          {/* Filter out sold and out_of_stock items from the listing */}
+          {inventoryData.data.items.filter(item => !['sold', 'out_of_stock'].includes(item.status?.toLowerCase() || '')).length > 0 ? (
             <div className="overflow-x-auto">
               <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-sm min-w-max">
               {/* Table Header */}
@@ -723,7 +724,7 @@ const InventoryPage: React.FC = () => {
 
               {/* Table Body */}
               <div className="divide-y divide-gray-200">
-                {inventoryData.data.items.map((item, index) => (
+                {inventoryData.data.items.filter(item => !['sold', 'out_of_stock'].includes(item.status?.toLowerCase() || '')).map((item, index) => (
                   <div key={item._id} className={`grid gap-0 hover:bg-gray-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
                     {/* Row Number */}
                     <div className="p-2 border-r-2 border-gray-400 text-center text-xs text-gray-600 flex items-center justify-center">
@@ -848,7 +849,7 @@ const InventoryPage: React.FC = () => {
                     {/* VIN Count */}
                     <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
                       <div className="text-xs text-gray-600">
-                        {item.vinNumber?.length || 0}
+                        {item.quantity || 0}
                       </div>
                         </div>
 

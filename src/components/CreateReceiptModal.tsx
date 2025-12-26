@@ -489,7 +489,7 @@ const CreateReceiptModal: React.FC<CreateReceiptModalProps> = ({ isOpen, onClose
                 <Input
                   type="number"
                   name="amount"
-                  value={formData.amount}
+                  value={formData.amount || ''}
                   onChange={handleInputChange}
                   onPaste={(e) => {
                     e.preventDefault();

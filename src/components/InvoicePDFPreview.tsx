@@ -366,10 +366,6 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                     <div className="font-semibold text-gray-800 mb-1">PAYMENT & MODE:</div>
                     <div className="text-gray-600">{invoiceData.company.termCondition.export.payment}</div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-gray-800 mb-1">VALIDITY:</div>
-                    <div className="text-gray-600">{invoiceData.company.termCondition.export.validity}</div>
-                  </div>
                   <div className="border-t border-gray-300 pt-3 mt-3">
                     <div className="font-semibold text-gray-800 mb-1">Amount in words:</div>
                     <div className="text-gray-600">{toWords(Math.floor(invoiceData.finalTotal))} Only</div>

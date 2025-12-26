@@ -756,7 +756,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.costPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
-                    placeholder="0.00"
+                    placeholder=""
                   />
                 </div>
                 {errors.costPrice && <p className="text-red-400 text-xs mt-2 flex items-center">
@@ -781,7 +781,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     className={`w-full pl-8 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white focus:border-blue-500 focus:outline-none transition-all duration-200 ${
                       errors.sellingPrice ? 'border-red-500 bg-red-500/10' : 'border-gray-600 hover:border-gray-500'
                     }`}
-                    placeholder="0.00"
+                    placeholder=""
                   />
                 </div>
                 {errors.sellingPrice && <p className="text-red-400 text-xs mt-2 flex items-center">
@@ -856,7 +856,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
             </div>
           </div>
 
-          {/* VIN Numbers & Quantity - Only for cars */}
+          {/* VIN Number - Only for cars (single VIN per car) */}
           {formData.type === 'car' && formData.status?.toLowerCase() !== 'sold' && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-6">
@@ -865,12 +865,44 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-purple-400">VIN Numbers & Quantity</h3>
+                <h3 className="text-xl font-semibold text-purple-400">VIN Number</h3>
+                {/* Multi-VIN: Uncomment to show editable note
                 <span className="text-sm text-gray-400">(Only active chassis numbers are editable)</span>
+                */}
               </div>
             
             <div className="space-y-4">
-              {/* Show all VIN numbers (active + inactive) */}
+              {/* Show inactive/sold VIN numbers (read-only history) */}
+              {allVinNumbers.filter(vin => vin.status !== 'active').map((vin, index) => (
+                <div key={vin._id || `inactive-${index}`} className="flex items-center space-x-3 p-3 rounded-xl border bg-gray-700/20 border-gray-600/30">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={vin.chasisNumber}
+                      disabled
+                      className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/50 rounded-xl text-gray-400 cursor-not-allowed"
+                      placeholder="VIN Number"
+                    />
+                  </div>
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-gray-500/20 text-gray-400">
+                    {vin.status}
+                  </span>
+                </div>
+              ))}
+              
+              {/* Single active VIN input */}
+              <div className="p-3 rounded-xl border bg-gray-800/30 border-gray-600/50">
+                <label className="block text-sm font-medium text-gray-300 mb-2">VIN/Chassis Number *</label>
+                <input
+                  type="text"
+                  value={vinNumbers[0] || ''}
+                  onChange={(e) => handleVinNumberChange(0, e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
+                  placeholder="Enter VIN/Chassis Number"
+                />
+              </div>
+
+              {/* Multi-VIN: Uncomment below to enable multiple VIN inputs with edit/delete
               {allVinNumbers.map((vin, index) => {
                 const isActive = vin.status === 'active';
                 const editableIndex = vinNumbers.findIndex(v => v === vin.chasisNumber);
@@ -896,7 +928,6 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                       />
                     </div>
                     <div className="flex items-center space-x-2">
-                      {/* Status badge */}
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         isActive 
                           ? 'bg-green-500/20 text-green-400' 
@@ -904,7 +935,6 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                       }`}>
                         {vin.status}
                       </span>
-                      {/* Remove button - only for active VINs */}
                       {isActive && (
                         <button
                           type="button"
@@ -922,9 +952,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                 );
               })}
               
-              {/* Show editable VIN numbers (for adding new ones) */}
               {vinNumbers.map((vin, index) => {
-                // Skip if this VIN already exists in allVinNumbers
                 const existsInAll = allVinNumbers.some(v => v.chasisNumber === vin);
                 if (existsInAll) return null;
                 
@@ -940,9 +968,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                       />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-blue-500/20 text-blue-400">
-                        new
-                      </span>
+                      <span className="px-2 py-1 rounded text-xs font-medium bg-blue-500/20 text-blue-400">new</span>
                       <button
                         type="button"
                         onClick={() => removeVinNumber(index)}
@@ -967,6 +993,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                 </svg>
                 <span>Add VIN Number</span>
               </button>
+              */}
               
               {errors.vinNumber && <p className="text-red-400 text-xs flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1119,7 +1146,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   min="0"
                   step="0.1"
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
 
@@ -1141,7 +1168,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   min="0"
                   step="0.1"
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
 
@@ -1163,7 +1190,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   min="0"
                   step="0.1"
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
 
@@ -1185,7 +1212,7 @@ const InventoryEditModal: React.FC<InventoryEditModalProps> = ({
                   min="0"
                   step="0.1"
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
             </div>

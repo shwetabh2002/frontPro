@@ -353,9 +353,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">Discount Amount</label>
                   <Input
                     type="number"
-                    value={formData.discount}
+                    value={formData.discount || ''}
                     onChange={(e) => handleInputChange('discount', parseFloat(e.target.value) || 0)}
-                    placeholder="Discount amount"
+                    placeholder=""
                   />
                 </div>
                 <div>
@@ -458,9 +458,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                               </div>
                               <Input
                                 type="number"
-                                value={expense.amount}
+                                value={expense.amount || ''}
                                 onChange={(e) => handleInputChange(`additionalExpenses.${index}.amount`, parseFloat(e.target.value) || 0)}
-                                placeholder="Amount"
+                                placeholder=""
                                 className="pl-10"
                               />
                             </div>

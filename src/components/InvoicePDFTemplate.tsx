@@ -340,10 +340,6 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
                     <div style={{ fontWeight: '600', color: '#000000', marginBottom: '2px' }}>PAYMENT & MODE:</div>
                     <div style={{ color: '#000000' }}>{invoiceData.company.termCondition.export.payment}</div>
                   </div>
-                  <div style={{ marginBottom: '6px' }}>
-                    <div style={{ fontWeight: '600', color: '#000000', marginBottom: '2px' }}>VALIDITY:</div>
-                    <div style={{ color: '#000000' }}>{invoiceData.company.termCondition.export.validity}</div>
-                  </div>
                   <div style={{ borderTop: '1px solid #000000', paddingTop: '6px', marginTop: '6px' }}>
                     <div style={{ fontWeight: '600', color: '#000000', marginBottom: '2px' }}>Amount in words:</div>
                     <div style={{ color: '#000000' }}>{toWords(Math.floor(invoiceData.finalTotal))} Only</div>

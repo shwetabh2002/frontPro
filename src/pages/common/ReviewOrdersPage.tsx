@@ -1283,9 +1283,9 @@ const ReviewOrdersPage: React.FC = () => {
                       </label>
                       <Input
                         type="number"
-                        value={editFormData.discount}
+                        value={editFormData.discount || ''}
                         onChange={(e) => handleEditFormChange('discount', parseFloat(e.target.value) || 0)}
-                        placeholder={`Enter discount ${editFormData.discountType === 'percentage' ? 'percentage' : 'amount'}`}
+                        placeholder=""
                         min="0"
                         step={editFormData.discountType === 'percentage' ? '0.01' : '0.01'}
                         className="w-full"

@@ -205,13 +205,13 @@ const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
                     <input
                       type="number"
                       name="amount"
-                      value={formData.amount}
+                      value={formData.amount || ''}
                       onChange={handleInputChange}
                       required
                       min="0"
                       step="0.01"
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      placeholder="0.00"
+                      placeholder=""
                     />
                   </div>
                 </div>
