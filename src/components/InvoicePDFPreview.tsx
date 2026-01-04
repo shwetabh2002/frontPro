@@ -108,7 +108,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
       {/* Header Section */}
       <header className="flex items-center justify-between gap-4 mb-5">
         <div className="flex gap-4 items-center">
-          <div className="w-28 h-28 rounded-lg overflow-hidden">
+          <div className="w-36 h-36 rounded-lg overflow-hidden flex-shrink-0">
             <img 
               src="/logo_extracted.png" 
               alt="Company Logo" 
@@ -116,8 +116,8 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
             />
           </div>
           <div>
-            <div className="text-sm text-gray-700 leading-tight">
-              <div className="font-semibold text-lg">{invoiceData.company?.name || 'AL KARAMA MOTORS FZE'}</div>
+            <div className="text-xs text-gray-700 leading-snug">
+              <div className="font-bold text-base mb-1">{invoiceData.company?.name || 'AL KARAMA MOTORS FZE'}</div>
               <div>{invoiceData.company?.address?.street || 'Show Room No: 377,'}</div>
               <div>{invoiceData.company?.address?.city || 'Ducamz (Dubai Auto Zone),'}</div>
               <div>{invoiceData.company?.address?.state || 'Ras Al Khor Dubai'} {invoiceData.company?.address?.country || 'UAE'}</div>

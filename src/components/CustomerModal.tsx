@@ -1607,7 +1607,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       const quantity = itemQuantities[itemId] || 1;
                       const unitPrice = getEffectivePrice(item);
                       const originalPrice = item.newSellingPrice || item.sellingPrice;
+                      const costPrice = item.newCostPrice || item.costPrice || 0;
                       const isPriceEdited = editedPrices[itemId] !== undefined;
+                      const isPriceTooLow = unitPrice < costPrice;
                       const totalPrice = unitPrice * quantity;
                       const isInCurrentFilter = filteredItems.some(filteredItem => filteredItem._id === itemId);
                       
@@ -1664,16 +1666,23 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                                       const newPrice = parseFloat(e.target.value) || 0;
                                       handlePriceEdit(itemId, newPrice);
                                     }}
-                                    className={`w-28 text-right text-lg font-bold border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                                      isPriceEdited 
-                                        ? 'text-amber-600 border-amber-300 bg-amber-50' 
-                                        : 'text-emerald-600 border-gray-300 bg-white'
+                                    className={`w-28 text-right text-lg font-bold border rounded px-2 py-1 focus:outline-none focus:ring-2 ${
+                                      isPriceTooLow
+                                        ? 'text-red-600 border-red-400 bg-red-50 focus:ring-red-500'
+                                        : isPriceEdited 
+                                          ? 'text-amber-600 border-amber-300 bg-amber-50 focus:ring-emerald-500' 
+                                          : 'text-emerald-600 border-gray-300 bg-white focus:ring-emerald-500'
                                     }`}
                                     min="0"
                                     step="0.01"
                                   />
                                 </div>
-                                {isPriceEdited && (
+                                {isPriceTooLow && (
+                                  <div className="text-xs text-red-600 mt-1 font-medium">
+                                    Price is too low
+                                  </div>
+                                )}
+                                {isPriceEdited && !isPriceTooLow && (
                                   <div className="text-xs text-gray-400 mt-1 line-through">
                                     Original: {formatPrice(originalPrice, item.currencyType || selectedCurrency?.code || 'USD')}
                                   </div>

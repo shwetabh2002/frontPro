@@ -79,20 +79,21 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
       
       {/* Header Section */}
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '8px', marginTop: '4px' }}>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{ 
-            width: '90px', 
-            height: '90px', 
+            width: '130px', 
+            height: '130px', 
             borderRadius: '6px', 
             overflow: 'hidden',
             backgroundImage: 'url(/logo_extracted.png)',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
+            flexShrink: 0
           }}></div>
           <div>
-            <div style={{ fontSize: '11px', color: '#000000', lineHeight: '1.15' }}>
-              <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '2px' }}>{invoiceData.company?.name || 'AL KARAMA MOTORS FZE'}</div>
+            <div style={{ fontSize: '10px', color: '#000000', lineHeight: '1.2' }}>
+              <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '3px' }}>{invoiceData.company?.name || 'AL KARAMA MOTORS FZE'}</div>
               <div style={{ marginBottom: '1px' }}>{invoiceData.company?.address?.street || 'Show Room No: 377,'}</div>
               <div style={{ marginBottom: '1px' }}>{invoiceData.company?.address?.city || 'Ducamz (Dubai Auto Zone),'}</div>
               <div style={{ marginBottom: '1px' }}>{invoiceData.company?.address?.state || 'Ras Al Khor Dubai'} {invoiceData.company?.address?.country || 'UAE'}</div>
