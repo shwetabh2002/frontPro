@@ -44,6 +44,9 @@ const InventoryPage: React.FC = () => {
   // Bulk upload states
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Brand group expansion state
+  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
 
   // Zero state component
   const ZeroState = () => (
@@ -416,6 +419,35 @@ const InventoryPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Toggle brand expansion
+  const toggleBrandExpansion = (brand: string) => {
+    setExpandedBrands(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(brand)) {
+        newSet.delete(brand);
+      } else {
+        newSet.add(brand);
+      }
+      return newSet;
+    });
+  };
+
+  // Group items by brand
+  const groupItemsByBrand = (items: InventoryItem[]) => {
+    const filteredItems = items.filter(item => !['sold', 'out_of_stock'].includes(item.status?.toLowerCase() || ''));
+    const groups: { [brand: string]: InventoryItem[] } = {};
+    
+    filteredItems.forEach(item => {
+      const brand = item.brand || 'Unknown Brand';
+      if (!groups[brand]) {
+        groups[brand] = [];
+      }
+      groups[brand].push(item);
+    });
+    
+    return groups;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -693,197 +725,240 @@ const InventoryPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Excel-like Inventory Table */}
-          {/* Filter out sold and out_of_stock items from the listing */}
-          {inventoryData.data.items.filter(item => !['sold', 'out_of_stock'].includes(item.status?.toLowerCase() || '')).length > 0 ? (
-            <div className="overflow-x-auto">
-              <div className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-sm min-w-max">
-              {/* Table Header */}
-              <div className="bg-gray-50 border-b border-gray-300 sticky top-0 z-10">
-                <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">#</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Brand</div>
-                  <div className="p-2 border-r-2 border-gray-400">Kind of Car</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Type</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Category</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Year</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Color (int./ext.)</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Qty</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Sell Price</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Currency</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Status</div>
-                  {/* <div className="p-2 border-r-2 border-gray-400 text-center">Min Stock</div> */}
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Created</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Updated</div>
-                  <div className="p-2 border-r-2 border-gray-400 text-center">Supplier</div>
-                  {/* <div className="p-2 border-r-2 border-gray-400 text-center">Tags</div> */}
-                  <div className="p-2 border-r-2 border-gray-400 text-center">VIN</div>
-                  <div className="p-2 text-center">Actions</div>
-                </div>
+          {/* Inventory Grouped by Brand */}
+          {(() => {
+            const brandGroups = groupItemsByBrand(inventoryData.data.items);
+            const brands = Object.keys(brandGroups).sort();
+            
+            if (brands.length === 0) {
+              return <ZeroState />;
+            }
+            
+            return (
+              <div className="space-y-3">
+                {brands.map((brand, brandIndex) => {
+                  const items = brandGroups[brand];
+                  const isExpanded = expandedBrands.has(brand);
+                  const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                  const totalValue = items.reduce((sum, item) => sum + ((item.sellingPrice || 0) * (item.quantity || 0)), 0);
+                  
+                  return (
+                    <div key={brand} className="bg-white rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+                      {/* Brand Header Row - Clickable */}
+                      <div 
+                        onClick={() => toggleBrandExpansion(brand)}
+                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${
+                          isExpanded ? 'bg-emerald-50 border-b border-gray-300' : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-4">
+                          {/* Expand/Collapse Icon */}
+                          <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
+                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                          
+                          {/* Brand Name */}
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
+                              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-gray-800">{brand}</h3>
+                              <p className="text-sm text-gray-500">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Brand Summary Stats */}
+                        <div className="flex items-center space-x-6">
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Total Qty</p>
+                            <p className="text-lg font-semibold text-gray-800">{totalQuantity}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Total Value</p>
+                            <p className="text-lg font-semibold text-emerald-600">${totalValue.toLocaleString()}</p>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            isExpanded ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {isExpanded ? 'Expanded' : 'Click to expand'}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Expanded Items List */}
+                      {isExpanded && (
+                        <div className="overflow-x-auto">
+                          {/* Table Header */}
+                          <div className="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
+                            <div className="grid gap-0 text-xs font-semibold text-gray-700" style={{gridTemplateColumns: '50px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 140px'}}>
+                              <div className="p-2 border-r border-gray-300 text-center">#</div>
+                              <div className="p-2 border-r border-gray-300">Kind of Car</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Type</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Category</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Year</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Color (int./ext.)</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Qty</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Sell Price</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Currency</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Status</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Created</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Updated</div>
+                              <div className="p-2 border-r border-gray-300 text-center">Supplier</div>
+                              <div className="p-2 border-r border-gray-300 text-center">VIN</div>
+                              <div className="p-2 text-center">Actions</div>
+                            </div>
+                          </div>
+                          
+                          {/* Table Body */}
+                          <div className="divide-y divide-gray-200">
+                            {items.map((item, index) => (
+                              <div key={item._id} className={`grid gap-0 hover:bg-blue-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '50px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 140px'}}>
+                                {/* Row Number */}
+                                <div className="p-2 border-r border-gray-200 text-center text-xs text-gray-600 flex items-center justify-center">
+                                  {index + 1}
+                                </div>
+
+                                {/* Name */}
+                                <div className="p-2 border-r border-gray-200 flex items-center">
+                                  <div className="text-xs font-medium text-gray-900 break-words leading-tight">
+                                    {item.name}
+                                  </div>
+                                </div>
+
+                                {/* Type */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
+                                    item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                                  }`}>
+                                    {item.type?.toUpperCase() || 'N/A'}
+                                  </span>
+                                </div>
+
+                                {/* Category */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-start justify-center">
+                                  <div className="text-xs text-gray-800 break-words leading-tight">
+                                    {item.category || 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* Year */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-800">
+                                    {item.year || 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* Color (int./ext.) */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-start justify-center">
+                                  <div className="text-xs text-gray-800 break-words leading-tight">
+                                    {item.color && item.interiorColor ? 
+                                      `${item.color} / ${item.interiorColor}` : 
+                                      item.color || item.interiorColor || 'N/A'
+                                    }
+                                  </div>
+                                </div>
+
+                                {/* Quantity */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-800 font-medium">
+                                    {item.quantity || 0}
+                                  </div>
+                                </div>
+
+                                {/* Selling Price */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-blue-600 font-medium">
+                                    ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* Currency */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-600">
+                                    {item.currencyType || 'USD'}
+                                  </div>
+                                </div>
+
+                                {/* Status */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
+                                    item.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                                    item.status === 'inactive' ? 'bg-red-100 text-red-700' :
+                                    item.status === 'out_of_stock' ? 'bg-orange-100 text-orange-700' :
+                                    'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {item.status || 'N/A'}
+                                  </span>
+                                </div>
+
+                                {/* Created Date */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-600">
+                                    {(item as any).createdAt ? new Date((item as any).createdAt).toLocaleDateString() : 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* Updated Date */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-600">
+                                    {(item as any).updatedAt ? new Date((item as any).updatedAt).toLocaleDateString() : 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* Supplier */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-start justify-center">
+                                  <div className="text-xs text-gray-800 break-words leading-tight">
+                                    {item.supplierId?.name || 'N/A'}
+                                  </div>
+                                </div>
+
+                                {/* VIN Count */}
+                                <div className="p-2 border-r border-gray-200 text-center flex items-center justify-center">
+                                  <div className="text-xs text-gray-600">
+                                    {item.quantity || 0}
+                                  </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="p-2 text-center flex items-center justify-center">
+                                  <div className="flex space-x-1 justify-center">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleViewItem(item); }}
+                                      disabled={isLoadingItem}
+                                      className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                      title="View Details"
+                                    >
+                                      View
+                                    </button>
+                                    {canEditFeature('inventory') && (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleEditItem(item); }}
+                                        disabled={isLoadingItem}
+                                        className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        title="Edit Item"
+                                      >
+                                        Edit
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Table Body */}
-              <div className="divide-y divide-gray-200">
-                {inventoryData.data.items.filter(item => !['sold', 'out_of_stock'].includes(item.status?.toLowerCase() || '')).map((item, index) => (
-                  <div key={item._id} className={`grid gap-0 hover:bg-gray-50 transition-colors items-stretch ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`} style={{gridTemplateColumns: '60px 100px 1fr 80px 100px 70px 100px 80px 100px 80px 100px 80px 100px 100px 120px 80px 80px 140px'}}>
-                    {/* Row Number */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center text-xs text-gray-600 flex items-center justify-center">
-                      {index + 1}
-                    </div>
-
-                    {/* Brand */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.brand || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Name */}
-                    <div className="p-2 border-r-2 border-gray-400 flex items-center">
-                      <div className="text-xs font-medium text-gray-900 break-words leading-tight">
-                        {item.name}
-                      </div>
-                    </div>
-
-                    {/* Type */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
-                        item.type === 'car' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {item.type?.toUpperCase() || 'N/A'}
-                      </span>
-                    </div>
-
-                    {/* Category */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.category || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Year */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-800">
-                        {item.year || 'N/A'}
-                      </div>
-                        </div>
-
-                    {/* Color (int./ext.) */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.color && item.interiorColor ? 
-                          `${item.color} / ${item.interiorColor}` : 
-                          item.color || item.interiorColor || 'N/A'
-                        }
-                      </div>
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-800 font-medium">
-                        {item.quantity || 0}
-                      </div>
-                    </div>
-
-                    {/* Selling Price */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-blue-600 font-medium">
-                        ${item.sellingPrice ? item.sellingPrice.toLocaleString() : 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Currency */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-600">
-                        {item.currencyType || 'USD'}
-                      </div>
-                    </div>
-
-                    {/* Status */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${
-                        item.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                        item.status === 'inactive' ? 'bg-red-100 text-red-700' :
-                        item.status === 'out_of_stock' ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {item.status || 'N/A'}
-                        </span>
-                    </div>
-
-                    {/* Min Stock Level */}
-                    {/* <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-800">
-                        {item.minStockLevel || 'N/A'}
-                      </div>
-                    </div> */}
-
-                    {/* Created Date */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-600">
-                        {(item as any).createdAt ? new Date((item as any).createdAt).toLocaleDateString() : 'N/A'}
-                      </div>
-                            </div>
-
-                    {/* Updated Date */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-600">
-                        {(item as any).updatedAt ? new Date((item as any).updatedAt).toLocaleDateString() : 'N/A'}
-                            </div>
-                        </div>
-
-                    {/* Supplier */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-start justify-center">
-                      <div className="text-xs text-gray-800 break-words leading-tight">
-                        {item.supplierId?.name || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    {/* <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-600">
-                        {item.tags?.length || 0}
-                      </div>
-                    </div> */}
-
-                    {/* VIN Count */}
-                    <div className="p-2 border-r-2 border-gray-400 text-center flex items-center justify-center">
-                      <div className="text-xs text-gray-600">
-                        {item.quantity || 0}
-                      </div>
-                        </div>
-
-                    {/* Actions */}
-                    <div className="p-2 text-center flex items-center justify-center">
-                      <div className="flex space-x-1 justify-center">
-                        <button
-                          onClick={() => handleViewItem(item)}
-                          disabled={isLoadingItem}
-                          className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          title="View Details"
-                        >
-                          View
-                        </button>
-                        {canEditFeature('inventory') && (
-                          <button
-                            onClick={() => handleEditItem(item)}
-                            disabled={isLoadingItem}
-                            className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            title="Edit Item"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                  </div>
-                </div>
-            </div>
-          ) : (
-            <ZeroState />
-          )}
+            );
+          })()}
 
           {/* Pagination */}
           {inventoryData.data.pagination.totalPages > 1 && (

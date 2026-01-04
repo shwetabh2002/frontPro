@@ -188,6 +188,32 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const [discount, setDiscount] = useState<number>(0);
   const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
   
+  // Edited prices state - stored in localStorage
+  const [editedPrices, setEditedPrices] = useState<Record<string, number>>({});
+
+  // Load edited prices from localStorage when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const storedPrices = localStorage.getItem('quotation_edited_prices');
+      if (storedPrices) {
+        try {
+          const parsed = JSON.parse(storedPrices);
+          setEditedPrices(parsed);
+        } catch (e) {
+          console.error('Error loading edited prices from localStorage:', e);
+          setEditedPrices({});
+        }
+      }
+    }
+  }, [isOpen]);
+
+  // Save edited prices to localStorage whenever they change
+  useEffect(() => {
+    if (Object.keys(editedPrices).length > 0) {
+      localStorage.setItem('quotation_edited_prices', JSON.stringify(editedPrices));
+    }
+  }, [editedPrices]);
+  
   // Additional expenses state - now an array
   const [additionalExpenses, setAdditionalExpenses] = useState<Array<{
     expenceType: 'shipping' | 'accessories' | 'Rta Fees' | 'COO Fees' | 'Customs' | 'Insurance' | 'Other';
@@ -755,6 +781,35 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     return selectedChassisNumbers[itemId] || [];
   };
 
+  // Handle unit price edit
+  const handlePriceEdit = (itemId: string, newPrice: number) => {
+    console.log('💰 Price edit:', { itemId, newPrice });
+    setEditedPrices(prev => {
+      const updated = { ...prev, [itemId]: newPrice };
+      // Save to localStorage immediately
+      localStorage.setItem('quotation_edited_prices', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Get effective price for an item (edited price takes priority)
+  const getEffectivePrice = (item: InventoryItem): number => {
+    if (editedPrices[item._id] !== undefined) {
+      return editedPrices[item._id];
+    }
+    return item.newSellingPrice || item.sellingPrice;
+  };
+
+  // Clear edited price for an item (reset to original)
+  const clearEditedPrice = (itemId: string) => {
+    setEditedPrices(prev => {
+      const updated = { ...prev };
+      delete updated[itemId];
+      localStorage.setItem('quotation_edited_prices', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const getTotalSelectedItems = () => {
     return Array.from(selectedItems).reduce((total, itemId) => {
       return total + (itemQuantities[itemId] || 1);
@@ -764,7 +819,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
   const getSubtotal = () => {
     return getAllSelectedItems().reduce((total, item) => {
       if (!item) return total;
-      const price = item.newSellingPrice || item.sellingPrice;
+      const price = getEffectivePrice(item);
       return total + (price * item.quantity);
     }, 0);
   };
@@ -814,7 +869,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
           fuelType: 'Gasoline',
         },
         costPrice: item.newCostPrice || item.costPrice,
-        sellingPrice: item.newSellingPrice || item.sellingPrice,
+        sellingPrice: getEffectivePrice(item), // Use edited price if available
         condition: item.condition || 'new',
         status: item.status || 'active',
         dimensions: (item as any).dimensions || {
@@ -1015,6 +1070,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
     setShowCloseConfirmation(false);
     setIsCreatingQuotation(false);
     setCreatedCustomerId('');
+    // Clear edited prices from state and localStorage
+    setEditedPrices({});
+    localStorage.removeItem('quotation_edited_prices');
     onClose();
   };
 
@@ -1547,7 +1605,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                       
                       const itemId = item._id;
                       const quantity = itemQuantities[itemId] || 1;
-                      const unitPrice = item.newSellingPrice || item.sellingPrice;
+                      const unitPrice = getEffectivePrice(item);
+                      const originalPrice = item.newSellingPrice || item.sellingPrice;
+                      const isPriceEdited = editedPrices[itemId] !== undefined;
                       const totalPrice = unitPrice * quantity;
                       const isInCurrentFilter = filteredItems.some(filteredItem => filteredItem._id === itemId);
                       
@@ -1581,12 +1641,43 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, prePopul
                                 </div>
                               </div>
                               
-                              {/* Price Section */}
+                              {/* Price Section - Editable */}
                               <div className="text-right ml-4">
-                                <div className="text-sm text-gray-500 mb-1">Unit Price</div>
-                                <div className="text-lg font-bold text-emerald-600">
-                                  {formatPrice(item.newSellingPrice || item.sellingPrice, item.currencyType || selectedCurrency?.code || 'USD')}
+                                <div className="text-sm text-gray-500 mb-1 flex items-center justify-end space-x-2">
+                                  <span>Unit Price</span>
+                                  {isPriceEdited && (
+                                    <button
+                                      onClick={() => clearEditedPrice(itemId)}
+                                      className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                      title="Reset to original price"
+                                    >
+                                      Reset
+                                    </button>
+                                  )}
                                 </div>
+                                <div className="flex items-center justify-end space-x-2">
+                                  <span className="text-gray-500">{getCurrencySymbol(item.currencyType || selectedCurrency?.code || 'USD')}</span>
+                                  <input
+                                    type="number"
+                                    value={unitPrice}
+                                    onChange={(e) => {
+                                      const newPrice = parseFloat(e.target.value) || 0;
+                                      handlePriceEdit(itemId, newPrice);
+                                    }}
+                                    className={`w-28 text-right text-lg font-bold border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                      isPriceEdited 
+                                        ? 'text-amber-600 border-amber-300 bg-amber-50' 
+                                        : 'text-emerald-600 border-gray-300 bg-white'
+                                    }`}
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+                                {isPriceEdited && (
+                                  <div className="text-xs text-gray-400 mt-1 line-through">
+                                    Original: {formatPrice(originalPrice, item.currencyType || selectedCurrency?.code || 'USD')}
+                                  </div>
+                                )}
                               </div>
                             </div>
                             

@@ -136,7 +136,6 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
         <div className="text-right text-sm text-gray-700">
           <div><strong>Invoice Date:</strong> {formatDate(invoiceData.createdAt)}</div>
           <div><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</div>
-          <div><strong>Due Date:</strong> {formatDate(invoiceData.dueDate)}</div>
         </div>
       </header>
 
@@ -220,7 +219,7 @@ const InvoicePDFPreview: React.FC<InvoicePDFPreviewProps> = ({
                       <div className="mt-1 text-xs text-gray-500">
                         <div className="font-medium">Chassis No:</div>
                         {item.vinNumbers.map((vin: any, vinIndex: number) => (
-                          <div key={vinIndex} className="ml-2">{vinIndex + 1}) {vin.chasisNumber}</div>
+                          <div key={vinIndex} className="ml-2">{vin.chasisNumber}</div>
                         ))}
                       </div>
                     )}

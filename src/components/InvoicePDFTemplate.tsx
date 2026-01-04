@@ -110,7 +110,6 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
         <div style={{ textAlign: 'right', fontSize: '11px', color: '#000000' }}>
           <div style={{ margin: '1px 0' }}><strong>Invoice Date:</strong> {formatDate(invoiceData.createdAt)}</div>
           <div style={{ margin: '1px 0' }}><strong>Invoice #:</strong> {invoiceData.invoiceNumber}</div>
-          <div style={{ margin: '1px 0' }}><strong>Due Date:</strong> {formatDate(invoiceData.dueDate)}</div>
         </div>
       </header>
 
@@ -194,7 +193,7 @@ const InvoicePDFTemplate = forwardRef<HTMLDivElement, InvoicePDFTemplateProps>((
                       <div style={{ marginTop: '1px', fontSize: '9px', color: '#000000' }}>
                         <div style={{ fontWeight: '500' }}>Chassis No:</div>
                         {item.vinNumbers.map((vin: any, vinIndex: number) => (
-                          <div key={vinIndex} style={{ marginLeft: '4px' }}>{vinIndex + 1}) {vin.chasisNumber}</div>
+                          <div key={vinIndex} style={{ marginLeft: '4px' }}>{vin.chasisNumber}</div>
                         ))}
                       </div>
                     )}
